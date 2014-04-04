@@ -18,23 +18,19 @@ using namespace std;
 typedef struct
 {
 
-	int nx;   // x component of position
-	int ny;   // y component of position
-    int size;  // the length of one pace
+	int nx;       // x component of position
+	int ny;       // y component of position
+    int size;     // the length of one pace
     double beta;  // the current angle
-
+    bool flip;    // if the x axis will be flipped
 }
 STATE;
 
 typedef struct
 {
 
-	//int r;
-	//int g;
-	//int b;
 	COLORREF rgb;
 	char index;
-
 
 }
 COLOR;
@@ -43,39 +39,37 @@ class DrawGraph
 {
 private:
 
-/*
-	struct State
 
-	{
+	STATE m_pst;         // current state
 
-		int nx;   // x component of position
-	    int ny;   // y component of position
-    	int size;  // the length of one pace
-    	int beta;  // the current angle
 
-	} crt_state;  // the current state
-*/
+	static COLOR m_col_A, m_col_B, m_col_C,
+		         m_col_D, m_col_E, m_col_F;
 
-	STATE m_pst;  // the current state
+	string m_command;    // string of command
 
-	//COLOR cols[NUM_COLS];
-	static COLOR m_col_A, m_col_B, m_col_C, m_col_D, m_col_E, m_col_F;
+	double m_delta;      // angle that the direction will be changed
 
-	string m_command;
-
-	double m_delta;
-
-	stack<STATE> m_sta_stat; 
+	stack<STATE> m_sta_stat;  // stack of current states
 
 public:
 
-	BezierLine bl_A, bl_B, bl_C, bl_D, bl_E, bl_F;
+	BezierLine m_bl_A, m_bl_B, m_bl_C,   // BezierLine objects
+		       m_bl_D, m_bl_E, m_bl_F;
 
-	DrawGraph( string str="F", int a=0);
-	~DrawGraph();
-	void Draw(HWND hdlg);
-	COLOR FindCol(char c); // get the COLOR structur by character as index
-	void SetCol(char c, COLOR col);   // set the COLOR structur by character as index
+	DrawGraph(string str="F", int a=0);  // command string and angle
+
+	void Update(string, int);            // the same parameters as constructor
+
+	~DrawGraph();                        // default destructor
+
+	void Draw(HWND, int, int, bool, bool);                // paint on the graphic dialog
+
+	COLOR FindCol(char c);               // get the COLOR structur by character as index
+
+	void SetCol(char c, COLOR col);      // set the COLOR structur by character as index
+
+	void ClearState();                   // clear the current state information
 
 };
 

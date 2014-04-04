@@ -15,16 +15,16 @@ class Alphabet
 
 private:
 
-	string al;
+	string m_al;
 
 public:
 
-	Alphabet(char * ptr="+-[]ABCDEFG") ;
+	Alphabet(char * ptr="~+-[]ABCDEFG") ;
 	~Alphabet();
     char Get(int);
 	int Len();
 	int Position(char);
-
+	string ReturnAlph();
 };
 
 

@@ -1,11 +1,13 @@
-/*
+/* --------------------------------------------
   CSIT691 Independent Project 
   Extended L-System
   ZHANG Lingzhang 5th Mar 2009 
   Supervisor: Prof. Rossiter
   HKUST
   Revised at 19th Mar by ZHANG Lingzhang
-*/
+  Revised at 21th Mar by ZHANG Lingzhang
+  Revised at 23th Mar by ZHANG Lingzhang
+----------------------------------------------*/
 
 #include <windows.h>
 #include "resource.h"
@@ -32,22 +34,23 @@
 #define ID_BTN_RESET 10
 #define ID_BTN_CONCEAL 11
 
+#define WM_CON_SIZE 0x0500
 //   Global   variables
 
 HWND   hDMlesGraph;
 HBRUSH hBrushWhite;      
 
 char g_ax[3];          // axiom
-char g_ru[20];         // rules string
+char g_ru[30];         // rules string
 int  g_ord;            // order
 char g_ordStr[4];      //
 int  g_ang;            // angle
 char g_angStr[10];     // 
 
-ELSystem  g_elsys; 
-DrawGraph g_dg_ptr;
+ELSystem      g_elsys;     // object of ELSystem
+DrawGraph     g_dg;        // object of DrawGraph
+ParaValidator g_pv;        // object of ParaValidator
 
-/*
 POINT     g_bez_pt[4];
 
 POINT     g_bez_pt_A[4];  // global point array and is scaled 
@@ -56,14 +59,30 @@ POINT     g_bez_pt_C[4];  // global point array and is scaled
 POINT     g_bez_pt_D[4];  // global point array and is scaled 
 POINT     g_bez_pt_E[4];  // global point array and is scaled 
 POINT     g_bez_pt_F[4];  // global point array and is scaled 
-*/
-static POINT_POSITION g_pp;
-
-static POINT_POSITION pp_A, pp_B, pp_C, pp_D, pp_E, pp_F;
-
+     
 static COLOR col_A, col_B, col_C, col_D, col_E, col_F;
 
-///////////////////////
+
+int iMaxWidth=310, iMaxHeight=450;
+
+const int xUnit = 50;
+const int yUnit = 50;
+
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////// debugging functions///////////////////////////////////////
+
+///////////////////// these functions are only for debugging purpose///////////////////////
+
+void g_PrintPoints(POINT[], LPCTSTR);                     /////////////////////////////////  
+
+void g_PrintRect(RECT &, LPCTSTR);                        /////////////////////////////////
+
+void g_PrintWH(int, int, LPCTSTR);
+///////////////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////
 
 LRESULT CALLBACK WndProc           (HWND, UINT, WPARAM, LPARAM);
 BOOL    CALLBACK AboutDlgProc      (HWND, UINT, WPARAM, LPARAM);
@@ -122,7 +141,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
      ///////////////////////////////////////////////////////////////
 
      hwnd = CreateWindow (szAppName, TEXT ("Extended L-System"),
-                          WS_OVERLAPPEDWINDOW,
+                          WS_OVERLAPPEDWINDOW ,
                           CW_USEDEFAULT, CW_USEDEFAULT,
                           310, 450,
                           NULL, NULL, hInstance, NULL) ;
@@ -266,22 +285,42 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		  case ID_BTN_APPLY :
 			  
-			  // retrieve the values from controls
-			  GetDlgItemText (hwnd, ID_EDIT_AXIOM , g_ax, 2) ;
-			  GetDlgItemText (hwnd, ID_EDIT_RULES, g_ru, 19);
-			  GetDlgItemText (hwnd, ID_EDIT_ORDER, g_ordStr, 3);
-			  g_ord = atoi(g_ordStr);
-			  GetDlgItemText (hwnd, ID_EDIT_ANGLE, g_angStr , 4);
-			  g_ang = atoi(g_angStr);
-              
-			  // pass the variables to ELSystem class object and generate the m_Tree
 
-			  g_elsys.Update(g_ax, g_ru, g_ord);
-			  g_elsys.Pick();
-              g_elsys.Gentree();
-             
-			  // course the graphics window being redrawn 
-			  InvalidateRect (hDMlesGraph, NULL, TRUE) ;
+			  if( 0==GetDlgItemText (hwnd, ID_EDIT_AXIOM, g_ax, 2)     || 
+				  0==GetDlgItemText (hwnd, ID_EDIT_RULES, g_ru, 29)    || 
+				  0==GetDlgItemText (hwnd, ID_EDIT_ORDER, g_ordStr, 3) ||
+				  0==GetDlgItemText (hwnd, ID_EDIT_ANGLE, g_angStr, 4))
+			  {
+				            
+				  MessageBox (NULL, TEXT ("Please type in a letter or a number!"),
+                    
+					  TEXT("Invalid Input"), MB_ICONINFORMATION);
+			  }
+			  else
+			  {
+			  
+				  // retrieve the values from controls
+
+			      g_ord = atoi(g_ordStr);
+			      g_ang = atoi(g_angStr);
+              
+			      // pass the variables to ELSystem class object and generate the m_Tree
+
+			      g_pv.Update(g_ax, g_ru, g_ord);
+			      g_pv.RulStrFilter();
+			      g_pv.AxmStrFilter();
+
+			      g_elsys.Update(g_pv.ReturnAxm(), g_pv.ReturnRul(), g_pv.ReturnOrd());
+			      g_elsys.Pick();
+                  g_elsys.Gentree();
+
+				  iMaxWidth = 2*g_elsys.ReportLen()*3;
+                  iMaxHeight = 2*g_elsys.ReportLen()*3;
+
+				  SendMessage(hDMlesGraph, WM_CON_SIZE, 0, 0);
+			      // course the graphics window being redrawn 
+			      InvalidateRect (hDMlesGraph, NULL, TRUE) ;
+			  }
 
 			  break;
 
@@ -390,12 +429,12 @@ BOOL CALLBACK ColorDlgProc (HWND hDlg, UINT message,
 			 hCtrlCol_E = GetDlgItem (hDlg, IDC_COLOR_E);
 			 hCtrlCol_F = GetDlgItem (hDlg, IDC_COLOR_F);
 
-			 col_A = g_dg_ptr.FindCol('A');
-			 col_B = g_dg_ptr.FindCol('B');
-			 col_C = g_dg_ptr.FindCol('C');
-			 col_D = g_dg_ptr.FindCol('D');
-             col_E = g_dg_ptr.FindCol('E');
-			 col_F = g_dg_ptr.FindCol('F');
+			 col_A = g_dg.FindCol('A');
+			 col_B = g_dg.FindCol('B');
+			 col_C = g_dg.FindCol('C');
+			 col_D = g_dg.FindCol('D');
+             col_E = g_dg.FindCol('E');
+			 col_F = g_dg.FindCol('F');
 
 			 return FALSE;
 
@@ -404,12 +443,12 @@ BOOL CALLBACK ColorDlgProc (HWND hDlg, UINT message,
 			 {
 				 case IDOK:
 
-					 g_dg_ptr.SetCol('A',col_A);
-					 g_dg_ptr.SetCol('B',col_B);
-					 g_dg_ptr.SetCol('C',col_C);
-					 g_dg_ptr.SetCol('D',col_D);
-					 g_dg_ptr.SetCol('E',col_E);
-					 g_dg_ptr.SetCol('F',col_F);
+					 g_dg.SetCol('A',col_A);
+					 g_dg.SetCol('B',col_B);
+					 g_dg.SetCol('C',col_C);
+					 g_dg.SetCol('D',col_D);
+					 g_dg.SetCol('E',col_E);
+					 g_dg.SetCol('F',col_F);
                      EndDialog (hDlg, TRUE);
 
 					 return TRUE;
@@ -492,32 +531,218 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 {
     //HDC  hdc ;
     PAINTSTRUCT  ps ;
+
+	CREATESTRUCT* pcs;
+
+	int VertNumPos=6, HorzNumPos=6;
     
-    static int  cxClient, cyClient;
+    static int  cxClient, cyClient;  
+
+	int iVertPos=0, iHorzPos=0;
 
 	switch (message)		 	
 	{
      
+/*	case WM_CREATE:
+
+		///////////////
+        g_PrintWH(iMaxWidth,iMaxHeight,TEXT("This is iMax before Dialog created."));
+		//////////////
+
+        pcs = (CREATESTRUCT*)(lParam);
+        iMaxWidth = pcs->cx;
+		iMaxHeight = pcs->cy;
+
+		///////////////
+        g_PrintWH(iMaxWidth,iMaxHeight,TEXT("This is iMax after Dialog created. in WM_CREA"));
+		//////////////
+
+
+		return TRUE;
+*/
+	case WM_CON_SIZE:
+
+	    ///////////////
+        //g_PrintWH(iMaxWidth,iMaxHeight,TEXT("This is iMax after Dialog created.in WM_CON"));
+		//////////////
+
+		if (iMaxWidth > cxClient )
+		{
+			HorzNumPos = 2*(iMaxWidth-cxClient)/xUnit;
+			SetScrollRange (hDlg, SB_HORZ, 0, HorzNumPos, TRUE);
+			SetScrollPos (hDlg, SB_HORZ, HorzNumPos/2, TRUE);
+		}
+
+		if (iMaxHeight > cyClient )
+		{
+			VertNumPos = 2*(iMaxHeight-cyClient)/yUnit;
+			SetScrollRange (hDlg, SB_VERT , 0, VertNumPos, TRUE);
+			SetScrollPos (hDlg, SB_VERT , VertNumPos/2, TRUE);
+		}
+
+		return TRUE;
+
 	case WM_SIZE :
+
+		///////////////
+        //g_PrintWH(iMaxWidth,iMaxHeight,TEXT("This is iMax after Dialog created. in WM_SIZE"));
+		//////////////
 
 		cxClient = LOWORD (lParam);        
 		cyClient = HIWORD (lParam);
-		  
+
+		InvalidateRect (hDlg, NULL, TRUE) ;
+
 		return TRUE;
+
+     case WM_VSCROLL:		
+
+
+		///////////////
+        //g_PrintWH(iVertPos,iHorzPos,TEXT("This is iPos after Dialog created. in WM_VSCR"));
+		//////////////
+
+		 iVertPos = GetScrollPos (hDlg, SB_VERT);
+          
+		 switch (LOWORD (wParam))
+          {
+          case SB_TOP:
+               iVertPos = 0;
+               break ;
+               
+          case SB_BOTTOM:
+               iVertPos = VertNumPos;
+               break ;
+               
+          case SB_LINEUP:
+               iVertPos -= 1 ;
+               break ;
+               
+          case SB_LINEDOWN:
+               iVertPos += 1 ;
+               break ;
+               
+          case SB_PAGEUP:
+               iVertPos -= 1;
+               break ;
+
+          case SB_PAGEDOWN:
+               iVertPos += 1;
+               break ;
+               
+          case SB_THUMBPOSITION:
+               iVertPos = HIWORD (wParam);
+               break ;
+               
+          default:
+               break ;         
+          }
+ 
+
+          iVertPos = max (0, min (iVertPos, VertNumPos)) ;
+
+
+          if (GetScrollPos (hDlg, SB_VERT) != iVertPos)
+          {                    
+               SetScrollPos (hDlg, SB_VERT, iVertPos, TRUE) ;
+               InvalidateRect (hDlg, NULL, TRUE) ;
+          }
+          return TRUE ;
+          
+     case WM_HSCROLL:
+
+		///////////////
+        //g_PrintWH(iVertPos,iHorzPos,TEXT("This is iPos after Dialog created. in WM_HSCR"));
+		//////////////
+
+
+		 iHorzPos = GetScrollPos (hDlg, SB_HORZ);
+
+
+          switch (LOWORD (wParam))
+          {
+          case SB_LINELEFT:
+               iHorzPos -= 1 ;
+               break ;
+               
+          case SB_LINERIGHT:
+               iHorzPos += 1 ;
+               break ;
+               
+          case SB_PAGELEFT:
+               iHorzPos -= 1;
+               break ;
+               
+          case SB_PAGERIGHT:
+               iHorzPos += 1;
+               break ;
+               
+          case SB_THUMBPOSITION:
+               iHorzPos = HIWORD (wParam);
+               break ;
+               
+          default :
+               break ;
+          }
+
+          iHorzPos = max (0, min (iHorzPos, HorzNumPos)) ;
+
+          if (GetScrollPos (hDlg, SB_HORZ) != iHorzPos)
+          {                    
+               SetScrollPos (hDlg, SB_HORZ, iHorzPos, TRUE) ;
+               InvalidateRect (hDlg, NULL, TRUE) ;
+          }
+
+          return TRUE ;
+          
 	 
 	case WM_PAINT :
 		 
 		BeginPaint (hDlg, &ps);		 
 		EndPaint (hDlg, &ps);		
-		// draw the graphics	
-		g_dg_ptr = DrawGraph(g_elsys.Report(), g_ang);			
-		g_dg_ptr.Draw(hDlg);
-		  
-		return TRUE;		
 		
-	case WM_INITDIALOG:
-          			
-		return TRUE ;
+		// draw the graphics
+		g_dg.ClearState();
+		g_dg.Update(g_elsys.Report(), g_ang);
+	
+		///////////////
+        //g_PrintWH(iMaxWidth,iMaxHeight,TEXT("This is iMax before paint."));
+		//////////////		
+
+		if (iMaxWidth > cxClient )
+		{
+				
+
+
+			if (iMaxHeight > cyClient )
+			{	
+				
+			///////////////
+        
+			//g_PrintWH((iHorzPos-HorzNumPos/2) * xUnit,(iVertPos-VertNumPos/2) * yUnit,TEXT("This is offset before passed."));
+		
+			//////////////
+
+				g_dg.Draw(hDlg, (iHorzPos-HorzNumPos/2) * xUnit, (iVertPos-VertNumPos/2) * yUnit, true, true);
+			}
+			else
+			{
+				g_dg.Draw(hDlg, (iHorzPos-HorzNumPos/2) * xUnit, (iVertPos-VertNumPos/2) * yUnit, true, false);
+			}
+
+		}
+		else if (iMaxHeight > cyClient )
+		{
+
+			g_dg.Draw(hDlg, (iHorzPos-HorzNumPos/2) * xUnit, (iVertPos-VertNumPos/2) * yUnit, false, true);
+		}
+		else
+		{
+			g_dg.Draw(hDlg, (iHorzPos-HorzNumPos/2) * xUnit, (iVertPos-VertNumPos/2) * yUnit, false, false);
+		}
+
+		return TRUE;		
+
 		
 	case WM_CTLCOLORDLG:          
 			
@@ -549,10 +774,8 @@ void DrawBezier (HDC hdc, POINT apt[])
 
 // draw Bezier line to a window
 
-void DrawBezierToBlock(HWND hctrl, POINT_POSITION f_pp)
+void DrawBezierToBlock(HWND hctrl, POINT apt[])
 {
-	POINT apt[4];
-
 	HDC hdc;
      
 	RECT rect;
@@ -564,18 +787,6 @@ void DrawBezierToBlock(HWND hctrl, POINT_POSITION f_pp)
 	hdc = GetDC(hctrl);
      
 	GetClientRect (hctrl, &rect);
-
-	apt[0].x = f_pp.p0.x;
-	apt[0].y = f_pp.p0.y;
-
-	apt[1].x = f_pp.p1.x;
-	apt[1].y = f_pp.p1.y;
-
-	apt[2].x = f_pp.p2.x;
-	apt[2].y = f_pp.p2.y;
-
-	apt[3].x = f_pp.p3.x;
-	apt[3].y = f_pp.p3.y;
 
 	SelectObject (hdc, hBrushWhite);
 
@@ -615,7 +826,7 @@ BOOL CALLBACK LineDlgProc (HWND hDlg, UINT message,
 		hdc = GetDC(hCtrlLine_A);    	
 		GetClientRect (hCtrlLine_A, &rect);
 
-		pp_A = g_dg_ptr.bl_A.UpRect(rect);
+		g_dg.m_bl_A.UpRect(rect, g_bez_pt_A);
 
 		// initialize the array for Bezier line B's points
 
@@ -623,7 +834,7 @@ BOOL CALLBACK LineDlgProc (HWND hDlg, UINT message,
 		hdc = GetDC(hCtrlLine_B);    	
 		GetClientRect (hCtrlLine_B, &rect);
 
-		pp_B = g_dg_ptr.bl_B.UpRect(rect);
+		g_dg.m_bl_B.UpRect(rect, g_bez_pt_B);
 
 		// initialize the array for Bezier line C's points
 
@@ -631,7 +842,7 @@ BOOL CALLBACK LineDlgProc (HWND hDlg, UINT message,
 		hdc = GetDC(hCtrlLine_C);    	
 		GetClientRect (hCtrlLine_C, &rect);
 
-		pp_C = g_dg_ptr.bl_C.UpRect(rect);
+		g_dg.m_bl_C.UpRect(rect, g_bez_pt_C);
 
 		// initialize the array for Bezier line D's points
 
@@ -639,7 +850,7 @@ BOOL CALLBACK LineDlgProc (HWND hDlg, UINT message,
 		hdc = GetDC(hCtrlLine_D);    	
 		GetClientRect (hCtrlLine_D, &rect);
 
-		pp_D = g_dg_ptr.bl_D.UpRect(rect);
+		g_dg.m_bl_D.UpRect(rect, g_bez_pt_D);
 
 		// initialize the array for Bezier line E's points
 
@@ -647,7 +858,7 @@ BOOL CALLBACK LineDlgProc (HWND hDlg, UINT message,
 		hdc = GetDC(hCtrlLine_E);    	
 		GetClientRect (hCtrlLine_E, &rect);
 
-		pp_E = g_dg_ptr.bl_E.UpRect(rect);
+		g_dg.m_bl_E.UpRect(rect, g_bez_pt_E);
 
 		// initialize the array for Bezier line F's points
 
@@ -655,7 +866,7 @@ BOOL CALLBACK LineDlgProc (HWND hDlg, UINT message,
 		hdc = GetDC(hCtrlLine_F);    	
 		GetClientRect (hCtrlLine_F, &rect);
 
-		pp_F = g_dg_ptr.bl_F.UpRect(rect);
+		g_dg.m_bl_F.UpRect(rect, g_bez_pt_F);
 		
 		return FALSE;
 		 
@@ -667,12 +878,12 @@ BOOL CALLBACK LineDlgProc (HWND hDlg, UINT message,
 
 	case WM_PAINT:
 
-		DrawBezierToBlock(hCtrlLine_A,pp_A);
-		DrawBezierToBlock(hCtrlLine_B,pp_B);
-		DrawBezierToBlock(hCtrlLine_C,pp_C);
-		DrawBezierToBlock(hCtrlLine_D,pp_D);
-		DrawBezierToBlock(hCtrlLine_E,pp_E);
-		DrawBezierToBlock(hCtrlLine_F,pp_F);
+		DrawBezierToBlock(hCtrlLine_A,g_bez_pt_A);
+		DrawBezierToBlock(hCtrlLine_B,g_bez_pt_B);
+		DrawBezierToBlock(hCtrlLine_C,g_bez_pt_C);
+		DrawBezierToBlock(hCtrlLine_D,g_bez_pt_D);
+		DrawBezierToBlock(hCtrlLine_E,g_bez_pt_E);
+		DrawBezierToBlock(hCtrlLine_F,g_bez_pt_F);
 
 		return FALSE;
 		  
@@ -685,7 +896,12 @@ BOOL CALLBACK LineDlgProc (HWND hDlg, UINT message,
 				 
 		case IDOK:
 
-			g_dg_ptr.bl_A.UpPoints(pp_A);
+			g_dg.m_bl_A.UpPoints(g_bez_pt_A);
+			g_dg.m_bl_B.UpPoints(g_bez_pt_B);
+			g_dg.m_bl_C.UpPoints(g_bez_pt_C);
+			g_dg.m_bl_D.UpPoints(g_bez_pt_D);
+			g_dg.m_bl_E.UpPoints(g_bez_pt_E);
+			g_dg.m_bl_F.UpPoints(g_bez_pt_F);
 
 			EndDialog (hDlg, TRUE);	
 			
@@ -701,97 +917,82 @@ BOOL CALLBACK LineDlgProc (HWND hDlg, UINT message,
 
 			if (DialogBox (hInstance, TEXT ("BezierBox"), hCtrlLine_A, BezierDlgProc) )
 			{
-				/*
 				for (i=0; i<4; i++)			  
 				  {				  
 					  g_bez_pt_A[i].x = g_bez_pt[i].x;				  
 					  g_bez_pt_A[i].y = g_bez_pt[i].y;			  
 				  }
-				*/
-				pp_A = g_pp;
-				DrawBezierToBlock(hCtrlLine_A,pp_A);
+				DrawBezierToBlock(hCtrlLine_A,g_bez_pt_A);
 			}
 			return FALSE;
 
 		case IDC_BTN_LINE_B:
 
 			if (DialogBox (hInstance, TEXT ("BezierBox"), hCtrlLine_B, BezierDlgProc) )
-			{	
-				/*
+			{					  
 				for (i=0; i<4; i++)			  
 				  {				  
 					  g_bez_pt_B[i].x = g_bez_pt[i].x;				  
 					  g_bez_pt_B[i].y = g_bez_pt[i].y;			  
 				  }
-                */
-                pp_B = g_pp;
 
-				DrawBezierToBlock(hCtrlLine_B,pp_B);
+				DrawBezierToBlock(hCtrlLine_B,g_bez_pt_B);
 			}
 			return FALSE;
 
 		case IDC_BTN_LINE_C:
 
 			if (DialogBox (hInstance, TEXT ("BezierBox"), hCtrlLine_C, BezierDlgProc) )
-			{	
-				/*
+			{						  
 				for (i=0; i<4; i++)			  
 				  {				  
 					  g_bez_pt_C[i].x = g_bez_pt[i].x;				  
 					  g_bez_pt_C[i].y = g_bez_pt[i].y;			  
 				  }
-				  */
-                pp_C = g_pp;
-				DrawBezierToBlock(hCtrlLine_C,pp_C);
+
+				DrawBezierToBlock(hCtrlLine_C,g_bez_pt_C);
 			}
 			return FALSE;
 			
 		case IDC_BTN_LINE_D:
 
 			if (DialogBox (hInstance, TEXT ("BezierBox"), hCtrlLine_D, BezierDlgProc) )
-			{		
-				/*
+			{				
 				  for (i=0; i<4; i++)			  
 				  {				  
 					  g_bez_pt_D[i].x = g_bez_pt[i].x;				  
 					  g_bez_pt_D[i].y = g_bez_pt[i].y;			  
 				  }
-				  */
 
-                pp_D = g_pp;
-				DrawBezierToBlock(hCtrlLine_D,pp_D);
+				DrawBezierToBlock(hCtrlLine_D,g_bez_pt_D);
 			}
 			return FALSE;
 
 		case IDC_BTN_LINE_E:
 
 			if (DialogBox (hInstance, TEXT ("BezierBox"), hCtrlLine_E, BezierDlgProc) )
-			{	
-				/*
+			{								  
 				for (i=0; i<4; i++)			  
 				  {				  
 					  g_bez_pt_E[i].x = g_bez_pt[i].x;				  
 					  g_bez_pt_E[i].y = g_bez_pt[i].y;			  
 				  }
-				  */
-                pp_E = g_pp;
-				DrawBezierToBlock(hCtrlLine_E,pp_E);
+
+				DrawBezierToBlock(hCtrlLine_E,g_bez_pt_E);
 			}
 			return FALSE;		 
      
 		case IDC_BTN_LINE_F:
 
 			if (DialogBox (hInstance, TEXT ("BezierBox"), hCtrlLine_F, BezierDlgProc) )
-			{	
-				/*
+			{								  
 				for (i=0; i<4; i++)			  
 				  {				  
 					  g_bez_pt_F[i].x = g_bez_pt[i].x;				  
 					  g_bez_pt_F[i].y = g_bez_pt[i].y;			  
 				  }
-				  */
-                pp_F = g_pp;
-				DrawBezierToBlock(hCtrlLine_F,pp_F);
+
+				DrawBezierToBlock(hCtrlLine_F,g_bez_pt_F);
 			}
 			return FALSE;
 		}
@@ -905,29 +1106,63 @@ LRESULT CALLBACK BezierLineWndProc (HWND hwnd, UINT message,
 			  }
 
 			  InvalidateRect(hwnd, NULL, TRUE);
-				/*  
+				  
 			  for (int i=0; i<4; i++)			  				  
 			  {				  
 					  g_bez_pt[i].x = apt[i].x / SCALE_FACTOR;				  
 					  g_bez_pt[i].y = apt[i].y / SCALE_FACTOR;			  				  
-			  }	
-			  */
-			  g_pp.p0.x = apt[0].x / SCALE_FACTOR;
-			  g_pp.p0.y = apt[0].y / SCALE_FACTOR;
-
-			  g_pp.p1.x = apt[1].x / SCALE_FACTOR;
-			  g_pp.p1.y = apt[1].y / SCALE_FACTOR;
-
-			  g_pp.p2.x = apt[2].x / SCALE_FACTOR;
-			  g_pp.p2.y = apt[2].y / SCALE_FACTOR;
-
-			  g_pp.p3.x = apt[3].x / SCALE_FACTOR;
-			  g_pp.p3.y = apt[3].y / SCALE_FACTOR;
-
-
+			  }		
 			}
 
 		return FALSE;            
 	}    
 	return DefWindowProc (hwnd, message, wParam, lParam) ;
 }
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+/// thesw functions are only for debugging purpose////////////////////////////////////////
+
+void g_PrintPoints(POINT* pts, LPCTSTR lpTitle)
+{
+
+        TCHAR szFormatpts[] = TEXT ("%-04i %-04i %-04i %-04i %-04i %-04i %-04i %-04i"),
+              szBufferpts[50];
+
+        wsprintf (szBufferpts, szFormatpts, pts[0].x, pts[0].y,
+                                            pts[1].x, pts[1].y,
+									        pts[2].x, pts[2].y,
+								        	pts[3].x, pts[3].y);
+		MessageBox (NULL, szBufferpts,
+                      lpTitle, MB_ICONINFORMATION);
+
+}
+
+void g_PrintRect(RECT & f_rect, LPCTSTR lpTitle)
+{
+
+        TCHAR szFormatrec[] = TEXT ("%-04i %-04i %-04i %-04i"),
+              szBufferrec[30];
+
+        wsprintf (szBufferrec, szFormatrec, f_rect.top,    f_rect.left,
+			                                f_rect.bottom, f_rect.right);
+
+		MessageBox (NULL, szBufferrec,
+                      lpTitle, MB_ICONINFORMATION);
+
+}
+
+void g_PrintWH(int Width, int Height, LPCTSTR lpTitle)
+{
+
+        TCHAR szFormatWH[] = TEXT ("%-04i %-04i"),
+              szBufferWH[30];
+
+        wsprintf (szBufferWH, szFormatWH, Width, Height);
+
+		MessageBox (NULL, szBufferWH,
+                      lpTitle, MB_ICONINFORMATION);
+
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////

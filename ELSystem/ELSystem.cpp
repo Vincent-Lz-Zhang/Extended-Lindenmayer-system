@@ -20,42 +20,54 @@ ELSystem::ELSystem() // default constructor
 
 	}
 
-	m_axiom     = 'F';
+	m_axiom = 'F';
 
     m_Maxiterat = 0;
 
 }
 
-ELSystem::ELSystem(char * a, char * r, int o)
+ELSystem::ELSystem(string a, string r, int o)
 
 {
-    m_axiom     = a;
-    m_ruleStr   = r;
-    m_Maxiterat = o;
+	if( (!a.empty()) && (!r.empty()) )
+	{
+		m_axiom     = a;
+		m_ruleStr   = r; 
+		m_Maxiterat = o;
+	}
 }
 
 ELSystem::~ELSystem()
-{
-}
-/*
-void ELSystem::Filter()
 
 {
 
 }
-*/
-void ELSystem::Update(char * a, char * r, int o)
+
+
+void ELSystem::Update(string a, string r, int o)
 {
-    m_axiom     = a;
-    m_ruleStr   = r;
-    m_Maxiterat = o;
+	if( (!a.empty()) && (!r.empty()) )
+	{
+		m_axiom     = a;
+		m_ruleStr   = r; 
+		m_Maxiterat = o;
+	}
 	
+}
+
+int ELSystem::ReportLen()
+{
+	if( !m_Tree.empty() )
+		return m_Tree.length();
+	else
+		return 0;
+
 }
 
 int ELSystem::Pick()
 {
 
-	int comma[6];
+	int comma[6];    // due to six symbols A~F
 
 	int num_of_comma = 0; // number of commas
 

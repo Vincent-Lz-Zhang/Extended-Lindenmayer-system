@@ -4,26 +4,31 @@
 
 Alphabet::Alphabet(char * ptr)
 {
-	al = ptr;
+	m_al = ptr;
 }
 
 char Alphabet::Get(int i)
 {
-	return al.at(i);
+	return m_al.at(i);
 
 }
 
 int Alphabet::Len()
 {
-	return al.length();
+	return m_al.length();
 }
 
 int Alphabet::Position(char c)
 {
-	return al.find(c,0);
+	return m_al.find(c,0);
 }
 
+string Alphabet::ReturnAlph()
+{
+	return m_al;
+}
 
 Alphabet::~Alphabet()
 {
+
 }

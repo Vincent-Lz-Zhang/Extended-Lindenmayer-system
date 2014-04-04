@@ -15,48 +15,47 @@ class ELSystem
 
 private:
 
-	Alphabet m_Abet; // alphabet
+	Alphabet m_Abet;       // alphabet
 
-	int m_Maxiterat; // number of iterations
+	int m_Maxiterat;       // number of iterations
 
-	//string m_rules[11]; // A B C D E F G + - [ ], 11 in total
+	string * m_rules;      // this is a pointer for implementing a dynamic array of rules
+	                       // it's size should depend on the length of alphabet m_Abet
 
-	string * m_rules; // this is a pointer for implementing a dynamic array of rules
-	                  // it's size should depend on the length of alphabet m_Abet
+	string m_ruleStr;      // this is the raw string for rules
 
-	string m_ruleStr;
+	string m_axiom;        // axiom 
 
-	string m_axiom; 
+	int m_len_of_albet;    // length of Alphabet
 
-	int m_len_of_albet;
-
-	string m_Tree; // the string after subtitution
+	string m_Tree;         // the string after subtitution
 
 public:
 
-	ELSystem();
-	ELSystem(char *, char *, int);
-	~ELSystem();
+	ELSystem();                         // default constructor
 
-    string Report() { return m_Tree; } // return m_tree
+	ELSystem(string, string, int);      // constructor, set m_axiom, m_ruleStr and m_Maxiterat (namely the order)   
 
-    void Update(char *, char *, int);  // 
+	~ELSystem();                        //
 
-	int Pick(); // split the string of rules into rules which are unique for each letter,
-		             // then put them into the rules array ,the return value indicate the number 
-					 // of valid rules
-    void Gentree(); // apply the replacement rules to generate m_tree
+    string Report() { return m_Tree; }  // return m_tree
 
-//	bool Validate(); // validate the strings do not contain any other letter or invalid symble and 
-	                 // the number of '[' equals to that of ']'
+    void Update(string, string, int);   // reset m_axiom, m_ruleStr and m_Maxiterat (namely the order)
 
- //   void Filter(); 
+	int Pick();                         // split the string of rules into rules which are unique for each letter,
+		                                // then put them into the rules array ,the return value indicate the number 
+					                    // of valid rules
+    void Gentree();                     // apply the replacement rules to generate m_tree
 
-	// for testing
-	string * ReturnRules() { return m_rules; }
+    int ReportLen();                    //
 
-	int ReturnRulesLeng() { return m_Abet.Len(); }
 
+	// for testing and debugging only//////////////
+
+	string * ReturnRules() { return m_rules; }     //
+
+	int ReturnRulesLeng() { return m_Abet.Len(); } //
+    ////////////////////////////////////////////////
 };
 
 #endif
