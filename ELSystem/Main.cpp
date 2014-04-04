@@ -910,6 +910,13 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			  }   
 			  break;
 
+
+		  case IDM_FILE_EXIT:
+
+			  PostQuitMessage (0) ;
+         
+			  return 0 ;
+
 		  case IDM_FILE_EXPORT:
 
 			  if(DialogBox( hInstance, TEXT ("NameBox"), hwnd, ExportDlgProc))
@@ -1060,12 +1067,24 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		  case ID_BTN_ANIMATE:
 
-              hwnd_anim = CreateWindow ( TEXT("PlayWnd"),
+			  if( g_frame.IsMapEmpty() )
+			  {
+				  MessageBox (NULL, TEXT ("Please edit the animation."),
+                    
+					  TEXT("No frame yet"), MB_ICONINFORMATION);
+			  }
+			  else
+			  {
+				  
+
+              
+				  hwnd_anim = CreateWindow ( TEXT("PlayWnd"),
 				                         NULL,
 										 WS_OVERLAPPEDWINDOW | WS_VISIBLE,
                                          CW_USEDEFAULT, CW_USEDEFAULT,
                                          700, 700,
                                          NULL, NULL, hInstance, NULL);
+			  }
 			  break;
           
 		  case ID_RBTN_EIGHT:
@@ -1702,10 +1721,12 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
                break ;
                
           case VK_UP:
+			  MessageBeep (0) ;
                SendMessage (hDlg, WM_VSCROLL, SB_LINEUP, 0) ;
                break ;
 
           case VK_DOWN:
+			  MessageBeep (0) ;
                SendMessage (hDlg, WM_VSCROLL, SB_LINEDOWN, 0) ;
                break ;
                

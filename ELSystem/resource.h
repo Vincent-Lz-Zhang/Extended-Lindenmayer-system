@@ -47,13 +47,14 @@
 #define IDM_FRAME_DELETE                40006
 #define IDM_MARK                        40007
 #define IDM_FILE_EXPORT                 40008
+#define IDM_FILE_EXIT                   40009
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        114
-#define _APS_NEXT_COMMAND_VALUE         40009
+#define _APS_NEXT_COMMAND_VALUE         40010
 #define _APS_NEXT_CONTROL_VALUE         1035
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
