@@ -27,7 +27,7 @@ void ParaValidator::Filter()
 
 	// find the first letter in alphabet and assign it to strbuf
 
-	for (int i=0; i<len_axm; i++)
+	for (int i=0; i<len; i++)
 	{
 		for (int j=0; j<len_albet; j++)
 		{
@@ -39,17 +39,17 @@ void ParaValidator::Filter()
     
 	m_axmContl = strbuf;
 
-
+    strbuf.erase(&strbuf[0]);
     
 	len = m_rulContl.length();
 
     // find the first letter in alphabet and assign it to strbuf
 
-	for (int i=0; i<len_axm; i++)
+	for ( i=0; i<len; i++)
 	{
 		for (int j=0; j<len_albet; j++)
 		{
-			if ( m_axmContl[i] == m_albet.Get(j) )
+			if ( (m_axmContl[i] == m_albet.Get(j))||(m_axmContl[i] == '=')||(m_axmContl[i] == ',') )
 
 				strbuf += m_axmContl[i];
 		}
@@ -65,19 +65,8 @@ void ParaValidator::Filter()
 bool ParaValidator::IsValid()
 {
 
+	bool f = true;
+	return f; 
 }
 
-string ParaValidator::ReturnAxm()
-{
 
-}
-
-string ParaValidator::ReturnRul()
-{
-
-}
-
-int ParaValidator::ReturnOrd()
-{
-
-}

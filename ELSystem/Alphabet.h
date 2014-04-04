@@ -23,6 +23,7 @@ public:
 	~Alphabet();
     char Get(int);
 	int Len();
+	int Position(char);
 
 };
 

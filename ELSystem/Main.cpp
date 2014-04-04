@@ -26,6 +26,13 @@ HWND hDMlesGraph ;
 
 HBRUSH     hBrushWhite;   //   Global   variable   
 
+char ax[3];
+char ru[20];
+int ord;
+char ordStr[4];
+int ang;
+char angStr[10];
+
 ELSystem g_elsys; 
 
 LRESULT CALLBACK WndProc      (HWND, UINT, WPARAM, LPARAM) ;
@@ -146,7 +153,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
           hwnd_Edit_Ord = CreateWindow (TEXT ("edit"), NULL,
                          WS_CHILD | WS_VISIBLE |
                                    WS_BORDER | ES_LEFT ,
-                         7 * cxChar, 7 * cyChar, 3 * cxChar, cyChar, hwnd, (HMENU) ID_EDIT_RULES,
+                         7 * cxChar, 7 * cyChar, 3 * cxChar, cyChar, hwnd, (HMENU) ID_EDIT_ORDER,
                           hInstance, NULL) ;     		  
 
 		  hwnd_Stic_Ang = CreateWindow ( TEXT( "STATIC"), angle, WS_CHILD | WS_VISIBLE,
@@ -156,7 +163,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		  hwnd_Edit_Ang = CreateWindow (TEXT ("edit"), NULL,
                          WS_CHILD | WS_VISIBLE |
                                    WS_BORDER | ES_LEFT ,
-                         18 * cxChar, 7 * cyChar, 3 * cxChar, cyChar, hwnd, (HMENU) ID_EDIT_RULES,
+                         18 * cxChar, 7 * cyChar, 3 * cxChar, cyChar, hwnd, (HMENU) ID_EDIT_ANGLE,
                           hInstance, NULL) ;
 
     
@@ -192,7 +199,25 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
           case IDM_APP_ABOUT :
                DialogBox (hInstance, TEXT ("AboutBox"), hwnd, AboutDlgProc) ;
                break ;
+          //// for testing so far
+		  case ID_BTN_APPLY :
+			  
+			  GetDlgItemText (hwnd, ID_EDIT_AXIOM , ax, 2) ;
+			  GetDlgItemText (hwnd, ID_EDIT_RULES, ru, 19);
+			  GetDlgItemText (hwnd, ID_EDIT_ORDER, ordStr, 3);
+			  ord = atoi(ordStr);
+			  GetDlgItemText (hwnd, ID_EDIT_ANGLE, angStr , 4);
+			  ang = atoi(angStr);
+              g_elsys.Update(ax, ru, ord);
 
+			  g_elsys.Pick();
+
+			  g_elsys.Gentree();
+
+              InvalidateRect (hDMlesGraph, NULL, TRUE) ;
+
+			  break;
+		  ///////////////////////////
           }
           return 0 ;
           
@@ -227,10 +252,47 @@ BOOL CALLBACK AboutDlgProc (HWND hDlg, UINT message,
 BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message, 
                            WPARAM wParam, LPARAM lParam)
 {
-	    
+	// for testing 
+	 HDC          hdc ;
+     PAINTSTRUCT  ps ;
+   
+	 string * sptr = g_elsys.ReturnRules();
+
+	 //int n;
+	//////////////////////////  	    
 	switch (message)
 		 
 	{
+		////////////////////////////////
+		case WM_PAINT :
+
+			
+			hdc = BeginPaint (hDlg, &ps) ;
+          
+			SelectObject (hdc, GetStockObject (SYSTEM_FIXED_FONT)) ;
+
+          
+/*
+			for ( n=0; n<g_elsys.ReturnRulesLeng(); n++)
+
+			{
+
+          
+				TextOut (hdc, 4 * 4, 5+n*16,  (const char *) sptr[n].c_str(), lstrlen(sptr[n].c_str())) ;  
+
+
+			}  
+*/
+
+			TextOut (hdc, 4 * 4, 5,  (g_elsys.Report()).c_str(), lstrlen((g_elsys.Report()).c_str())) ; 
+
+ 
+          
+			EndPaint (hDlg, &ps) ;
+
+		  
+			return TRUE;
+			///////////////////////////////////////////
 		case WM_INITDIALOG :
           return TRUE ;
 
