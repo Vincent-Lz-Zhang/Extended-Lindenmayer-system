@@ -429,7 +429,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 						
           hwnd_Edit_Axm = CreateWindow ( TEXT ("edit"), 
 			                      NULL, 
-								  WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT,           
+								  WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT | WS_TABSTOP | WS_GROUP,           
                                   8 * cxChar, cyChar, 15*cxChar, 5 * cyChar / 4,
 								  hwnd, (HMENU) ID_EDIT_AXIOM,
                                   hInstance, NULL);
@@ -443,7 +443,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
          
           hwnd_Edit_Rule = CreateWindow ( TEXT ("edit"),
 			                       NULL, 
-								   WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT | ES_AUTOHSCROLL,
+								   WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT | ES_AUTOHSCROLL | WS_TABSTOP | WS_GROUP,
                                    cxChar, 5 * cyChar, 35 * cxChar, 5 * cyChar / 4, 
 								   hwnd, (HMENU) ID_EDIT_RULES,
                                    hInstance, NULL);
@@ -457,7 +457,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		  
           hwnd_Edit_Ord = CreateWindow ( TEXT ("edit"), 
 			                      NULL, 
-								  WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT,
+								  WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT | WS_TABSTOP | WS_GROUP,
                                   7 * cxChar, 7 * cyChar, 4 * cxChar, 5 * cyChar / 4,
 								  hwnd, (HMENU) ID_EDIT_ORDER,
                                   hInstance, NULL); 
@@ -471,7 +471,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
              
 		  hwnd_Edit_AngL = CreateWindow ( TEXT ("edit"), 
 			                      NULL, 
-								  WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT,                    
+								  WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT | WS_TABSTOP | WS_GROUP,                    
                                   39 * cxChar / 2, 7 * cyChar, 4 * cxChar, 5 * cyChar / 4, 
 								  hwnd, (HMENU) ID_EDIT_ANGLEL,
                                   hInstance, NULL);
@@ -485,7 +485,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
              
 		  hwnd_Edit_AngR = CreateWindow ( TEXT ("edit"), 
 			                      NULL, 
-								  WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT,                    
+								  WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT | WS_TABSTOP | WS_GROUP,                    
                                   32 * cxChar, 7 * cyChar, 4 * cxChar, 5 * cyChar / 4, 
 								  hwnd, (HMENU) ID_EDIT_ANGLER,
                                   hInstance, NULL);
@@ -493,7 +493,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		  hwnd_Btn_Apply = CreateWindow ( TEXT("button"), 
                                    btnApply,
-                                   WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+                                   WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON | WS_TABSTOP | WS_GROUP,
                                    14 * cxChar, 22 * cyChar,
                                    6 * cxChar, 7 * cyChar / 4,
                                    hwnd, (HMENU) ID_BTN_APPLY,
@@ -501,7 +501,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		  hwnd_Btn_Reset = CreateWindow ( TEXT("button"), 
                                    btnReset,
-                                   WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+                                   WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_TABSTOP | WS_GROUP,
                                    21 * cxChar, 22 * cyChar,
                                    7 * cxChar, 7 * cyChar / 4,
                                    hwnd, (HMENU) ID_BTN_RESET,
@@ -509,7 +509,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		  hwnd_Btn_Anima = CreateWindow ( TEXT("button"), 
                                    btnAnima,
-                                   WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+                                   WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_TABSTOP | WS_GROUP,
                                    29 * cxChar, 22 * cyChar,
                                    8 * cxChar, 7 * cyChar / 4,
                                    hwnd, (HMENU) ID_BTN_ANIMATE,
@@ -518,7 +518,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		  hwnd_Cbtn_Ang = CreateWindow ( TEXT("button"), 
                                    cbtn_ang,
-                                   WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX,
+                                   WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX | WS_TABSTOP,
                                    cxChar, 9 * cyChar,
                                    18 * cxChar, 5 * cyChar / 4,
                                    hwnd, (HMENU) ID_CBTN_ANGRAN,
@@ -546,7 +546,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		  hwnd_Cbtn_Len = CreateWindow ( TEXT("button"), 
                                    cbtn_len,
-                                   WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX,
+                                   WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX | WS_TABSTOP,
                                    cxChar, 11 * cyChar,
                                    18 * cxChar, 5 * cyChar / 4,
                                    hwnd, (HMENU) ID_CBTN_LENRAN,
@@ -580,7 +580,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		 hwnd_Rbtn_Eig = CreateWindow ( TEXT("button"), 
                                    rbtn_eig,
-                                   WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON,
+                                   WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_GROUP,
                                    2 * cxChar , 15 * cyChar ,
                                    8 * cxChar, 5 * cyChar / 4,
                                    hwnd, (HMENU) ID_RBTN_EIGHT,
