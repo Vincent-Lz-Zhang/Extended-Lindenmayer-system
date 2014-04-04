@@ -22,6 +22,7 @@ FRAMEINFO;
 
 typedef map<unsigned int,FRAMEINFO> FRAMEMAP;
 
+class ParaIO;
 class Frame
 {
 private:
@@ -31,6 +32,8 @@ private:
 	FRAMEMAP::const_iterator curpos;
 
 public:
+
+	friend class ParaIO;
 
     Frame();
     ~Frame();

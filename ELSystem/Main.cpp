@@ -360,7 +360,7 @@ void RecoverPara(HWND hwnd, int i)
 		 SetDlgItemText (hwnd, ID_EDIT_AXIOM, g_ax);
 		 
 				  
-		 g_pIO.CopyToClass(g_elsys, g_dg);
+		 g_pIO.CopyToClass(g_elsys, g_dg, g_frame);
 				  
 		 if (fin.eof())       									  
 			 fin.clear();     // clear eof flag				  
@@ -915,7 +915,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			  if(DialogBox( hInstance, TEXT ("NameBox"), hwnd, ExportDlgProc))
 			  {				 
 				  g_pIO.GetNameFromInput(g_name);
-				  g_pIO.CopyFromClass(g_elsys, g_dg, g_angL, g_angR);
+				  g_pIO.CopyFromClass(g_elsys, g_dg, g_frame, g_angL, g_angR);
 
 				  ofstream fout(file, ios::out | ios::app | ios::binary);
     
@@ -1339,9 +1339,6 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 
 		rMax = g_dg.CheckBoundary(hDlg, fAng, fLen);
 
-		g_PrintRect(rMax, TEXT("RECT"));
-		g_PrintWH(cxClient, cyClient, TEXT("Win SIZE"));
-
 		///////judge the horizontal size//////////////////
 
 		if ( (rMax.left < 0) && (rMax.right > cxClient) ) // the horizontal width of graph is over the width of window
@@ -1355,12 +1352,14 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 			g_HorzNumPos = 2*temp_HorzNumPos1;
 
 		    SetScrollRange (hDlg, SB_HORZ, 0, g_HorzNumPos, TRUE);
-		    SetScrollPos (hDlg, SB_HORZ, temp_HorzNumPos1+ceil( (float(abs(rMax.right-cxClient)-abs(rMax.left))/2) / float(xUnit) ), TRUE);
+		    SetScrollPos (hDlg, SB_HORZ, temp_HorzNumPos1, TRUE);
 		}
 		else if(rMax.left < 0)   // the width of graph is not over the width of window, but exceed left edge
 		{
 			temp_HorzNumPos1 = ceil( fabs( float(rMax.left) / float(xUnit) ) );
-            g_HorzNumPos = 2*temp_HorzNumPos1;
+
+			g_HorzNumPos = 2*temp_HorzNumPos1;
+
 			if(  abs(rMax.left)<=abs(rMax.right-cxClient)  )
 			{				
 				SetScrollRange (hDlg, SB_HORZ, 0, g_HorzNumPos, TRUE);
@@ -1369,10 +1368,8 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 			else 
 			{
 				SetScrollRange (hDlg, SB_HORZ, 0, g_HorzNumPos, TRUE);
-				SetScrollPos (hDlg, SB_HORZ, ceil( ( float(abs(rMax.left)-abs(rMax.right-cxClient))/2) / float(xUnit) ), TRUE);
-
+				SetScrollPos (hDlg, SB_HORZ, ceil(float((abs(rMax.left)-abs(rMax.right-cxClient))/2) / float(xUnit) ), TRUE);
 			}
-
 		}
 		else if(rMax.right > cxClient)  // the width of graph is not over the width of window, but exceed right edge
 		{
@@ -1388,12 +1385,9 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 			else 
 			{
 				SetScrollRange (hDlg, SB_HORZ, 0, g_HorzNumPos, TRUE);
-				SetScrollPos (hDlg, SB_HORZ, g_HorzNumPos-ceil( ( float(abs(rMax.right-cxClient)-abs(rMax.left))/2) / float(xUnit) ), TRUE);
+				SetScrollPos (hDlg, SB_HORZ, ceil(float((abs(rMax.right-cxClient)-abs(rMax.left))/2) / float(xUnit) ), TRUE);
 			}
-		}
-		else
-		{
-			SetScrollPos (hDlg, SB_HORZ, g_HorzNumPos/2, TRUE);
+
 		}
 
 		
@@ -1412,7 +1406,7 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 			g_VertNumPos = 2*temp_VertNumPos1;
 			
 		    SetScrollRange (hDlg, SB_VERT , 0, g_VertNumPos, TRUE);
-		    SetScrollPos (hDlg, SB_VERT , temp_VertNumPos1+ceil( (float(abs(rMax.bottom-cyClient)-abs(rMax.top))/2) / float(yUnit) ), TRUE);
+		    SetScrollPos (hDlg, SB_VERT , temp_VertNumPos1, TRUE);
 
 		}
 		else if(rMax.top < 0)   // the height of graph is not over the height of window, but exceed top edge
@@ -1420,7 +1414,7 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 			temp_VertNumPos1 = ceil( fabs( float(rMax.top) / float(yUnit) ) );
 
 			g_VertNumPos = 2*temp_VertNumPos1;
-			
+
 			if(  abs(rMax.top)<=abs(rMax.bottom-cyClient)  )
 			{				
 				SetScrollRange (hDlg, SB_VERT , 0, g_VertNumPos, TRUE);
@@ -1431,8 +1425,9 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 			{
 
 				SetScrollRange (hDlg, SB_VERT , 0, g_VertNumPos, TRUE);
-                SetScrollPos (hDlg, SB_VERT , ceil( (  float(abs(rMax.top)-abs(rMax.bottom-cyClient) )/2) / float(yUnit) ), TRUE);
+                SetScrollPos (hDlg, SB_VERT , ceil(float((abs(rMax.top)-abs(rMax.bottom-cyClient))/2) / float(yUnit) ), TRUE);
 			}
+		    		    
 
 		}
 		else if(rMax.bottom > cyClient)   // the height of graph is not over the height of window, but exceed bottom edge
@@ -1440,7 +1435,7 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 			temp_VertNumPos1 = ceil( float(rMax.bottom - cyClient/2 ) / float(yUnit) );
 
 			g_VertNumPos = 2*temp_VertNumPos1;
-			
+
 			if(  abs(rMax.top)<=abs(rMax.bottom-cyClient)  )
 			{				
 				SetScrollRange (hDlg, SB_VERT , 0, g_VertNumPos, TRUE);
@@ -1451,13 +1446,9 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 			{
 
 				SetScrollRange (hDlg, SB_VERT , 0, g_VertNumPos, TRUE);
-                SetScrollPos (hDlg, SB_VERT , g_VertNumPos-ceil( (float (abs(rMax.bottom-cyClient)-abs(rMax.top))/2) / float(yUnit) ), TRUE);
+                SetScrollPos (hDlg, SB_VERT , ceil(float((abs(rMax.bottom-cyClient)-abs(rMax.top))/2) / float(yUnit) ), TRUE);
 			}
 
-		}
-		else
-		{
-			SetScrollPos (hDlg, SB_VERT, g_VertNumPos/2, TRUE);
 		}
 
 		InvalidateRect (hDlg, NULL, TRUE);
@@ -1472,9 +1463,6 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 
 		rMax = g_dg.CheckBoundary(hDlg, fAng, fLen);
 
-		g_PrintRect(rMax, TEXT("RECT"));
-		g_PrintWH(cxClient, cyClient, TEXT("Win SIZE"));
-
 		//-------------------- judge the horizontal size --------------------///
 
 		if ( (rMax.left < 0) && (rMax.right > cxClient) ) // the horizontal width of graph is over the width of window
@@ -1488,7 +1476,7 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 			g_HorzNumPos = 2*temp_HorzNumPos;
 
 		    SetScrollRange (hDlg, SB_HORZ, 0, g_HorzNumPos, TRUE);
-		    SetScrollPos (hDlg, SB_HORZ, temp_HorzNumPos+ceil( (float(abs(rMax.right-cxClient)-abs(rMax.left))/2) / float(xUnit) ), TRUE);
+		    SetScrollPos (hDlg, SB_HORZ, temp_HorzNumPos, TRUE);
 		}
 		else if(rMax.left < 0)   // the width of graph is not over the width of window, but exceed left edge
 		{
@@ -1504,7 +1492,7 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 			else 
 			{
 				SetScrollRange (hDlg, SB_HORZ, 0, g_HorzNumPos, TRUE);
-				SetScrollPos (hDlg, SB_HORZ, ceil( (float (abs(rMax.left)-abs(rMax.right-cxClient))/2) / float(xUnit) ), TRUE);
+				SetScrollPos (hDlg, SB_HORZ, ceil(float((abs(rMax.left)-abs(rMax.right-cxClient))/2) / float(xUnit) ), TRUE);
 			}
 		}
 		else if(rMax.right > cxClient)  // the width of graph is not over the width of window, but exceed right edge
@@ -1521,12 +1509,8 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 			else 
 			{
 				SetScrollRange (hDlg, SB_HORZ, 0, g_HorzNumPos, TRUE);
-				SetScrollPos (hDlg, SB_HORZ, g_HorzNumPos-ceil((float(abs(rMax.right-cxClient)-abs(rMax.left))/2) / float(xUnit) ), TRUE);
+				SetScrollPos (hDlg, SB_HORZ, ceil(float((abs(rMax.right-cxClient)-abs(rMax.left))/2) / float(xUnit) ), TRUE);
 			}
-		}
-		else
-		{
-			SetScrollPos (hDlg, SB_HORZ, g_HorzNumPos/2, TRUE);
 		}
 			
 		//--------------------------------------------------------------------------------------//	
@@ -1544,7 +1528,7 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 			g_VertNumPos = 2*temp_VertNumPos;
 			
 		    SetScrollRange (hDlg, SB_VERT , 0, g_VertNumPos, TRUE);
-		    SetScrollPos (hDlg, SB_VERT , temp_VertNumPos+ceil( (float(abs(rMax.bottom-cyClient)-abs(rMax.top))/2) / float(yUnit) ), TRUE);
+		    SetScrollPos (hDlg, SB_VERT , temp_VertNumPos, TRUE);
 
 		}
 		else if(rMax.top < 0)  // the height of graph is not over the height of window, but exceed top edge
@@ -1563,7 +1547,7 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 			{
 
 				SetScrollRange (hDlg, SB_VERT , 0, g_VertNumPos, TRUE);
-                SetScrollPos (hDlg, SB_VERT , ceil( ( float(abs(rMax.top)-abs(rMax.bottom-cyClient) ) / 2 ) / float(yUnit) ), TRUE);
+                SetScrollPos (hDlg, SB_VERT , ceil(float((abs(rMax.top)-abs(rMax.bottom-cyClient))/2) / float(yUnit) ), TRUE);
 			}
 
 		}
@@ -1572,8 +1556,8 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 			temp_VertNumPos = ceil( float(rMax.bottom - cyClient/2 ) / float(yUnit) );
 
 			g_VertNumPos = 2*temp_VertNumPos;
-			
-			if(  abs(rMax.bottom-cyClient)<=abs(rMax.top)  )
+
+			if(  abs(rMax.top)<=abs(rMax.bottom-cyClient)  )
 			{				
 				SetScrollRange (hDlg, SB_VERT , 0, g_VertNumPos, TRUE);
 				SetScrollPos (hDlg, SB_VERT, g_VertNumPos, TRUE);
@@ -1583,12 +1567,9 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 			{
 
 				SetScrollRange (hDlg, SB_VERT , 0, g_VertNumPos, TRUE);
-                SetScrollPos (hDlg, SB_VERT , g_VertNumPos-ceil((float(abs(rMax.bottom-cyClient)-abs(rMax.top))/2) / float(yUnit) ), TRUE);
+                SetScrollPos (hDlg, SB_VERT , ceil(float((abs(rMax.bottom-cyClient)-abs(rMax.top))/2) / float(yUnit) ), TRUE);
 			}
-		}
-		else
-		{
-			SetScrollPos (hDlg, SB_VERT, g_VertNumPos/2, TRUE);
+
 		}
 	
 		InvalidateRect (hDlg, NULL, TRUE);
@@ -2712,7 +2693,7 @@ BOOL CALLBACK AnimDlgProc (HWND hDlg, UINT message,
 		 // enable angle scroll bar and set its value
 
 		 EnableWindow(hCtrl_AngR, TRUE);
-         degreeR = fi_tmp.angleL;    // get data of the frame
+         degreeR = fi_tmp.angleR;    // get data of the frame
 		 SetScrollPos  (hCtrl_AngR, SB_CTL, degreeR, TRUE) ;         		
 		 SetDlgItemInt (hDlg, IDC_STATIC_ANGR, degreeR, FALSE) ; // set static text
 

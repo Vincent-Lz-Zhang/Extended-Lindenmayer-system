@@ -9,7 +9,7 @@ ParaIO::~ParaIO()
 {
 }
 
-void ParaIO::CopyFromClass(ELSystem & e,DrawGraph & d, int l, int r)
+void ParaIO::CopyFromClass(ELSystem & e,DrawGraph & d, Frame & f, int l, int r)
 {	
 	if(!e.m_ruleStr.empty())
 	{
@@ -65,6 +65,23 @@ void ParaIO::CopyFromClass(ELSystem & e,DrawGraph & d, int l, int r)
 
 	}
 
+
+	if( !f.FrmMap.empty() )
+	{
+		m_count = min( f.FrmMap.size(), 10 );
+		FRAMEMAP::const_iterator pos;
+	    int i;
+		for(i=0,pos=f.FrmMap.begin();i<m_count;pos++,i++)
+	
+		{
+			m_frameIndex[i] = pos->first;
+		    m_frameInfo[i].len_Ratio  = pos->second.len_Ratio;
+			m_frameInfo[i].angleL = pos->second.angleL;
+			m_frameInfo[i].angleR = pos->second.angleR;
+		}
+	
+	}
+
 }
 void ParaIO::GetNameFromInput(const char * c)
 {
@@ -80,7 +97,7 @@ const char * ParaIO::GetNameFromFile()
 }
 
 	
-void ParaIO::CopyToClass(ELSystem & e,DrawGraph & d) const
+void ParaIO::CopyToClass(ELSystem & e,DrawGraph & d, Frame & f) const
 {
 
 	d.m_col_A.index = m_cA.index;
@@ -121,6 +138,15 @@ void ParaIO::CopyToClass(ELSystem & e,DrawGraph & d) const
 		d.m_bl_F.m_points[i].x = m_lF[i].x;
 		d.m_bl_F.m_points[i].y = m_lF[i].y;
 
+	}
+
+	if(m_count!=0)
+	{
+		for(int i=0; i<m_count; i++)
+		{
+			FRAMEINFO temp = m_frameInfo[i];
+			f.FrmMap[(m_frameIndex[i])] = temp;
+		}
 	}
 
 }
