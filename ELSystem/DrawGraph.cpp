@@ -1715,3 +1715,868 @@ void DrawGraph::ClearDyAryL()
 	    m_ranLen = NULL;
 	}
 }
+
+
+void DrawGraph::Copy(HWND hdlg, BOOL fRanA, BOOL fRanL)
+{
+
+    HDC hdcMem, hdc ; 
+	    
+	HBRUSH hBrush;
+
+	HPEN hPen;
+
+	int cxBitmap, cyBitmap;
+
+	double r;
+
+	POINT tempt[4];
+
+	
+	HBITMAP hBmp;
+
+	RECT rect, rect_2;
+
+    int index_Ang = 0;
+	int index_Len = 0;
+
+	int cx,cy;
+	int new_x,new_y;
+	
+	rect=CheckBoundary(hdlg, fRanA, fRanL);
+
+	cxBitmap = abs(rect.right - rect.left);
+	cyBitmap = abs(rect.top - rect.bottom);
+
+	rect_2.top = rect_2.left = 0;
+	rect_2.right = cxBitmap+100;
+	rect_2.bottom = cyBitmap+100;
+
+	hdc = GetDC(hdlg);
+
+	SaveDC (hdc);
+
+	hdcMem = CreateCompatibleDC (hdc);
+
+	hBmp = CreateCompatibleBitmap(hdc, cxBitmap+100, cyBitmap+100);
+
+	SelectObject (hdcMem, hBmp);
+
+	hBrush = CreateSolidBrush(RGB(255,255,255));
+		 
+	FillRect(hdcMem, &rect_2, hBrush);
+
+    ///////////////////abs(rect.bottom)//abs(rect.right)
+
+	SetMapMode (hdcMem, MM_LOENGLISH);
+
+	SetViewportOrgEx (hdcMem, 105, rect.bottom, NULL);
+
+
+	if(fRanA)
+	{
+		if(fRanL)
+		{		 
+			for ( int i=0; i<m_command.length(); i++)	
+			{
+				switch (m_command[i])			
+				{					
+
+				case 'A':
+							
+					hPen = CreatePen (PS_SOLID, 1, m_col_A.rgb) ;                
+					SelectObject (hdcMem, hPen);
+			    
+					r = m_bl_A.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);			    
+					index_Len++;
+			    
+					PolyBezier (hdcMem, tempt, 4) ;
+			    
+					MoveToEx (hdcMem, tempt[3].x, tempt[3].y, NULL);
+			    
+					m_pst.beta += r;
+			    
+					m_pst.nx = tempt[3].x;
+					m_pst.ny = tempt[3].y;
+			    
+					DeleteObject (hPen);
+			    
+					break;
+		    
+				case 'B':
+							
+					hPen = CreatePen (PS_SOLID, 1, m_col_B.rgb) ;
+					SelectObject (hdcMem, hPen);
+
+					r = m_bl_B.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);               
+					index_Len++;					
+					
+					PolyBezier (hdcMem, tempt, 4) ;
+		    
+					MoveToEx (hdcMem, tempt[3].x, tempt[3].y, NULL);
+
+					m_pst.beta += r;
+			  
+					m_pst.nx = tempt[3].x;
+					m_pst.ny = tempt[3].y;
+
+					DeleteObject (hPen);
+	   
+					break;
+					
+				case 'C':
+							
+					hPen = CreatePen (PS_SOLID, 1, m_col_C.rgb) ;                
+					SelectObject (hdcMem, hPen);
+
+			    
+					r = m_bl_C.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);                
+					index_Len++;
+			    
+					PolyBezier (hdcMem, tempt, 4) ;
+			    
+					MoveToEx (hdcMem, tempt[3].x, tempt[3].y, NULL);
+			    
+					m_pst.beta += r;
+			   
+					m_pst.nx = tempt[3].x;			    
+					m_pst.ny = tempt[3].y;
+			    
+					DeleteObject (hPen);
+			    
+					break;
+					
+				case 'D':
+			
+					hPen = CreatePen (PS_SOLID, 1, m_col_D.rgb) ;            
+					SelectObject (hdcMem, hPen);
+			
+					r = m_bl_D.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);
+					index_Len++;
+
+					PolyBezier (hdcMem, tempt, 4) ;
+			
+					MoveToEx (hdcMem, tempt[3].x, tempt[3].y, NULL);
+			
+					m_pst.beta += r;
+			
+					m_pst.nx = tempt[3].x;			
+					m_pst.ny = tempt[3].y;
+			
+					DeleteObject (hPen);
+					
+					break;
+		
+				case 'E':
+			
+					hPen = CreatePen (PS_SOLID, 1, m_col_E.rgb) ;            
+					SelectObject (hdcMem, hPen);
+			
+					r = m_bl_E.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);            
+					index_Len++;
+			
+					PolyBezier (hdcMem, tempt, 4) ;
+			
+					MoveToEx (hdcMem, tempt[3].x, tempt[3].y, NULL);
+			
+					m_pst.beta += r;
+			
+					m_pst.nx = tempt[3].x;			
+					m_pst.ny = tempt[3].y;
+			
+					DeleteObject (hPen);
+			
+					break;
+					
+				case 'F':
+			
+					hPen = CreatePen (PS_SOLID, 1, m_col_F.rgb) ;            
+					SelectObject (hdcMem, hPen);
+			
+					r = m_bl_F.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);           
+					index_Len++;
+			
+					PolyBezier (hdcMem, tempt, 4) ;
+			
+					MoveToEx (hdcMem, tempt[3].x, tempt[3].y, NULL); 
+			
+					m_pst.beta += r;			
+					m_pst.nx = tempt[3].x;
+			
+					m_pst.ny = tempt[3].y;
+			
+					DeleteObject (hPen);
+			
+					break;
+		
+			
+				case 'G':
+			
+					cx  = m_pst.size*sin(m_pst.beta);
+					cy  = m_pst.size*cos(m_pst.beta);
+			
+					new_x = m_pst.nx+cx;			
+					new_y = m_pst.ny+cy;
+			
+					MoveToEx (hdcMem,new_x,new_y,NULL);
+					
+					m_pst.nx = new_x;			
+					m_pst.ny = new_y;			
+			
+					break;
+
+		
+			
+				case '~':
+			
+					m_pst.flip = (m_pst.flip?false:true);
+			
+					break;
+					
+				case '+':			
+				
+					m_pst.beta += (m_deltaR * (1 + m_ranAng[index_Ang]) );			    
+					index_Ang++;
+			    
+					break;
+					
+				case '-':
+							
+					m_pst.beta -= (m_deltaL * (1 + m_ranAng[index_Ang]) );						
+					index_Ang++;
+			
+				break;
+		
+			
+				case '[':
+							
+					m_sta_stat.push(m_pst);			
+				
+					break;
+			
+				case ']':
+							
+					m_pst = m_sta_stat.top();			
+					m_sta_stat.pop();          
+				
+					MoveToEx(hdcMem,m_pst.nx,m_pst.ny,NULL);
+							
+					break;
+						
+				default:
+															
+					break;        
+ 
+				} // end of switch
+	      
+			} // end of for
+		
+		} // end of second if
+
+		else // not random for length, random for angle 	
+		{			
+			for ( int i=0; i<m_command.length(); i++)	
+			{				
+				switch (m_command[i])			
+				{									
+				case 'A':			
+				
+					hPen = CreatePen (PS_SOLID, 1, m_col_A.rgb) ;
+					SelectObject (hdcMem, hPen);
+			    
+					r = m_bl_A.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);			    
+			    
+					PolyBezier (hdcMem, tempt, 4) ;
+			    
+					MoveToEx (hdcMem, tempt[3].x, tempt[3].y, NULL);
+  			    
+					m_pst.beta += r;
+			    
+					m_pst.nx = tempt[3].x;
+					m_pst.ny = tempt[3].y;
+			    
+					DeleteObject (hPen);
+			    
+					break;
+		    
+				case 'B':			
+				
+					hPen = CreatePen (PS_SOLID, 1, m_col_B.rgb) ;
+					SelectObject (hdcMem, hPen);
+			    
+					r = m_bl_B.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);
+			    
+					PolyBezier (hdcMem, tempt, 4) ;
+			    
+					MoveToEx (hdcMem, tempt[3].x, tempt[3].y, NULL);
+  		    
+					m_pst.beta += r;
+			    
+					m_pst.nx = tempt[3].x;			    
+					m_pst.ny = tempt[3].y;
+			    
+					DeleteObject (hPen);
+			    
+					break;		
+			
+				case 'C':			
+				
+					hPen = CreatePen (PS_SOLID, 1, m_col_C.rgb) ;          
+					SelectObject (hdcMem, hPen);
+			 
+					r = m_bl_C.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);             
+			  
+					PolyBezier (hdcMem, tempt, 4) ;
+			   
+					MoveToEx (hdcMem, tempt[3].x, tempt[3].y, NULL);
+  			  
+					m_pst.beta += r;
+		   
+					m_pst.nx = tempt[3].x;			   
+					m_pst.ny = tempt[3].y;
+			 
+					DeleteObject (hPen);
+			   
+					break;		
+		
+				case 'D':
+		
+					hPen = CreatePen (PS_SOLID, 1, m_col_D.rgb) ;         
+					SelectObject (hdcMem, hPen);
+		
+					r = m_bl_D.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);       
+		
+					PolyBezier (hdcMem, tempt, 4) ;
+		
+					MoveToEx (hdcMem, tempt[3].x, tempt[3].y, NULL);
+  		
+					m_pst.beta += r;
+	
+					m_pst.nx = tempt[3].x;	
+					m_pst.ny = tempt[3].y;
+	
+					DeleteObject (hPen);
+	
+					break;	
+		
+				case 'E':
+		
+					hPen = CreatePen (PS_SOLID, 1, m_col_E.rgb) ;     
+					SelectObject (hdcMem, hPen);
+		
+					r = m_bl_E.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);       
+		
+					PolyBezier (hdcMem, tempt, 4) ;
+		
+					MoveToEx (hdcMem, tempt[3].x, tempt[3].y, NULL);
+  		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;				
+					m_pst.ny = tempt[3].y;
+		
+					DeleteObject (hPen);
+		
+					break;		
+		
+				case 'F':
+		
+					hPen = CreatePen (PS_SOLID, 1, m_col_F.rgb) ;        
+					SelectObject (hdcMem, hPen);
+		
+					r = m_bl_F.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);         
+		
+					PolyBezier (hdcMem, tempt, 4) ;
+		
+					MoveToEx (hdcMem, tempt[3].x, tempt[3].y, NULL);
+  		
+					m_pst.beta += r;
+					
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+		
+					DeleteObject (hPen);
+		
+					break;		
+		
+				case 'G':
+		
+					cx  = m_pst.size*sin(m_pst.beta);		
+					cy  = m_pst.size*cos(m_pst.beta);
+		
+					new_x = m_pst.nx+cx;		
+					new_y = m_pst.ny+cy;
+		
+					MoveToEx (hdcMem,new_x,new_y,NULL);
+		
+					m_pst.nx = new_x;	
+					m_pst.ny = new_y;			
+		
+					break;		
+		
+				case '~':
+		
+					m_pst.flip = (m_pst.flip?false:true);
+		
+					break;		
+		
+				case '+':		
+		
+					m_pst.beta += (m_deltaR * (1 + m_ranAng[index_Ang]) );		
+					index_Ang++;
+		
+					break;
+			
+				case '-':
+						
+					m_pst.beta -= (m_deltaL * (1 + m_ranAng[index_Ang]) );						
+					index_Ang++;			
+		
+					break;		
+		
+				case '[':			
+			
+					m_sta_stat.push(m_pst);			
+						
+					break;		
+		
+				case ']':			
+			
+					m_pst = m_sta_stat.top();			
+			
+					m_sta_stat.pop();         
+			
+					MoveToEx(hdcMem,m_pst.nx,m_pst.ny,NULL);			
+			
+					break;		
+		
+				default:
+						
+					break;
+        
+				} // end of switch
+	
+			} // end of for
+		} // end of else
+
+
+	} // end of first if
+
+
+	else // not random for angle
+	{	
+		if(fRanL) // random for length, not random for angle	
+		{			
+			for ( int i=0; i<m_command.length(); i++)				
+			{				
+				switch (m_command[i])
+			
+				{					
+				case 'A':			
+				
+					hPen = CreatePen (PS_SOLID, 1, m_col_A.rgb) ;               
+					SelectObject (hdcMem, hPen);
+			    
+					r = m_bl_A.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);			    
+					index_Len++;
+			    
+					PolyBezier (hdcMem, tempt, 4) ;
+			    
+					MoveToEx (hdcMem, tempt[3].x, tempt[3].y, NULL); 
+			   
+					m_pst.beta += r;
+			    
+					m_pst.nx = tempt[3].x;			    
+					m_pst.ny = tempt[3].y;
+			    
+					DeleteObject (hPen);
+			    
+					break;
+
+		    
+				case 'B':
+							
+					hPen = CreatePen (PS_SOLID, 1, m_col_B.rgb) ;               
+					SelectObject (hdcMem, hPen);
+			    
+					r = m_bl_B.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);                
+					index_Len++;
+			    
+					PolyBezier (hdcMem, tempt, 4) ;
+			    
+					MoveToEx (hdcMem, tempt[3].x, tempt[3].y, NULL);
+			    
+					m_pst.beta += r;
+			    
+					m_pst.nx = tempt[3].x;			    
+					m_pst.ny = tempt[3].y;
+			    
+					DeleteObject (hPen);
+			    
+					break;
+					
+				case 'C':			
+				
+					hPen = CreatePen (PS_SOLID, 1, m_col_C.rgb) ;              
+					SelectObject (hdcMem, hPen);
+			    
+					r = m_bl_C.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);               
+					index_Len++;
+			   
+					PolyBezier (hdcMem, tempt, 4) ;
+			 
+					MoveToEx (hdcMem, tempt[3].x, tempt[3].y, NULL);
+  			 
+					m_pst.beta += r;
+			
+					m_pst.nx = tempt[3].x;			 
+					m_pst.ny = tempt[3].y;
+			 
+					DeleteObject (hPen);
+			  
+					break;		
+		
+				case 'D':
+		
+					hPen = CreatePen (PS_SOLID, 1, m_col_D.rgb) ;         
+					SelectObject (hdcMem, hPen);
+		
+					r = m_bl_D.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);        
+					index_Len++;
+	
+					PolyBezier (hdcMem, tempt, 4) ;
+		
+					MoveToEx (hdcMem, tempt[3].x, tempt[3].y, NULL);
+  		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+		
+					DeleteObject (hPen);			
+		
+					break;
+				
+				case 'E':
+		
+					hPen = CreatePen (PS_SOLID, 1, m_col_E.rgb) ;         
+					SelectObject (hdcMem, hPen);
+		
+					r = m_bl_E.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);
+          
+					index_Len++;
+		
+					PolyBezier (hdcMem, tempt, 4) ;
+	
+					MoveToEx (hdcMem, tempt[3].x, tempt[3].y, NULL);
+  		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+		
+					DeleteObject (hPen);
+		
+					break;		
+		
+				case 'F':
+		
+					hPen = CreatePen (PS_SOLID, 1, m_col_F.rgb) ;         
+					SelectObject (hdcMem, hPen);
+		
+					r = m_bl_F.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);         
+					index_Len++;
+		
+					PolyBezier (hdcMem, tempt, 4) ;
+		
+					MoveToEx (hdcMem, tempt[3].x, tempt[3].y, NULL);
+  		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+		
+					DeleteObject (hPen);
+		
+					break;
+				
+				case 'G':
+		
+					cx  = m_pst.size*sin(m_pst.beta);		
+					cy  = m_pst.size*cos(m_pst.beta);
+		
+					new_x = m_pst.nx+cx;		
+					new_y = m_pst.ny+cy;
+		
+					MoveToEx (hdcMem,new_x,new_y,NULL);
+		
+					m_pst.nx = new_x;		
+					m_pst.ny = new_y;
+					
+					break;
+				
+				case '~':
+			
+					m_pst.flip = (m_pst.flip?false:true);		
+					break;		
+		
+				case '+':
+					
+					m_pst.beta += m_deltaR;		
+			
+					break;
+				
+				case '-':
+					
+					m_pst.beta -= m_deltaL;						
+					
+					break;
+				
+				case '[':			
+			
+					m_sta_stat.push(m_pst);			
+					
+					break;		
+		
+				case ']':
+					
+					m_pst = m_sta_stat.top();							
+					m_sta_stat.pop();
+            			
+					MoveToEx(hdcMem,m_pst.nx,m_pst.ny,NULL);			
+			
+					break;
+						
+				default:
+							
+					break;
+		
+
+        
+				} // end of switch
+	
+			} // end of for
+		} // end of if 
+	
+		else // not random for length, not random for angle	
+		{	
+			for ( int i=0; i<m_command.length(); i++)	
+			{				
+				switch (m_command[i])
+			
+				{					
+				case 'A':
+			
+				
+					hPen = CreatePen (PS_SOLID, 1, m_col_A.rgb) ;
+                
+					SelectObject (hdcMem, hPen);
+			 
+					r = m_bl_A.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);			 
+		
+					PolyBezier (hdcMem, tempt, 4) ;
+			  
+					MoveToEx (hdcMem, tempt[3].x, tempt[3].y, NULL); 
+			  
+					m_pst.beta += r;
+			  
+					m_pst.nx = tempt[3].x;			   
+					m_pst.ny = tempt[3].y;
+			 
+					DeleteObject (hPen);
+			  
+					break;
+		  
+				case 'B':			
+				
+					hPen = CreatePen (PS_SOLID, 1, m_col_B.rgb) ;              
+					SelectObject (hdcMem, hPen);
+			  
+					r = m_bl_B.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);            
+			  
+					PolyBezier (hdcMem, tempt, 4) ;
+			  
+					MoveToEx (hdcMem, tempt[3].x, tempt[3].y, NULL);
+			 
+					m_pst.beta += r;
+			  
+					m_pst.nx = tempt[3].x;			  
+					m_pst.ny = tempt[3].y;
+			   
+					DeleteObject (hPen);
+			  
+					break;		
+		
+				case 'C':
+						
+					hPen = CreatePen (PS_SOLID, 1, m_col_C.rgb) ;              
+					SelectObject (hdcMem, hPen);
+			  
+					r = m_bl_C.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);            
+					
+					PolyBezier (hdcMem, tempt, 4) ;
+			
+					MoveToEx (hdcMem, tempt[3].x, tempt[3].y, NULL);
+  		
+					m_pst.beta += r;
+			   
+					m_pst.nx = tempt[3].x;			 
+					m_pst.ny = tempt[3].y;
+			
+					DeleteObject (hPen);
+			  
+					break;
+				
+				case 'D':
+		
+					hPen = CreatePen (PS_SOLID, 1, m_col_D.rgb) ;        
+					SelectObject (hdcMem, hPen);
+		
+					r = m_bl_D.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);        
+		
+					PolyBezier (hdcMem, tempt, 4) ;
+		
+					MoveToEx (hdcMem, tempt[3].x, tempt[3].y, NULL);
+  		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+		
+					DeleteObject (hPen);			
+		
+					break;
+				
+				case 'E':
+		
+					hPen = CreatePen (PS_SOLID, 1, m_col_E.rgb) ;         
+					SelectObject (hdcMem, hPen);
+		
+					r = m_bl_E.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);        
+		
+					PolyBezier (hdcMem, tempt, 4) ;
+		
+					MoveToEx (hdcMem, tempt[3].x, tempt[3].y, NULL);
+  		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+		
+					DeleteObject (hPen);
+		
+					break;		
+		
+				case 'F':
+		
+					hPen = CreatePen (PS_SOLID, 1, m_col_F.rgb) ;        
+					SelectObject (hdcMem, hPen);
+		
+					r = m_bl_F.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);        
+		
+					PolyBezier (hdcMem, tempt, 4) ;
+		
+					MoveToEx (hdcMem, tempt[3].x, tempt[3].y, NULL);
+  		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+		
+					DeleteObject (hPen);
+		
+					break;
+		
+				case 'G':
+		
+					cx  = m_pst.size*sin(m_pst.beta);		
+					cy  = m_pst.size*cos(m_pst.beta);
+		
+					new_x = m_pst.nx+cx;		
+					new_y = m_pst.ny+cy;
+		
+					MoveToEx (hdcMem,new_x,new_y,NULL);
+		
+					m_pst.nx = new_x;		
+					m_pst.ny = new_y;			
+		
+					break;		
+		
+				case '~':
+		
+					m_pst.flip = (m_pst.flip?false:true);
+		
+					break;
+			
+				case '+':
+					
+					m_pst.beta += m_deltaR ;			 
+			
+					break;		
+		
+				case '-':			
+		
+					m_pst.beta -= m_deltaL ;						
+		
+					break;		
+		
+				case '[':
+					
+					m_sta_stat.push(m_pst);
+								
+					break;		
+		
+				case ']':
+					
+					m_pst = m_sta_stat.top();					
+					m_sta_stat.pop();
+            		
+					MoveToEx(hdcMem,m_pst.nx,m_pst.ny,NULL);			
+		
+					break;
+		
+				default:
+						
+					break;		
+        
+				} // end of switch
+	
+			} // end of for
+
+		} // end of else
+
+	} // end of else
+
+    ClearState();
+
+	////////////////////
+
+
+/*
+		 hBrush = CreateSolidBrush(RGB(255,255,255));
+		 FillRect(hdcMem, &rect, hBrush);
+
+		 hPen = CreatePen (PS_SOLID, 3, RGB(0,0,255)) ;
+		 SelectObject (hdcMem, hPen);
+		 Ellipse(hdcMem, 0,0,110,110);
+
+		 LineTo(hdcMem,50,50);
+//////*/
+
+	OpenClipboard (hdlg);
+
+		 
+	EmptyClipboard () ;
+               
+	SetClipboardData (CF_BITMAP, hBmp) ;
+               
+	CloseClipboard () ;
+		 
+	DeleteObject (hBmp);
+		 
+	DeleteDC (hdcMem) ;     
+		 
+	RestoreDC (hdc, -1) ;
+		 
+	ReleaseDC (hdlg, hdc);
+}

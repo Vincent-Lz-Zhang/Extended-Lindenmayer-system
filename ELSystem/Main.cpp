@@ -963,6 +963,12 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 			  break;
 
+		  case IDM_EDIT_COPY:
+
+			  g_dg.Copy (hDMlesGraph, fAng, fLen);
+
+			  break;
+
 		  case ID_BTN_APPLY :
 
 			 if(fAng)

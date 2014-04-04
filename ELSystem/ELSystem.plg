@@ -6,13 +6,13 @@
 --------------------Configuration: ELSystem - Win32 Debug--------------------
 </h3>
 <h3>Command Lines</h3>
-Creating temporary file "C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP5A6.tmp" with contents
+Creating temporary file "C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP2AE.tmp" with contents
 [
 /nologo /MLd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /FR"Debug/" /Fp"Debug/ELSystem.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
-"D:\CSIT691\29thMay\ELSystem_f_v0.60_B\Main.cpp"
+"D:\CSIT691\1stJun\ELSystem_f_v0.61_B\DrawGraph.cpp"
 ]
-Creating command line "cl.exe @C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP5A6.tmp" 
-Creating temporary file "C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP5A7.tmp" with contents
+Creating command line "cl.exe @C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP2AE.tmp" 
+Creating temporary file "C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP2AF.tmp" with contents
 [
 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /incremental:yes /pdb:"Debug/ELSystem.pdb" /debug /machine:I386 /out:"Debug/ELSystem.exe" /pdbtype:sept 
 .\Debug\Alphabet.obj
@@ -27,18 +27,10 @@ kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32
 .\Debug\ParaValidator.obj
 .\Debug\ELSystem.res
 ]
-Creating command line "link.exe @C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP5A7.tmp"
+Creating command line "link.exe @C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP2AF.tmp"
 <h3>Output Window</h3>
 Compiling...
-Main.cpp
-c:\program files\microsoft visual studio\vc98\include\map(85) : warning C4786: 'std::reverse_bidirectional_iterator<std::_Tree<unsigned int,std::pair<unsigned int const ,FRAMEINFOtag>,std::map<unsigned int,FRAMEINFOtag,std::less<unsigned int>,std::allocator<FRAMEINFOtag> >::_Kfn,std::less<unsigned int>,std::allocator<FRAMEINFOtag> >::iterator,std::pair<unsigned int const ,FRAMEINFOtag>,std::pair<unsigned int const ,FRAMEINFOtag> &,std::pair<unsigned int const ,FRAMEINFOtag> *,int>' : identifier was truncated to '255' characters in the debug information
-        c:\program files\microsoft visual studio\vc98\include\map(85) : while compiling class-template member function 'unsigned int __thiscall std::map<unsigned int,FRAMEINFOtag,std::less<unsigned int>,std::allocator<FRAMEINFOtag> >::size(void) const'
-c:\program files\microsoft visual studio\vc98\include\map(85) : warning C4786: 'std::reverse_bidirectional_iterator<std::_Tree<unsigned int,std::pair<unsigned int const ,FRAMEINFOtag>,std::map<unsigned int,FRAMEINFOtag,std::less<unsigned int>,std::allocator<FRAMEINFOtag> >::_Kfn,std::less<unsigned int>,std::allocator<FRAMEINFOtag> >::const_iterator,std::pair<unsigned int const ,FRAMEINFOtag>,std::pair<unsigned int const ,FRAMEINFOtag> const &,std::pair<unsigned int const ,FRAMEINFOtag> const *,int>' : identifier was truncated to '255' characters in the debug information
-        c:\program files\microsoft visual studio\vc98\include\map(85) : while compiling class-template member function 'unsigned int __thiscall std::map<unsigned int,FRAMEINFOtag,std::less<unsigned int>,std::allocator<FRAMEINFOtag> >::size(void) const'
-c:\program files\microsoft visual studio\vc98\include\map(85) : warning C4786: 'std::pair<std::_Tree<unsigned int,std::pair<unsigned int const ,FRAMEINFOtag>,std::map<unsigned int,FRAMEINFOtag,std::less<unsigned int>,std::allocator<FRAMEINFOtag> >::_Kfn,std::less<unsigned int>,std::allocator<FRAMEINFOtag> >::iterator,std::_Tree<unsigned int,std::pair<unsigned int const ,FRAMEINFOtag>,std::map<unsigned int,FRAMEINFOtag,std::less<unsigned int>,std::allocator<FRAMEINFOtag> >::_Kfn,std::less<unsigned int>,std::allocator<FRAMEINFOtag> >::iterator>' : identifier was truncated to '255' characters in the debug information
-        c:\program files\microsoft visual studio\vc98\include\map(85) : while compiling class-template member function 'unsigned int __thiscall std::map<unsigned int,FRAMEINFOtag,std::less<unsigned int>,std::allocator<FRAMEINFOtag> >::size(void) const'
-c:\program files\microsoft visual studio\vc98\include\map(85) : warning C4786: 'std::pair<std::_Tree<unsigned int,std::pair<unsigned int const ,FRAMEINFOtag>,std::map<unsigned int,FRAMEINFOtag,std::less<unsigned int>,std::allocator<FRAMEINFOtag> >::_Kfn,std::less<unsigned int>,std::allocator<FRAMEINFOtag> >::const_iterator,std::_Tree<unsigned int,std::pair<unsigned int const ,FRAMEINFOtag>,std::map<unsigned int,FRAMEINFOtag,std::less<unsigned int>,std::allocator<FRAMEINFOtag> >::_Kfn,std::less<unsigned int>,std::allocator<FRAMEINFOtag> >::const_iterator>' : identifier was truncated to '255' characters in the debug information
-        c:\program files\microsoft visual studio\vc98\include\map(85) : while compiling class-template member function 'unsigned int __thiscall std::map<unsigned int,FRAMEINFOtag,std::less<unsigned int>,std::allocator<FRAMEINFOtag> >::size(void) const'
+DrawGraph.cpp
 Linking...
 Creating command line "bscmake.exe /nologo /o"Debug/ELSystem.bsc"  .\Debug\Alphabet.sbr .\Debug\Animation.sbr .\Debug\BezierLine.sbr .\Debug\Debugging.sbr .\Debug\DrawGraph.sbr .\Debug\ELSystem.sbr .\Debug\Frame.sbr .\Debug\Main.sbr .\Debug\ParaIO.sbr .\Debug\ParaValidator.sbr"
 Creating browse info file...
@@ -47,7 +39,7 @@ Creating browse info file...
 
 
 <h3>Results</h3>
-ELSystem.exe - 0 error(s), 4 warning(s)
+ELSystem.exe - 0 error(s), 0 warning(s)
 </pre>
 </body>
 </html>

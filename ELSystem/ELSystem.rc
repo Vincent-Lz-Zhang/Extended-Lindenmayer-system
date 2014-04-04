@@ -304,6 +304,8 @@ BEGIN
         MENUITEM "Edit Basic &Lines",           IDM_EDIT_LINE
         MENUITEM SEPARATOR
         MENUITEM "Edit A&nimation",             IDM_EDIT_ANIM
+        MENUITEM SEPARATOR
+        MENUITEM "Copy To Clipboard",           IDM_EDIT_COPY
     END
     POPUP "Library"
     BEGIN

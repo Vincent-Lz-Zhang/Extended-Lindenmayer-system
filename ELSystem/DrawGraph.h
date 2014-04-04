@@ -99,6 +99,8 @@ public:
  
 	void ClearDyAryA();                         // free the dynamic array's memory
 	void ClearDyAryL();                         // free the dynamic array's memory
+
+	void Copy(HWND, BOOL, BOOL);                // copy the image to clipboard
 };
 
 #endif
