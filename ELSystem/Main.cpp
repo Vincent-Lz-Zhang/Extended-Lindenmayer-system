@@ -992,7 +992,7 @@ void DrawBezierToBlock(HWND hctrl, POINT apt[])
 	hdc = GetDC(hctrl);
      
 	GetClientRect (hctrl, &rect);
-
+ 
 	SelectObject (hdc, hBrushWhite);
 
 	Rectangle (hdc, rect.left, rect.top, rect.right, rect.bottom);

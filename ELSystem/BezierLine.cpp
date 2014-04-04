@@ -2,7 +2,7 @@
 
 BezierLine::BezierLine(int nx, int ny)
 {
-	m_ratio = 0.6666;
+	m_ratio = 0.4666;
 
 	m_rectangle.top    = 0;
 	m_rectangle.left   = 0;
