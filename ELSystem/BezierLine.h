@@ -1,4 +1,15 @@
-
+/**********************************************
+  CSIT691 Independent Project 
+  Extended L-System
+  ZHANG Lingzhang 5th Mar 2009 
+  Supervisor: Prof. Rossiter
+  HKUST
+  Revised at 19th Mar by ZHANG Lingzhang
+  Revised at 21th Mar by ZHANG Lingzhang
+  Revised at 23th Mar by ZHANG Lingzhang
+  Revised at 30th Mar by ZHANG Lingzhang
+  Fixed by Zhang Lingzhang at 12 Apr
+**********************************************/
 #ifndef BEZIERLINE_H_
 #define BEZIERLINE_H_
 
@@ -32,11 +43,12 @@ public:
 
 
 	double TranslatePoint(int, int, bool, 
-		                  double, POINT[]);  // receive a POINT of current point and current angle 
+		                  double, POINT[]) const;  // receive a POINT of current point and current angle 
 	                                         // from L-System object, then update the element in 
 	                                         // POINT[], and return the variation of angle
 
-
+	double TranslatePointAni(int, int, bool, 
+		                  double, POINT[],double) const; 
 	//////////////////////////////////////////////////////
 	// for debugging only/////////////////////////////////
 	/* this method output the four points of a particular 

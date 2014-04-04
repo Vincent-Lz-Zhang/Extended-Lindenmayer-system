@@ -94,6 +94,10 @@ SOURCE=.\Alphabet.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\Animation.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\BezierLine.cpp
 # End Source File
 # Begin Source File
@@ -107,6 +111,10 @@ SOURCE=.\ELSystem.cpp
 # Begin Source File
 
 SOURCE=.\ELSystem.rc
+# End Source File
+# Begin Source File
+
+SOURCE=.\Frame.cpp
 # End Source File
 # Begin Source File
 
@@ -126,6 +134,10 @@ SOURCE=.\Alphabet.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\Animation.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\BezierLine.h
 # End Source File
 # Begin Source File
@@ -135,6 +147,10 @@ SOURCE=.\DrawGraph.h
 # Begin Source File
 
 SOURCE=.\ELSystem.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\Frame.h
 # End Source File
 # Begin Source File
 

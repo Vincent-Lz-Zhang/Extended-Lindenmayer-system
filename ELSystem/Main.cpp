@@ -8,6 +8,8 @@
   Revised at 21th Mar by ZHANG Lingzhang
   Revised at 23th Mar by ZHANG Lingzhang
   Revised at 30th Mar by ZHANG Lingzhang
+  Fixed by Zhang Lingzhang at 12th Apr
+  Revised by ZHANG Lingzhang at 16th Apr
 **********************************************/
 
 #include <windows.h>
@@ -15,13 +17,18 @@
 #include "ELSystem.h"
 #include "DrawGraph.h"
 #include "ParaValidator.h"
+#include "Frame.h"
+#include "Animation.h"
 
 #include <commdlg.h>
 #include <math.h>
 
-#define SCALE_FACTOR 3
-
 //----------------------------//
+#define SCALE_FACTOR 3
+//----------------------------//
+#define ID_TIMER    1
+//----------------------------//
+
 // resouse identities///////////
 
 //------- static texts -------//
@@ -42,15 +49,24 @@
 
 #define ID_BTN_APPLY 9
 #define ID_BTN_RESET 10
-#define ID_BTN_CONCEAL 11
+#define ID_BTN_ANIMATE 11
 
-////////////////////////////////
+//------------------------------//
 
+//-----------------------------------------My Defining Messages------------------------------------------//
 //-------------------------------------------------------------------------------------------------------//
 #define WM_CON_SIZE 0x0500  // new message for graphic dialog, indicates that the apply button is hit, and 
                             // the new graphics size should be calculated to get the scroll bars' range,
                             // and then, redraw the client area in the window
+
+#define WM_ADD_FRAME 0x0501   // new message for informing the child control-frame editer, that user has 
+                              // added new frames
+
+#define WM_ENABLE_CONTROLS 0x0502  // should enable scroll bars
+#define WM_DISABLE_CONTROLS 0x0503 // should disable scroll bars
 //-------------------------------------------------------------------------------------------------------//
+
+
 //   Global   variables ////////////////
 
 
@@ -74,6 +90,8 @@ char g_angStr[10];     //
 ELSystem      g_elsys;     // object of ELSystem
 DrawGraph     g_dg;        // object of DrawGraph
 ParaValidator g_pv;        // object of ParaValidator
+
+Frame         g_frame;      // object of Frame
 //----------------------------------------------------///
 
 /////--------------------- for the information of Bezier lines --------------////////
@@ -89,19 +107,16 @@ POINT     g_bez_pt_F[4];  // global point array and is scaled for BezierLine obj
      
 //--------------------------------------------------------------------------------///
 
-/// color information //////////////////////////////////
+//---------------- color information ----------------//
 static COLOR col_A, col_B, col_C, col_D, col_E, col_F;
 //---------------------------------------------------///
 
-////------------- scroll bars' information ------------//////
-//int g_VertNumPos=0, g_HorzNumPos=0;  
-//---------------------------------------------------///
 
-// the size of page //
 
+//----the size of page----//
 const int xUnit = 50;
 const int yUnit = 50;
-//////////////////////
+//------------------------//
 
 
 //---------------------------------------------------------------------------------------//
@@ -128,6 +143,14 @@ BOOL    CALLBACK LineDlgProc       (HWND, UINT, WPARAM, LPARAM);
 BOOL    CALLBACK BezierDlgProc     (HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK BezierLineWndProc (HWND, UINT, WPARAM, LPARAM);
 
+//---------------------------------------------------------------------------------------//
+
+//-----------------------------------Animation Part--------------------------------------//
+
+LRESULT CALLBACK FrameEdtWndProc   (HWND, UINT, WPARAM, LPARAM);
+BOOL    CALLBACK AnimDlgProc       (HWND, UINT, WPARAM, LPARAM);
+
+LRESULT CALLBACK PlayWndProc       (HWND, UINT, WPARAM, LPARAM);
 //---------------------------------------------------------------------------------------//
 
 int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
@@ -176,8 +199,41 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
      RegisterClass (&wndclass) ;
 
-     ///----------------------------------------///--------------------
+     //---------------------------------------------------------//
 
+     //--------------------for animation------------------------//
+
+     // declare a new window class, which is the custom control  
+
+     wndclass.style         = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
+     wndclass.lpfnWndProc   = FrameEdtWndProc ;
+     wndclass.cbClsExtra    = 0 ;
+     wndclass.cbWndExtra    = 0 ;
+     wndclass.hInstance     = hInstance ;
+     wndclass.hIcon         = NULL ;
+     wndclass.hCursor       = LoadCursor (NULL, IDC_ARROW) ;
+     wndclass.hbrBackground = (HBRUSH) hBrushWhite ;
+     wndclass.lpszMenuName  = NULL ;
+     wndclass.lpszClassName = TEXT ("FrameEditer") ;
+
+     RegisterClass (&wndclass) ;
+
+     //--------------------------------------------------------------//
+
+     wndclass.style         = CS_HREDRAW | CS_VREDRAW ;
+     wndclass.lpfnWndProc   = PlayWndProc ;
+     wndclass.cbClsExtra    = 0 ;
+     wndclass.cbWndExtra    = 0 ;
+     wndclass.hInstance     = hInstance ;
+     wndclass.hIcon         = NULL ;
+     wndclass.hCursor       = LoadCursor (NULL, IDC_ARROW) ;
+     wndclass.hbrBackground = (HBRUSH) hBrushWhite ;
+     wndclass.lpszMenuName  = NULL ;
+     wndclass.lpszClassName = TEXT ("PlayWnd") ;
+
+     RegisterClass (&wndclass) ;
+
+	 //----------------------------------------------------------------//
      hwnd = CreateWindow (szAppName, TEXT ("Extended L-System"),
                           WS_OVERLAPPEDWINDOW ,
                           CW_USEDEFAULT, CW_USEDEFAULT,
@@ -214,15 +270,15 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	 TCHAR angle[]    = TEXT ("Angle");
 	 TCHAR btnApply[] = TEXT ("Apply");
 	 TCHAR btnReset[] = TEXT ("Reset");
-	 TCHAR btnConcl[] = TEXT ("Conceal");
+	 TCHAR btnAnima[] = TEXT ("Animate");
 
 	 TCHAR empty[1];
 	 empty[0] = '\0';
 
 	 static HWND hwnd_Stic_Axm,  hwnd_Stic_Rule, hwnd_Stic_Ord, hwnd_Stic_Ang;
      static HWND hwnd_Edit_Axm,  hwnd_Edit_Rule, hwnd_Edit_Ord, hwnd_Edit_Ang;
-	 static HWND hwnd_Btn_Apply, hwnd_Btn_Reset, hwnd_Btn_Concl;
-
+	 static HWND hwnd_Btn_Apply, hwnd_Btn_Reset, hwnd_Btn_Anima;
+     static HWND hwnd_anim;
      static int cxChar, cyChar;
 
      switch (message)
@@ -312,12 +368,12 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
                                    hwnd, (HMENU) ID_BTN_RESET,
                                    hInstance, NULL);
 
-		  hwnd_Btn_Concl = CreateWindow ( TEXT("button"), 
-                                   btnConcl,
+		  hwnd_Btn_Anima = CreateWindow ( TEXT("button"), 
+                                   btnAnima,
                                    WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
                                    29 * cxChar, 20 * cyChar,
                                    8 * cxChar, 7 * cyChar / 4,
-                                   hwnd, (HMENU) ID_BTN_CONCEAL,
+                                   hwnd, (HMENU) ID_BTN_ANIMATE,
                                    hInstance, NULL);
 
 		  return 0 ;
@@ -326,16 +382,28 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
           switch (LOWORD (wParam))
           {
           case IDM_APP_ABOUT :
-               DialogBox (hInstance, TEXT ("AboutBox"), hwnd, AboutDlgProc);
-               break ;
+               
+			  DialogBox (hInstance, TEXT ("AboutBox"), hwnd, AboutDlgProc);
+               
+			  break ;
 
           case IDM_EDIT_COLOR :
-               DialogBox (hInstance, TEXT ("ColorBox"), hwnd, ColorDlgProc);
-               break ;
+               
+			  DialogBox (hInstance, TEXT ("ColorBox"), hwnd, ColorDlgProc);
+               
+			  break ;
 
           case IDM_EDIT_LINE :
-               DialogBox (hInstance, TEXT ("LineBox"), hwnd, LineDlgProc);
-               break ;
+               
+			  DialogBox (hInstance, TEXT ("LineBox"), hwnd, LineDlgProc);
+               
+			  break ;
+
+		  case IDM_EDIT_ANIM:
+			  
+			  DialogBox (hInstance, TEXT ("AnimaBox"), hwnd, AnimDlgProc);
+
+			  break;
 
 		  case ID_BTN_APPLY :
 			  
@@ -392,6 +460,16 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
               SetDlgItemText(hwnd, ID_EDIT_ORDER , empty);
               SetDlgItemText(hwnd, ID_EDIT_ANGLE , empty);
 
+			  break;
+
+		  case ID_BTN_ANIMATE:
+
+              hwnd_anim = CreateWindow ( TEXT("PlayBox"),
+				                         NULL,
+										 WS_OVERLAPPEDWINDOW | WS_VISIBLE,
+                                         CW_USEDEFAULT, CW_USEDEFAULT,
+                                         500, 450,
+                                         NULL, NULL, hInstance, NULL);
 			  break;
           }
           return 0 ;
@@ -473,10 +551,7 @@ BOOL CALLBACK ColorDlgProc (HWND hDlg, UINT message,
 
      switch (message)
      {
-		 case WM_CREATE:
 
-          hInstance = ((LPCREATESTRUCT) lParam)->hInstance ;
-		  return FALSE;
 
 		 case WM_INITDIALOG:
 
@@ -496,7 +571,7 @@ BOOL CALLBACK ColorDlgProc (HWND hDlg, UINT message,
              col_E = g_dg.FindCol('E');
 			 col_F = g_dg.FindCol('F');
 
-			 return FALSE;
+			 return TRUE;
 
 		 case WM_COMMAND:
 			 switch (LOWORD (wParam))
@@ -525,7 +600,7 @@ BOOL CALLBACK ColorDlgProc (HWND hDlg, UINT message,
 					 ChooseColor (&cc); 
 					 col_A.rgb = cc.rgbResult;
 					 PaintColor(hCtrlCol_A, col_A.rgb);
-					 return FALSE;
+					 return TRUE;
 
 				 case IDC_BTN_COR_B:
 
@@ -533,7 +608,7 @@ BOOL CALLBACK ColorDlgProc (HWND hDlg, UINT message,
 					 ChooseColor (&cc); 
 					 col_B.rgb = cc.rgbResult;
 					 PaintColor(hCtrlCol_B, col_B.rgb);             
-					 return FALSE;
+					 return TRUE;
 
 				 case IDC_BTN_COR_C:
 
@@ -541,7 +616,7 @@ BOOL CALLBACK ColorDlgProc (HWND hDlg, UINT message,
 					 ChooseColor (&cc); 
 					 col_C.rgb = cc.rgbResult;
 					 PaintColor(hCtrlCol_C, col_C.rgb);             
-					 return FALSE;
+					 return TRUE;
 
 				 case IDC_BTN_COR_D:
 
@@ -549,7 +624,7 @@ BOOL CALLBACK ColorDlgProc (HWND hDlg, UINT message,
 					 ChooseColor (&cc); 
 					 col_D.rgb = cc.rgbResult;
 					 PaintColor(hCtrlCol_D, col_D.rgb);             
-					 return FALSE;
+					 return TRUE;
 
 				 case IDC_BTN_COR_E:
 
@@ -557,7 +632,7 @@ BOOL CALLBACK ColorDlgProc (HWND hDlg, UINT message,
 					 ChooseColor (&cc); 
 					 col_E.rgb = cc.rgbResult;
 					 PaintColor(hCtrlCol_E, col_E.rgb);             
-					 return FALSE;
+					 return TRUE;
 
 				 case IDC_BTN_COR_F:
 
@@ -565,7 +640,7 @@ BOOL CALLBACK ColorDlgProc (HWND hDlg, UINT message,
 					 ChooseColor (&cc); 
 					 col_F.rgb = cc.rgbResult;
 					 PaintColor(hCtrlCol_F, col_F.rgb);             
-					 return FALSE;
+					 return TRUE;
 
 			 }
 		 case WM_PAINT:
@@ -608,20 +683,7 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 
 	switch (message)		 	
 	{
-     
-	case WM_CREATE:
-   
 
-		iVertPos = 0;			  		  
-		iHorzPos = 0;		
-		  
-		SetScrollRange (hDlg, SB_VERT, 0, 1, FALSE) ;          				  
-		SetScrollPos   (hDlg, SB_VERT, iVertPos, TRUE) ;
-				  
-		SetScrollRange (hDlg, SB_HORZ, 0, 1, FALSE) ;         				  
-		SetScrollPos   (hDlg, SB_HORZ, iHorzPos, TRUE) ;
-		
-		return TRUE;
 
 	case WM_INITDIALOG:
 
@@ -954,7 +1016,9 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 		if ( (HWND) lParam  == hDlg )		  			
 		{             				
 			return (BOOL) hBrushWhite;		  			
-		}		 
+		}
+		
+		return TRUE;
 	
 	}
 
@@ -992,7 +1056,7 @@ void DrawBezierToBlock(HWND hctrl, POINT apt[])
 	hdc = GetDC(hctrl);
      
 	GetClientRect (hctrl, &rect);
- 
+
 	SelectObject (hdc, hBrushWhite);
 
 	Rectangle (hdc, rect.left, rect.top, rect.right, rect.bottom);
@@ -1073,14 +1137,8 @@ BOOL CALLBACK LineDlgProc (HWND hDlg, UINT message,
 
 		g_dg.m_bl_F.UpRect(rect, g_bez_pt_F);
 		
-		return FALSE;
+		return TRUE;
 		 
-	case WM_CREATE:
-          
-		hInstance = ((LPCREATESTRUCT) lParam)->hInstance;
-		  
-		return FALSE;
-
 	case WM_PAINT:
 
 		DrawBezierToBlock(hCtrlLine_A,g_bez_pt_A);
@@ -1129,7 +1187,7 @@ BOOL CALLBACK LineDlgProc (HWND hDlg, UINT message,
 				  }
 				DrawBezierToBlock(hCtrlLine_A,g_bez_pt_A);
 			}
-			return FALSE;
+			return TRUE;
 
 		case IDC_BTN_LINE_B:
 
@@ -1143,7 +1201,7 @@ BOOL CALLBACK LineDlgProc (HWND hDlg, UINT message,
 
 				DrawBezierToBlock(hCtrlLine_B,g_bez_pt_B);
 			}
-			return FALSE;
+			return TRUE;
 
 		case IDC_BTN_LINE_C:
 
@@ -1157,7 +1215,7 @@ BOOL CALLBACK LineDlgProc (HWND hDlg, UINT message,
 
 				DrawBezierToBlock(hCtrlLine_C,g_bez_pt_C);
 			}
-			return FALSE;
+			return TRUE;
 			
 		case IDC_BTN_LINE_D:
 
@@ -1171,7 +1229,7 @@ BOOL CALLBACK LineDlgProc (HWND hDlg, UINT message,
 
 				DrawBezierToBlock(hCtrlLine_D,g_bez_pt_D);
 			}
-			return FALSE;
+			return TRUE;
 
 		case IDC_BTN_LINE_E:
 
@@ -1185,7 +1243,7 @@ BOOL CALLBACK LineDlgProc (HWND hDlg, UINT message,
 
 				DrawBezierToBlock(hCtrlLine_E,g_bez_pt_E);
 			}
-			return FALSE;		 
+			return TRUE;		 
      
 		case IDC_BTN_LINE_F:
 
@@ -1199,7 +1257,7 @@ BOOL CALLBACK LineDlgProc (HWND hDlg, UINT message,
 
 				DrawBezierToBlock(hCtrlLine_F,g_bez_pt_F);
 			}
-			return FALSE;
+			return TRUE;
 		}
 	
 	}	
@@ -1313,18 +1371,544 @@ LRESULT CALLBACK BezierLineWndProc (HWND hwnd, UINT message,
 			  InvalidateRect(hwnd, NULL, TRUE);
 				  
 			  for (int i=0; i<4; i++)			  				  
-			  {				  
-					  g_bez_pt[i].x = apt[i].x / SCALE_FACTOR;				  
-					  g_bez_pt[i].y = apt[i].y / SCALE_FACTOR;			  				  
-			  }		
-			}
+			  {				  					
+				  g_bez_pt[i].x = apt[i].x / SCALE_FACTOR;				  					  
+				  g_bez_pt[i].y = apt[i].y / SCALE_FACTOR;			  				  
+			  }				  
+		  }
 
 		return FALSE;            
 	}    
 	return DefWindowProc (hwnd, message, wParam, lParam) ;
 }
 
+//------------------------------------ Animation Part --------------------------------------//
 
+LRESULT CALLBACK FrameEdtWndProc (HWND hwnd, UINT message, 
+                                  WPARAM wParam, LPARAM lParam)
+{
+     
+	const static int FRMWIDTH = 10;
+	const static int FRMNUM = 35;
+
+	const static int PAGE = 7;
+
+	static BOOL state[FRMNUM];
+	static int frmarry_offset = 1;
+
+	int pos_x,pos_y;  // cuser position
+
+	static int index;  // indicate the selected frame
+
+	static HWND hParent, ctl_LenR, ctl_Ang;
+	HDC hdc ;  
+    RECT  rect_frm ;
+	HRGN hrgn;
+	PAINTSTRUCT ps;
+	HBRUSH hBrush;
+
+	TCHAR szBuffer[4]; // frames' number
+
+	FRAMEINFO fi_tmp;
+
+	int x;
+
+	//---variables for scroll bar---//
+
+	SCROLLINFO si;
+
+	int iHorzPos;
+
+	static int cyClient, cyUnit, iMax; 
+
+	int begin;
+
+	switch (message)    
+	{
+
+	case WM_CREATE:
+
+		hParent  = GetParent(hwnd);
+
+	    //-------------------------------//
+
+        cyUnit   = 5 * FRMWIDTH;
+		cyClient = FRMNUM * FRMWIDTH;
+        iMax     = FRMNUM;
+
+	    //-------------------------------//
+
+		si.cbSize = sizeof (si) ;
+        si.fMask  = SIF_RANGE | SIF_PAGE ;
+        si.nMin   = 0 ;
+        si.nMax   = iMax/5 ;
+        si.nPage  = PAGE ;
+        SetScrollInfo (hwnd, SB_HORZ, &si, TRUE) ;
+
+		return 0;
+     
+		     
+	case WM_LBUTTONDOWN :
+
+		pos_x = LOWORD (lParam);
+		pos_y = HIWORD (lParam);
+
+		if( pos_y>15 && pos_y<43 )
+		{  
+			index = pos_x/FRMWIDTH ;
+			InvalidateRect (hwnd, NULL, TRUE) ;
+
+			if(state[index]) // this frame does exist, enable scroll bars 
+			{                
+			    SendMessage (hParent, WM_ENABLE_CONTROLS, frmarry_offset+pos_x/FRMWIDTH, 0) ;	
+			}
+			else // does not exist, just disable the scroll bars
+			{
+				SendMessage (hParent, WM_DISABLE_CONTROLS, 0, 0) ;
+			}
+		}
+
+		return 0;
+
+	case WM_LBUTTONDBLCLK:
+
+		pos_x = LOWORD (lParam);
+		pos_y = HIWORD (lParam);
+				
+		if( pos_y>15 && pos_y<43 )
+		{  
+            // 
+			if(state[pos_x/FRMWIDTH]) // this frame does exist, delete it 
+			{
+                g_frame.RemoveFrame(frmarry_offset + pos_x/FRMWIDTH);
+			    InvalidateRect (hwnd, NULL, TRUE) ;	
+				SendMessage (hParent, WM_DISABLE_CONTROLS, 0, 0) ;
+			}
+			else // this frame does not exist, add it 
+			{			
+				fi_tmp.angle     = GetDlgItemInt(hParent, IDC_STATIC_ANG, NULL, FALSE);
+			    fi_tmp.len_Ratio = GetDlgItemInt(hParent, IDC_STATIC_LEN, NULL, FALSE);
+
+			    g_frame.AddFrame(frmarry_offset + pos_x/FRMWIDTH, fi_tmp);
+   
+				//test
+				g_frame.Show(frmarry_offset + pos_x/FRMWIDTH);
+				
+			    InvalidateRect (hwnd, NULL, TRUE) ;	
+				
+				SendMessage (hParent, WM_ENABLE_CONTROLS, frmarry_offset+pos_x/FRMWIDTH, 0) ;
+			}
+
+			state[pos_x/FRMWIDTH] ^= 1; // toggle the state
+		}
+		return 0;
+
+	case WM_PAINT :
+
+		hdc = BeginPaint (hwnd, &ps);
+  
+		//------------------------ some preprocessing -------------------------//
+		si.cbSize = sizeof (si) ;
+        si.fMask  = SIF_POS ;
+        GetScrollInfo (hwnd, SB_HORZ, &si) ;
+        iHorzPos = si.nPos ;
+		begin = max(0,iHorzPos)+1;
+	    //------------------------------------------------------------------////
+
+		frmarry_offset = (begin-1)*5+1;  // set the offset, it is important, it is used to send frame obj
+		                                 // then we can informed by frame which current frames should be labeled
+
+		g_frame.FillStateArr(frmarry_offset, state);
+
+		if(!state[index]) // if scroll bar's event causes paint, then need to check if the selected frame had a frame inserted 
+		{
+			SendMessage (hParent, WM_DISABLE_CONTROLS, 0, 0) ;
+		}
+		
+		//------------------------------draw frames----------------------------//
+
+		for(x=0;x<FRMNUM;x++)
+		{
+			Rectangle (hdc, x * FRMWIDTH, 20,
+                      (x + 1) * FRMWIDTH, 52) ;
+			if (index==x) // draw the frame that is selected by now               
+			{
+				hBrush = CreateHatchBrush (HS_DIAGCROSS, RGB(0,110,0)) ;		
+                SetRect(&rect_frm,x * FRMWIDTH, 20,
+                          (x + 1) * FRMWIDTH, 52);
+				FillRect (hdc, &rect_frm, hBrush) ;
+
+				DeleteObject (hBrush) ;
+			}
+			if (state[x]) // draw the frame that has been inserted a frame
+			{
+                hBrush = CreateSolidBrush( RGB(132,56,0) );
+				hrgn = CreateEllipticRgn (x * FRMWIDTH + 2, 34, x * FRMWIDTH + 8, 41) ;
+				FillRgn (hdc, hrgn, hBrush) ; 
+                DeleteObject (hBrush) ;
+			}
+		}
+
+		//------------------------------draw text------------------------------//
+		        
+
+		SetTextAlign (hdc, TA_RIGHT | TA_TOP) ;
+
+		for (x=1; x<8; x++)
+		{
+            
+			TextOut (hdc, x * 5 * FRMWIDTH, 0, szBuffer,
+                        wsprintf (szBuffer, TEXT ("%3d"),
+                                  begin * 5));
+			begin++;
+		}
+
+		SetTextAlign (hdc, TA_LEFT | TA_TOP) ;
+
+		EndPaint (hwnd, &ps);
+		return 0 ;     
+
+	case WM_ADD_FRAME:
+         
+		// the amount of added frames should be a number times 5
+		if( (wParam%5) != 0 )
+		{
+			iMax += wParam + 5 -(wParam%5);
+		}
+		else
+		{
+			iMax += wParam;
+		}
+
+		si.cbSize = sizeof (si) ;
+        si.fMask  = SIF_RANGE | SIF_PAGE ;
+        si.nMin   = 0 ;
+        si.nMax   = iMax/5 ;
+        si.nPage  = PAGE ;
+        SetScrollInfo (hwnd, SB_HORZ, &si, TRUE) ;
+	
+		return 0;
+     
+	case WM_HSCROLL:
+               
+		// Get all the vertical scroll bar information
+          
+		si.cbSize = sizeof (si) ;
+        si.fMask  = SIF_ALL ;
+
+        // Save the position for comparison later on
+          
+		GetScrollInfo (hwnd, SB_HORZ, &si) ;
+        iHorzPos = si.nPos ;
+          
+		switch (LOWORD (wParam))
+        {
+          
+		case SB_LINELEFT:
+               
+			si.nPos -= 1 ;
+            break ;
+                         
+		case SB_LINERIGHT:
+               
+			si.nPos += 1 ;
+            break ;
+               
+        case SB_PAGELEFT:
+            si.nPos -= si.nPage ;
+            break ;
+               
+        case SB_PAGERIGHT:
+            si.nPos += si.nPage ;
+            break ;
+               
+        case SB_THUMBPOSITION:
+            si.nPos = si.nTrackPos ;
+            break ;
+               
+        default :
+            break ;
+        }
+               
+		// Set the position and then retrieve it.  Due to adjustments
+        // by Windows it may not be the same as the value set.
+
+        si.fMask = SIF_POS ;
+        SetScrollInfo (hwnd, SB_HORZ, &si, TRUE) ;
+        GetScrollInfo (hwnd, SB_HORZ, &si) ;
+          
+        // If the position has changed, scroll the window 
+
+        if (si.nPos != iHorzPos)
+        {               
+			InvalidateRect (hwnd, NULL, TRUE) ;
+        }
+          
+		return 0 ;          
+
+	}
+	return DefWindowProc (hwnd, message, wParam, lParam) ;
+}
+
+BOOL CALLBACK AnimDlgProc (HWND hDlg, UINT message, 
+                           WPARAM wParam, LPARAM lParam)
+{
+
+	static HWND hCtrl_Len, hCtrl_Ang; 
+		
+	HWND	hCtrl;
+
+	FRAMEINFO fi_tmp;
+
+	char frmStr[4];
+
+	int nfrm;
+
+	int iCtrlID;
+
+	static int crt_frame = 1;
+
+	static int len_ratio = 20, degree = 0;
+
+	switch (message)     
+	{		
+	case WM_INITDIALOG :
+
+		// disable the scroll bars initially
+
+	    hCtrl_Len =GetDlgItem (hDlg, 1125);
+		SetScrollRange (hCtrl_Len, SB_CTL, 20, 300, FALSE);
+        SetScrollPos   (hCtrl_Len, SB_CTL, 20, FALSE);
+        SetDlgItemInt (hDlg, IDC_STATIC_LEN, len_ratio, FALSE) ;
+
+		EnableWindow (hCtrl_Len, FALSE);
+
+		// disable the scroll bars initially
+
+		hCtrl_Ang = GetDlgItem (hDlg, 1126);
+		SetScrollRange (hCtrl_Ang, SB_CTL, 0, 359, FALSE);
+        SetScrollPos   (hCtrl_Ang, SB_CTL, 0, FALSE);
+		SetDlgItemInt (hDlg,  IDC_STATIC_ANG, degree, FALSE) ;
+
+		EnableWindow (hCtrl_Ang, FALSE);			
+
+		return TRUE;
+
+     case WM_HSCROLL :
+
+          hCtrl  = (HWND) lParam ;
+          iCtrlID = GetWindowLong (hCtrl, GWL_ID) ;
+         
+		  if( hCtrl == hCtrl_Len)
+		  {
+			  switch (LOWORD (wParam))         
+			  {                  
+			  case SB_LINERIGHT :
+               
+				  len_ratio = min (300, len_ratio + 1) ;               
+				  break ;
+          
+			  case SB_LINELEFT :
+               
+				  len_ratio = max (0, len_ratio - 1) ;
+                  break ;
+                
+			  case SB_PAGELEFT:
+         
+				  len_ratio = max (0, len_ratio - 15) ;
+				  break ;
+                       
+			  case SB_PAGERIGHT:
+          
+				  len_ratio = min (300, len_ratio + 15) ;
+				  break ;
+
+			  case SB_THUMBPOSITION :         
+			  case SB_THUMBTRACK :
+               
+				  len_ratio = HIWORD (wParam) ;
+                  break ;
+          
+			  default :               
+				  return FALSE ;          
+			  }
+	          		  
+			  SetScrollPos  (hCtrl_Len, SB_CTL, len_ratio, TRUE) ;          
+			  SetDlgItemInt (hDlg, IDC_STATIC_LEN, len_ratio, FALSE) ;
+		  }
+		  else if( hCtrl == hCtrl_Ang)
+		  {
+			  switch (LOWORD (wParam))          
+			  {                   
+			  case SB_LINERIGHT :
+               
+				  degree = min (300, degree + 1) ;               
+				  break ;
+          
+			  case SB_LINELEFT :
+               
+				  degree = max (0, degree - 1) ;
+                  break ;
+    
+			  case SB_PAGELEFT:
+         
+				  degree = max (0, degree - 15) ;
+				  break ;
+                       
+			  case SB_PAGERIGHT:
+          
+				  degree = min (300, degree + 15) ;
+				  break ;
+				  
+			  case SB_THUMBPOSITION :          
+			  case SB_THUMBTRACK :
+               
+				  degree = HIWORD (wParam) ;
+                  break ;
+       
+			  default :
+               
+				  return FALSE ;         
+			  }
+	          		  
+			  SetScrollPos  (hCtrl_Ang, SB_CTL, degree, TRUE) ;         
+			  SetDlgItemInt (hDlg, IDC_STATIC_ANG, degree, FALSE) ;
+		  }
+
+          fi_tmp.angle = degree;
+          fi_tmp.len_Ratio = len_ratio;
+		  g_frame.UpdateFrmInfo(crt_frame, fi_tmp);
+
+		  return TRUE ;
+
+		  
+	 case WM_ENABLE_CONTROLS:
+
+		 // get the informations of the selected frame from Frame object
+
+		 crt_frame = wParam;
+
+		 fi_tmp = *(g_frame.GetFrame(crt_frame));
+
+		 // enable length scroll bar and set its value
+
+		 EnableWindow(hCtrl_Len, TRUE);
+		 len_ratio = max(20,fi_tmp.len_Ratio);    // get data of the frame
+		 SetScrollPos  (hCtrl_Len, SB_CTL, len_ratio, TRUE) ;         		
+		 SetDlgItemInt (hDlg, IDC_STATIC_LEN, len_ratio, FALSE) ; // set static text
+		 
+		 // enable angle scroll bar and set its value
+
+		 EnableWindow(hCtrl_Ang, TRUE);
+         degree = fi_tmp.angle;    // get data of the frame
+		 SetScrollPos  (hCtrl_Ang, SB_CTL, degree, TRUE) ;         		
+		 SetDlgItemInt (hDlg, IDC_STATIC_ANG, degree, FALSE) ; // set static text
+
+		 return TRUE;
+	
+	 case WM_DISABLE_CONTROLS:
+
+		 EnableWindow(hCtrl_Len, FALSE);
+		 EnableWindow(hCtrl_Ang, FALSE);
+
+		 return TRUE;
+
+	 case WM_COMMAND:
+			 
+		switch (LOWORD (wParam))			 
+		{
+				 
+		case IDOK:					 
+
+			EndDialog (hDlg, TRUE);
+					 
+			return TRUE;
+				 
+		case IDCANCEL:
+					 
+			EndDialog (hDlg, FALSE);
+			
+			g_frame.RemoveALL();  // if user clicks cancel button, then clear
+					 
+			return TRUE; 
+	
+		case IDC_BTN_ADD_FRM:
+
+			if( 0==GetDlgItemText (hDlg, IDC_EDIT_FRM, frmStr, 4) )
+			{								  
+				MessageBox (NULL, TEXT ("Please type in a number for frames!"),
+					  TEXT("Invalid Input"), MB_ICONINFORMATION);
+			}
+			else
+			{
+				nfrm = atoi(frmStr);
+
+				// send message to anim control that more frames had been added
+				SendMessage (GetDlgItem (hDlg, IDC_ANIM_FRAME),
+                         WM_ADD_FRAME, nfrm, 0);					
+			}
+			return TRUE; 	  
+		}				
+
+	}
+
+	return FALSE;
+}
+
+LRESULT CALLBACK PlayWndProc (HWND hwnd, UINT message, 
+                             WPARAM wParam, LPARAM lParam)
+{ 
+	
+	PAINTSTRUCT ps;
+
+	static Animation g_anim;
+	static double r;
+
+	static double offsetr;
+
+	static double aph;
+
+	double offseta = 5;
+
+	switch (message)		 	
+	{
+     
+	
+	case WM_CREATE:
+
+		SetTimer (hwnd, ID_TIMER, 104, NULL);
+
+
+
+		r = 0.66666;
+		//offsetr = 0.1;
+		aph = 0;
+		//MessageBox(NULL, TEXT("CREATE"), TEXT("TEST"), MB_ICONINFORMATION);
+		
+		return 0;
+     
+	case WM_TIMER:
+		          
+		//MessageBeep (-1);
+		//r += offsetr;
+		aph += offseta;
+		InvalidateRect (hwnd, NULL, TRUE);
+        if( aph>180) KillTimer (hwnd, ID_TIMER); 
+		return 0;
+          
+     
+	case WM_PAINT:
+
+		BeginPaint (hwnd, &ps);	
+		EndPaint (hwnd, &ps);
+
+		g_anim.DrawAni(hwnd, r, aph, g_dg);
+
+		return 0;
+	}
+	return DefWindowProc (hwnd, message, wParam, lParam) ;
+
+}
 //////////////////////////////////////////////////////////////////////////////////////////////
 /// thesw functions are only for debugging purpose////////////////////////////////////////
 

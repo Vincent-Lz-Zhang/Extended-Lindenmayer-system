@@ -1,6 +1,17 @@
+/**********************************************
+  CSIT691 Independent Project 
+  Extended L-System
+  ZHANG Lingzhang 5th Mar 2009 
+  Supervisor: Prof. Rossiter
+  HKUST
+  Revised at 19th Mar by ZHANG Lingzhang
+  Revised at 21th Mar by ZHANG Lingzhang
+  Revised at 23th Mar by ZHANG Lingzhang
+  Revised at 30th Mar by ZHANG Lingzhang
+  Fixed by Zhang Lingzhang at 12 Apr
+**********************************************/
+
 #include "Alphabet.h"
-
-
 
 Alphabet::Alphabet(char * ptr)
 {

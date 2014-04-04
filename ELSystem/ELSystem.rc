@@ -146,6 +146,42 @@ BEGIN
                     WS_EX_CLIENTEDGE
 END
 
+ANIMABOX DIALOGEX 105, 35, 213, 245
+STYLE DS_MODALFRAME | WS_MINIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Animation Editer"
+FONT 10, "System", 0, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,93,217,34,12
+    PUSHBUTTON      "Cancel",IDCANCEL,137,217,34,12
+    CONTROL         "",IDC_ANIM_FRAME,"FrameEditer",WS_HSCROLL | WS_TABSTOP,
+                    20,30,174,35
+    CTEXT           "Length:",IDC_STATIC,23,73,25,8
+    CTEXT           "Angle:",IDC_STATIC,25,114,21,8
+    CTEXT           "",IDC_STATIC_SAMPLE,121,155,60,51,0,WS_EX_CLIENTEDGE | 
+                    WS_EX_STATICEDGE
+    CTEXT           "FrameRate",IDC_STATIC,35,160,37,8
+    SCROLLBAR       1125,24,90,166,11
+    SCROLLBAR       1126,24,131,166,11
+    LTEXT           "",IDC_STATIC_LEN,62,73,14,8
+    LTEXT           "",IDC_STATIC_ANG,61,114,15,8
+    COMBOBOX        IDC_COMBO_ANIM_FR,32,178,48,47,CBS_DROPDOWNLIST | 
+                    CBS_OWNERDRAWFIXED | CBS_SORT | WS_VSCROLL | WS_GROUP | 
+                    WS_TABSTOP
+    CTEXT           "Time Line:",IDC_STATIC,21,13,35,8
+    PUSHBUTTON      "Add",IDC_BTN_ADD_FRM,97,13,22,11
+    EDITTEXT        IDC_EDIT_FRM,125,13,26,12,ES_RIGHT | ES_AUTOHSCROLL
+    CTEXT           "Frames",IDC_STATIC,157,15,26,8
+    LTEXT           "%",IDC_STATIC,79,73,8,8
+    LTEXT           "degree",IDC_STATIC,77,114,24,8
+END
+
+PLAYBOX DIALOG DISCARDABLE  50, 50, 329, 285
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+FONT 10, "System"
+BEGIN
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -194,6 +230,22 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 179
     END
+
+    "ANIMABOX", DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 206
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 238
+    END
+
+    "PLAYBOX", DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 322
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 278
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -219,11 +271,30 @@ BEGIN
     BEGIN
         MENUITEM "Edit &Color",                 IDM_EDIT_COLOR
         MENUITEM "Edit Basic &Lines",           IDM_EDIT_LINE
+        MENUITEM SEPARATOR
+        MENUITEM "A&nimation",                  IDM_EDIT_ANIM
     END
     POPUP "&Help"
     BEGIN
         MENUITEM "&About Extended L.",          IDM_APP_ABOUT
     END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+ANIMABOX DLGINIT
+BEGIN
+    IDC_COMBO_ANIM_FR, 0x403, 2, 0
+0x0038, 
+    IDC_COMBO_ANIM_FR, 0x403, 3, 0
+0x3031, "\000" 
+    IDC_COMBO_ANIM_FR, 0x403, 3, 0
+0x3231, "\000" 
+    0
 END
 
 #endif    // English (U.S.) resources
