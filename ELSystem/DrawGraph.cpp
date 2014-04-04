@@ -1735,7 +1735,7 @@ void DrawGraph::Copy(HWND hdlg, BOOL fRanA, BOOL fRanL)
 	
 	HBITMAP hBmp;
 
-	RECT rect, rect_2;
+	RECT rect;
 
     int index_Ang = 0;
 	int index_Len = 0;
@@ -1748,9 +1748,9 @@ void DrawGraph::Copy(HWND hdlg, BOOL fRanA, BOOL fRanL)
 	cxBitmap = abs(rect.right - rect.left);
 	cyBitmap = abs(rect.top - rect.bottom);
 
-	rect_2.top = rect_2.left = 0;
-	rect_2.right = cxBitmap+100;
-	rect_2.bottom = cyBitmap+100;
+	rect.top = rect.left = 0;
+	rect.right = 2*cxBitmap+50;
+	rect.bottom = 2*cyBitmap;
 
 	hdc = GetDC(hdlg);
 
@@ -1758,19 +1758,20 @@ void DrawGraph::Copy(HWND hdlg, BOOL fRanA, BOOL fRanL)
 
 	hdcMem = CreateCompatibleDC (hdc);
 
-	hBmp = CreateCompatibleBitmap(hdc, cxBitmap+100, cyBitmap+100);
+	hBmp = CreateCompatibleBitmap(hdc, 2*cxBitmap+50, 2*cyBitmap);
 
 	SelectObject (hdcMem, hBmp);
 
 	hBrush = CreateSolidBrush(RGB(255,255,255));
 		 
-	FillRect(hdcMem, &rect_2, hBrush);
+	FillRect(hdcMem, &rect, hBrush);
 
-    ///////////////////abs(rect.bottom)//abs(rect.right)
+
+    /////////////////////
 
 	SetMapMode (hdcMem, MM_LOENGLISH);
 
-	SetViewportOrgEx (hdcMem, 105, rect.bottom, NULL);
+	SetViewportOrgEx (hdcMem, abs(rect.left)+cxBitmap, abs(rect.top)+cyBitmap, NULL);
 
 
 	if(fRanA)

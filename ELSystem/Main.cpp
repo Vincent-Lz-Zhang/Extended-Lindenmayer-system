@@ -965,8 +965,18 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		  case IDM_EDIT_COPY:
 
-			  g_dg.Copy (hDMlesGraph, fAng, fLen);
+			  if(g_elsys.ReportLen()>0)
+			  {
+				  			  
+				  g_dg.Copy (hDMlesGraph, fAng, fLen);
+			  }
+			  else
+			  {
 
+				  MessageBox (NULL, TEXT ("No input for L-System!"), 
+					  
+						 TEXT("Invalid Input"), MB_ICONINFORMATION);
+			  }
 			  break;
 
 		  case ID_BTN_APPLY :
