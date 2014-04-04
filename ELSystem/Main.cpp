@@ -6,6 +6,7 @@
 
 #include <windows.h>
 #include "resource.h"
+#include "ELSystem.h"
 
 #define ID_STATIC_AXIOM 1
 #define ID_STATIC_RULES 2
@@ -23,7 +24,9 @@
 
 HWND hDMlesGraph ;
 
+HBRUSH     hBrushWhite;   //   Global   variable   
 
+ELSystem g_elsys; 
 
 LRESULT CALLBACK WndProc      (HWND, UINT, WPARAM, LPARAM) ;
 BOOL    CALLBACK AboutDlgProc (HWND, UINT, WPARAM, LPARAM) ;
@@ -33,6 +36,9 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
                     PSTR szCmdLine, int iCmdShow)
 
    {
+
+     hBrushWhite = CreateSolidBrush(RGB(255, 255, 255));   
+
      static TCHAR szAppName[] = TEXT ("ELSystem") ;
      MSG          msg ;
      HWND         hwnd ;
@@ -76,6 +82,9 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
                DispatchMessage  (&msg) ;
           }
      }
+
+	 DeleteObject(hBrushWhite); 
+
      return msg.wParam ;
 }
 
@@ -105,6 +114,10 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
           cyChar = HIWORD (GetDialogBaseUnits ()) ;
 
           hInstance = ((LPCREATESTRUCT) lParam)->hInstance ;
+
+		  //////////////////////////////////////
+		  // initialize the GDIs
+		  /////////////////////////////
 
           hwnd_Stic_Axm = CreateWindow ( TEXT( "STATIC"), axiom, WS_CHILD | WS_VISIBLE,
 			  cxChar, cyChar, 5 * cxChar, cyChar, 
@@ -172,15 +185,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
                                    hInstance, NULL) ;
 
 		  return 0 ;
-         
-	 case WM_SIZE:
-          //MoveWindow (hwndStic, 0, 0, LOWORD (lParam) * 0.5, HIWORD (lParam) * 0.5, TRUE) ;
-		  //SetDlgItemText(hwnd,ID_STATIC_AXIOM,axiom);
-		  //SetDlgItemText(hwnd,ID_STATIC_RULES,rule);
-		  //SetDlgItemText(hwnd,ID_STATIC_ORDER,order);
-		  //SetDlgItemText(hwnd,ID_STATIC_ANGLE,angle);
 
-		  return 0;
      case WM_COMMAND :
           switch (LOWORD (wParam))
           {
@@ -222,22 +227,21 @@ BOOL CALLBACK AboutDlgProc (HWND hDlg, UINT message,
 BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message, 
                            WPARAM wParam, LPARAM lParam)
 {
-	 /*    
+	    
 	switch (message)
-     
 		 
 	{
-			 
-		 case WM_VSCROLL :
+		case WM_INITDIALOG :
+          return TRUE ;
 
-			 
-		 case WM_HSCROLL :
+		case WM_CTLCOLORDLG :
+          if ( (HWND) lParam  == hDlg )
+		  {
+              return (BOOL) hBrushWhite;
 
-		 default : return TRUE;
-
-		 
+		  }
 		 
 	}
-*/
+
   return FALSE ;
 }

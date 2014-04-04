@@ -6,31 +6,38 @@
 --------------------Configuration: ELSystem - Win32 Debug--------------------
 </h3>
 <h3>Command Lines</h3>
-Creating temporary file "C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP250.tmp" with contents
+Creating temporary file "C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP598.tmp" with contents
 [
 /nologo /MLd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /FR"Debug/" /Fp"Debug/ELSystem.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
-"E:\CSIT691\6thMar\ELSystem_v2\Main.cpp"
+"E:\CSIT691\7thMar\ELSystem_v5\ParaValidator.cpp"
 ]
-Creating command line "cl.exe @C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP250.tmp" 
-Creating temporary file "C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP251.tmp" with contents
+Creating command line "cl.exe @C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP598.tmp" 
+Creating temporary file "C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP599.tmp" with contents
 [
 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /incremental:yes /pdb:"Debug/ELSystem.pdb" /debug /machine:I386 /out:"Debug/ELSystem.exe" /pdbtype:sept 
+.\Debug\Alphabet.obj
+.\Debug\ELSystem.obj
 .\Debug\Main.obj
 .\Debug\ELSystem.res
+.\Debug\ParaValidator.obj
 ]
-Creating command line "link.exe @C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP251.tmp"
+Creating command line "link.exe @C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP599.tmp"
 <h3>Output Window</h3>
 Compiling...
-Main.cpp
-Linking...
-Creating command line "bscmake.exe /nologo /o"Debug/ELSystem.bsc"  .\Debug\Main.sbr"
+ParaValidator.cpp
+e:\csit691\7thmar\elsystem_v5\paravalidator.cpp(47) : error C4716: 'ParaValidator::IsValid' : must return a value
+e:\csit691\7thmar\elsystem_v5\paravalidator.cpp(52) : error C4716: 'ParaValidator::ReturnAxm' : must return a value
+e:\csit691\7thmar\elsystem_v5\paravalidator.cpp(57) : error C4716: 'ParaValidator::ReturnRul' : must return a value
+e:\csit691\7thmar\elsystem_v5\paravalidator.cpp(62) : error C4716: 'ParaValidator::ReturnOrd' : must return a value
+Error executing cl.exe.
+Creating command line "bscmake.exe /nologo /o"Debug/ELSystem.bsc"  .\Debug\Alphabet.sbr .\Debug\ELSystem.sbr .\Debug\Main.sbr .\Debug\ParaValidator.sbr"
 Creating browse info file...
 <h3>Output Window</h3>
 
 
 
 <h3>Results</h3>
-ELSystem.exe - 0 error(s), 0 warning(s)
+ELSystem.exe - 4 error(s), 0 warning(s)
 </pre>
 </body>
 </html>
