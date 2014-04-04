@@ -1,0 +1,164 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Chinese (P.R.C.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+#ifdef _WIN32
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+#pragma code_page(936)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+CMDBOX DIALOG DISCARDABLE  16, 16, 309, 157
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION
+CAPTION "Command"
+FONT 10, "System"
+BEGIN
+    DEFPUSHBUTTON   "Apply",IDOK,166,112,32,14
+    PUSHBUTTON      "Cancel",IDCANCEL,242,112,34,14
+    LTEXT           "Axiom:",IDC_STATIC,23,19,24,8
+    EDITTEXT        IDC_AXIOM,56,16,42,14,ES_AUTOHSCROLL
+    LTEXT           "Replacement Rules:",IDC_STATIC,23,40,67,8
+    EDITTEXT        IDC_RULE,23,56,194,14,ES_AUTOHSCROLL
+    LTEXT           "Order:",IDC_STATIC,23,79,21,8
+    EDITTEXT        IDC_ORDER,52,76,40,14,ES_AUTOHSCROLL
+    LTEXT           "Angle:",IDC_STATIC,110,79,21,8
+    EDITTEXT        IDC_ANGLE,137,76,40,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Reset",IDC_RESET,204,112,32,14
+END
+
+ABOUTBOX DIALOG DISCARDABLE  32, 32, 187, 96
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "About Extended L-System"
+FONT 10, "System"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,122,59,50,14
+    ICON            "ELSystem",IDC_STATIC,21,17,20,20
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    "CMDBOX", DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 302
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 150
+    END
+
+    "ABOUTBOX", DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 180
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 89
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // Chinese (P.R.C.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+ELSYSTEM                ICON    DISCARDABLE     "elsystem.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+ELSYSTEM MENU DISCARDABLE 
+BEGIN
+    MENUITEM "&File",                       65535
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "Command",                     IDM_EDIT_CMD
+        MENUITEM SEPARATOR
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About ELSystem",             IDM_APP_ABOUT
+    END
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
