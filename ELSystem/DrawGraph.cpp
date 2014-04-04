@@ -14,12 +14,12 @@ COLOR DrawGraph::m_col_F = { RGB(0,0,0),'F' } ;
 DrawGraph::DrawGraph(string str,int a)
 {
 
-	m_delta = a*PI/180;  // convert the unit from  degree to radian
+	m_delta    = a*PI/180;  // convert the unit from  degree to radian
 
-	m_command = str;
+	m_command  = str;
 
-	m_pst.nx = 0;
-	m_pst.ny = 0;
+	m_pst.nx   = 0;
+	m_pst.ny   = 0;
     m_pst.size = PACELEN;
     m_pst.beta = 0;
 
@@ -33,11 +33,17 @@ DrawGraph::~DrawGraph()
 
 void DrawGraph::Draw(HWND hdlg)
 {
-	HPEN hPen; 
-	HDC hdc;
-	RECT rect;
+	HPEN   hPen; 
+	HDC    hdc;
+	RECT   rect;
+
 	hdc = GetDC (hdlg) ;
     GetClientRect (hdlg, &rect) ;
+
+	POINT_POSITION temp_pp;
+	POINT tempt[4];
+
+	double r;
 
 	///////////////////
 	/* it seems that setting mapping mode 
@@ -61,36 +67,55 @@ void DrawGraph::Draw(HWND hdlg)
 			hPen = CreatePen (PS_SOLID, 1, m_col_A.rgb) ;
             SelectObject (hdc, hPen);
 
-			cx = m_pst.size*sin(m_pst.beta);
-			cy = m_pst.size*cos(m_pst.beta);
+			//cx    = m_pst.size*sin(m_pst.beta);
+			//cy    = m_pst.size*cos(m_pst.beta);
 
-			new_x = m_pst.nx+cx;
-			new_y = m_pst.ny+cy;
+			//new_x = m_pst.nx+cx;
+			//new_y = m_pst.ny+cy;
 
-			LineTo(hdc,new_x,new_y);
 
-			MoveToEx(hdc,new_x,new_y,NULL);
+			r = bl_A.ReportAngle();
+			temp_pp = bl_A.TranslatePoint(m_pst.nx, m_pst.ny, m_pst.beta);
+
+			tempt[0].x= temp_pp.p0.x;
+			tempt[0].y= temp_pp.p0.y;
+
+			tempt[1].x= temp_pp.p1.x;
+			tempt[1].y= temp_pp.p1.y;
+
+			tempt[2].x= temp_pp.p2.x;
+			tempt[2].y= temp_pp.p2.y;
+
+			tempt[3].x= temp_pp.p3.x;
+			tempt[3].y= temp_pp.p3.y;
+
+			PolyBezier (hdc, tempt, 4) ;
+
+			MoveToEx (hdc, tempt[3].x, tempt[3].y, NULL);
   
-			m_pst.nx = new_x;
-			m_pst.ny = new_y;
+			m_pst.beta += r;
+
+			m_pst.nx = tempt[3].x;
+			m_pst.ny = tempt[3].y;
 
 			DeleteObject (hPen);
 
 			break;
+
 		case 'B':
 
 			hPen = CreatePen (PS_SOLID, 1, m_col_B.rgb) ;
             SelectObject (hdc, hPen);
 
-			cx = m_pst.size*sin(m_pst.beta);
-			cy = m_pst.size*cos(m_pst.beta);
+			cx    = m_pst.size*sin(m_pst.beta);
+			cy    = m_pst.size*cos(m_pst.beta);
 
 			new_x = m_pst.nx+cx;
 			new_y = m_pst.ny+cy;
 
-			LineTo(hdc,new_x,new_y);
+			LineTo   (hdc,new_x,new_y);
 
-			MoveToEx(hdc,new_x,new_y,NULL);
+			MoveToEx (hdc,new_x,new_y,NULL);
   
 			m_pst.nx = new_x;
 			m_pst.ny = new_y;
@@ -103,15 +128,15 @@ void DrawGraph::Draw(HWND hdlg)
 			hPen = CreatePen (PS_SOLID, 1, m_col_C.rgb) ;
             SelectObject (hdc, hPen);
 
-			cx = m_pst.size*sin(m_pst.beta);
-			cy = m_pst.size*cos(m_pst.beta);
+			cx    = m_pst.size*sin(m_pst.beta);
+			cy    = m_pst.size*cos(m_pst.beta);
 
 			new_x = m_pst.nx+cx;
 			new_y = m_pst.ny+cy;
 
-			LineTo(hdc,new_x,new_y);
+			LineTo   (hdc,new_x,new_y);
 
-			MoveToEx(hdc,new_x,new_y,NULL);
+			MoveToEx (hdc,new_x,new_y,NULL);
   
 			m_pst.nx = new_x;
 			m_pst.ny = new_y;
@@ -124,15 +149,15 @@ void DrawGraph::Draw(HWND hdlg)
 			hPen = CreatePen (PS_SOLID, 1, m_col_D.rgb) ;
             SelectObject (hdc, hPen);
 
-			cx = m_pst.size*sin(m_pst.beta);
-			cy = m_pst.size*cos(m_pst.beta);
+			cx    = m_pst.size*sin(m_pst.beta);
+			cy    = m_pst.size*cos(m_pst.beta);
 
 			new_x = m_pst.nx+cx;
 			new_y = m_pst.ny+cy;
 
-			LineTo(hdc,new_x,new_y);
+			LineTo   (hdc,new_x,new_y);
 
-			MoveToEx(hdc,new_x,new_y,NULL);
+			MoveToEx (hdc,new_x,new_y,NULL);
   
 			m_pst.nx = new_x;
 			m_pst.ny = new_y;
@@ -145,15 +170,15 @@ void DrawGraph::Draw(HWND hdlg)
 			hPen = CreatePen (PS_SOLID, 1, m_col_E.rgb) ;
             SelectObject (hdc, hPen);
 
-			cx = m_pst.size*sin(m_pst.beta);
-			cy = m_pst.size*cos(m_pst.beta);
+			cx    = m_pst.size*sin(m_pst.beta);
+			cy    = m_pst.size*cos(m_pst.beta);
 
 			new_x = m_pst.nx+cx;
 			new_y = m_pst.ny+cy;
 
-			LineTo(hdc,new_x,new_y);
+			LineTo   (hdc,new_x,new_y);
 
-			MoveToEx(hdc,new_x,new_y,NULL);
+			MoveToEx (hdc,new_x,new_y,NULL);
   
 			m_pst.nx = new_x;
 			m_pst.ny = new_y;
@@ -166,15 +191,15 @@ void DrawGraph::Draw(HWND hdlg)
 			hPen = CreatePen (PS_SOLID, 1, m_col_F.rgb) ;
             SelectObject (hdc, hPen);
 
-			cx = m_pst.size*sin(m_pst.beta);
-			cy = m_pst.size*cos(m_pst.beta);
+			cx    = m_pst.size*sin(m_pst.beta);
+			cy    = m_pst.size*cos(m_pst.beta);
 
 			new_x = m_pst.nx+cx;
 			new_y = m_pst.ny+cy;
 
-			LineTo(hdc,new_x,new_y);
+			LineTo   (hdc,new_x,new_y);
 
-			MoveToEx(hdc,new_x,new_y,NULL);
+			MoveToEx (hdc,new_x,new_y,NULL);
   
 			m_pst.nx = new_x;
 			m_pst.ny = new_y;
@@ -183,13 +208,14 @@ void DrawGraph::Draw(HWND hdlg)
 
 			break;
 		case 'G':
-			cx = m_pst.size*sin(m_pst.beta);
-			cy = m_pst.size*cos(m_pst.beta);
+
+			cx    = m_pst.size*sin(m_pst.beta);
+			cy    = m_pst.size*cos(m_pst.beta);
 
 			new_x = m_pst.nx+cx;
 			new_y = m_pst.ny+cy;
 
-			MoveToEx(hdc,new_x,new_y,NULL);
+			MoveToEx (hdc,new_x,new_y,NULL);
 
 			m_pst.nx = new_x;
 			m_pst.ny = new_y;

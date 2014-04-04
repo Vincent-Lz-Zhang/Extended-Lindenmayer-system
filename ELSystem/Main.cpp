@@ -1,9 +1,10 @@
 /*
   CSIT691 Independent Project 
   Extended L-System
-  ZHANG Lingzhang 5th Mar 2009
-  Supervisor: Prof.Rossiter
+  ZHANG Lingzhang 5th Mar 2009 
+  Supervisor: Prof. Rossiter
   HKUST
+  Revised at 19th Mar by ZHANG Lingzhang
 */
 
 #include <windows.h>
@@ -13,6 +14,9 @@
 #include "ParaValidator.h"
 
 #include <commdlg.h>
+
+
+#define SCALE_FACTOR 3
 
 #define ID_STATIC_AXIOM 1
 #define ID_STATIC_RULES 2
@@ -30,31 +34,44 @@
 
 //   Global   variables
 
-HWND hDMlesGraph;
-
+HWND   hDMlesGraph;
 HBRUSH hBrushWhite;      
 
-char g_ax[3];         // axiom
-char g_ru[20];        // rules string
-int g_ord;            // order
-char g_ordStr[4];     //
-int g_ang;            // angle
-char g_angStr[10];    // 
+char g_ax[3];          // axiom
+char g_ru[20];         // rules string
+int  g_ord;            // order
+char g_ordStr[4];      //
+int  g_ang;            // angle
+char g_angStr[10];     // 
 
-ELSystem g_elsys; 
-//DrawGraph dgr("F",0);
+ELSystem  g_elsys; 
 DrawGraph g_dg_ptr;
 
-     
+/*
+POINT     g_bez_pt[4];
+
+POINT     g_bez_pt_A[4];  // global point array and is scaled 
+POINT     g_bez_pt_B[4];  // global point array and is scaled 
+POINT     g_bez_pt_C[4];  // global point array and is scaled 
+POINT     g_bez_pt_D[4];  // global point array and is scaled 
+POINT     g_bez_pt_E[4];  // global point array and is scaled 
+POINT     g_bez_pt_F[4];  // global point array and is scaled 
+*/
+static POINT_POSITION g_pp;
+
+static POINT_POSITION pp_A, pp_B, pp_C, pp_D, pp_E, pp_F;
+
 static COLOR col_A, col_B, col_C, col_D, col_E, col_F;
+
 ///////////////////////
 
-LRESULT CALLBACK WndProc      (HWND, UINT, WPARAM, LPARAM) ;
-BOOL    CALLBACK AboutDlgProc (HWND, UINT, WPARAM, LPARAM) ;
-BOOL    CALLBACK GraphDlgProc (HWND, UINT, WPARAM, LPARAM) ;
-BOOL    CALLBACK ColorDlgProc (HWND, UINT, WPARAM, LPARAM) ;
-BOOL    CALLBACK LineDlgProc (HWND, UINT, WPARAM, LPARAM) ;
-BOOL    CALLBACK BezierDlgProc (HWND, UINT, WPARAM, LPARAM) ;
+LRESULT CALLBACK WndProc           (HWND, UINT, WPARAM, LPARAM);
+BOOL    CALLBACK AboutDlgProc      (HWND, UINT, WPARAM, LPARAM);
+BOOL    CALLBACK GraphDlgProc      (HWND, UINT, WPARAM, LPARAM);
+BOOL    CALLBACK ColorDlgProc      (HWND, UINT, WPARAM, LPARAM);
+BOOL    CALLBACK LineDlgProc       (HWND, UINT, WPARAM, LPARAM);
+BOOL    CALLBACK BezierDlgProc     (HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK BezierLineWndProc (HWND, UINT, WPARAM, LPARAM);
 
 int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
                     PSTR szCmdLine, int iCmdShow)
@@ -85,7 +102,25 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
                       szAppName, MB_ICONERROR) ;
           return 0 ;
      }
-     
+   
+	 //////////////////////////////////////////////////////////////
+     // declare a new window class, which is the custom control  
+
+     wndclass.style         = CS_HREDRAW | CS_VREDRAW ;
+     wndclass.lpfnWndProc   = BezierLineWndProc ;
+     wndclass.cbClsExtra    = 0 ;
+     wndclass.cbWndExtra    = 0 ;
+     wndclass.hInstance     = hInstance ;
+     wndclass.hIcon         = NULL ;
+     wndclass.hCursor       = LoadCursor (NULL, IDC_ARROW) ;
+     wndclass.hbrBackground = (HBRUSH) hBrushWhite ;
+     wndclass.lpszMenuName  = NULL ;
+     wndclass.lpszClassName = TEXT ("BezierLine") ;
+
+     RegisterClass (&wndclass) ;
+
+     ///////////////////////////////////////////////////////////////
+
      hwnd = CreateWindow (szAppName, TEXT ("Extended L-System"),
                           WS_OVERLAPPEDWINDOW,
                           CW_USEDEFAULT, CW_USEDEFAULT,
@@ -116,10 +151,10 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
      static HINSTANCE hInstance ;
 
-	 TCHAR axiom[] = TEXT ("Axiom");
-	 TCHAR rule[] = TEXT ("Replacement Rules");
-	 TCHAR order[] = TEXT ("Order");
-	 TCHAR angle[] = TEXT ("Angle");
+	 TCHAR axiom[]    = TEXT ("Axiom");
+	 TCHAR rule[]     = TEXT ("Replacement Rules");
+	 TCHAR order[]    = TEXT ("Order");
+	 TCHAR angle[]    = TEXT ("Angle");
 	 TCHAR btnApply[] = TEXT ("Apply");
 	 TCHAR btnReset[] = TEXT ("Reset");
 	 TCHAR btnConcl[] = TEXT ("Conceal");
@@ -127,11 +162,11 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	 TCHAR empty[1];
 	 empty[0] = '\0';
 
-	 static HWND hwnd_Stic_Axm, hwnd_Stic_Rule, hwnd_Stic_Ord, hwnd_Stic_Ang;
-     static HWND hwnd_Edit_Axm, hwnd_Edit_Rule, hwnd_Edit_Ord, hwnd_Edit_Ang;
+	 static HWND hwnd_Stic_Axm,  hwnd_Stic_Rule, hwnd_Stic_Ord, hwnd_Stic_Ang;
+     static HWND hwnd_Edit_Axm,  hwnd_Edit_Rule, hwnd_Edit_Ord, hwnd_Edit_Ang;
 	 static HWND hwnd_Btn_Apply, hwnd_Btn_Reset, hwnd_Btn_Concl;
 
-     static int   cxChar, cyChar;
+     static int cxChar, cyChar;
 
      switch (message)
      {
@@ -305,7 +340,6 @@ void PaintColor(HWND hctrl, COLORREF col_ref)
      hBrush = CreateSolidBrush ( col_ref );
      hBrush = (HBRUSH) SelectObject (hdc, hBrush);
      
-
      Rectangle (hdc, rect.left, rect.top, rect.right, rect.bottom);
      
      DeleteObject (SelectObject (hdc, hBrush));
@@ -313,7 +347,7 @@ void PaintColor(HWND hctrl, COLORREF col_ref)
 
 }
 
-
+// dialog box procedure for color panel
 
 BOOL CALLBACK ColorDlgProc (HWND hDlg, UINT message, 
                             WPARAM wParam, LPARAM lParam)
@@ -335,15 +369,16 @@ BOOL CALLBACK ColorDlgProc (HWND hDlg, UINT message,
 
 	PAINTSTRUCT  ps;
 
-	//static COLOR col_A, col_B, col_C, col_D, col_E, col_F;
     static HWND hCtrlCol_A, hCtrlCol_B, hCtrlCol_C, 
 		        hCtrlCol_D, hCtrlCol_E, hCtrlCol_F;
 
      switch (message)
      {
 		 case WM_CREATE:
+
           hInstance = ((LPCREATESTRUCT) lParam)->hInstance ;
 		  return FALSE;
+
 		 case WM_INITDIALOG:
 
 			 //hInstance = ((LPCREATESTRUCT) lParam)->hInstance ;
@@ -363,10 +398,12 @@ BOOL CALLBACK ColorDlgProc (HWND hDlg, UINT message,
 			 col_F = g_dg_ptr.FindCol('F');
 
 			 return FALSE;
+
 		 case WM_COMMAND:
 			 switch (LOWORD (wParam))
 			 {
 				 case IDOK:
+
 					 g_dg_ptr.SetCol('A',col_A);
 					 g_dg_ptr.SetCol('B',col_B);
 					 g_dg_ptr.SetCol('C',col_C);
@@ -374,16 +411,21 @@ BOOL CALLBACK ColorDlgProc (HWND hDlg, UINT message,
 					 g_dg_ptr.SetCol('E',col_E);
 					 g_dg_ptr.SetCol('F',col_F);
                      EndDialog (hDlg, TRUE);
+
 					 return TRUE;
+
 				 case IDCANCEL:
-					 EndDialog (hDlg, FALSE);               
+
+					 EndDialog (hDlg, FALSE); 
+					 
 					 return TRUE;
+
                  case IDC_BTN_COR_A:
 					      
                      cc.rgbResult = col_A.rgb; 
 					 ChooseColor (&cc); 
 					 col_A.rgb = cc.rgbResult;
-					 PaintColor(hCtrlCol_A, col_A.rgb );
+					 PaintColor(hCtrlCol_A, col_A.rgb);
 					 return FALSE;
 
 				 case IDC_BTN_COR_B:
@@ -391,7 +433,7 @@ BOOL CALLBACK ColorDlgProc (HWND hDlg, UINT message,
                      cc.rgbResult = col_B.rgb; 
 					 ChooseColor (&cc); 
 					 col_B.rgb = cc.rgbResult;
-					 PaintColor(hCtrlCol_B, col_B.rgb );             
+					 PaintColor(hCtrlCol_B, col_B.rgb);             
 					 return FALSE;
 
 				 case IDC_BTN_COR_C:
@@ -399,7 +441,7 @@ BOOL CALLBACK ColorDlgProc (HWND hDlg, UINT message,
                      cc.rgbResult = col_C.rgb; 
 					 ChooseColor (&cc); 
 					 col_C.rgb = cc.rgbResult;
-					 PaintColor(hCtrlCol_C, col_C.rgb );             
+					 PaintColor(hCtrlCol_C, col_C.rgb);             
 					 return FALSE;
 
 				 case IDC_BTN_COR_D:
@@ -407,7 +449,7 @@ BOOL CALLBACK ColorDlgProc (HWND hDlg, UINT message,
                      cc.rgbResult = col_D.rgb; 
 					 ChooseColor (&cc); 
 					 col_D.rgb = cc.rgbResult;
-					 PaintColor(hCtrlCol_D, col_D.rgb );             
+					 PaintColor(hCtrlCol_D, col_D.rgb);             
 					 return FALSE;
 
 				 case IDC_BTN_COR_E:
@@ -415,7 +457,7 @@ BOOL CALLBACK ColorDlgProc (HWND hDlg, UINT message,
                      cc.rgbResult = col_E.rgb; 
 					 ChooseColor (&cc); 
 					 col_E.rgb = cc.rgbResult;
-					 PaintColor(hCtrlCol_E, col_E.rgb );             
+					 PaintColor(hCtrlCol_E, col_E.rgb);             
 					 return FALSE;
 
 				 case IDC_BTN_COR_F:
@@ -423,22 +465,21 @@ BOOL CALLBACK ColorDlgProc (HWND hDlg, UINT message,
                      cc.rgbResult = col_F.rgb; 
 					 ChooseColor (&cc); 
 					 col_F.rgb = cc.rgbResult;
-					 PaintColor(hCtrlCol_F, col_F.rgb );             
+					 PaintColor(hCtrlCol_F, col_F.rgb);             
 					 return FALSE;
 
 			 }
 		 case WM_PAINT:
-
-		
+	
 			 BeginPaint (hDlg, &ps) ;		 		
 			 EndPaint (hDlg, &ps) ;   
 
-			 PaintColor(hCtrlCol_A, col_A.rgb );
-			 PaintColor(hCtrlCol_B, col_B.rgb );
-			 PaintColor(hCtrlCol_C, col_C.rgb );
-			 PaintColor(hCtrlCol_D, col_D.rgb );
-			 PaintColor(hCtrlCol_E, col_E.rgb );
-			 PaintColor(hCtrlCol_F, col_F.rgb );
+			 PaintColor(hCtrlCol_A, col_A.rgb);
+			 PaintColor(hCtrlCol_B, col_B.rgb);
+			 PaintColor(hCtrlCol_C, col_C.rgb);
+			 PaintColor(hCtrlCol_D, col_D.rgb);
+			 PaintColor(hCtrlCol_E, col_E.rgb);
+			 PaintColor(hCtrlCol_F, col_F.rgb);
 
 			 return TRUE;
 	 }
@@ -452,41 +493,38 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
     //HDC  hdc ;
     PAINTSTRUCT  ps ;
     
-
-    static int  cxClient, cyClient ;
+    static int  cxClient, cyClient;
 
 	switch (message)		 	
 	{
      
 	case WM_SIZE :
 
-		cxClient = LOWORD (lParam) ;        
-		cyClient = HIWORD (lParam) ;
+		cxClient = LOWORD (lParam);        
+		cyClient = HIWORD (lParam);
 		  
 		return TRUE;
 	 
 	case WM_PAINT :
 		 
-		BeginPaint (hDlg, &ps) ;		 
-		EndPaint (hDlg, &ps) ;		
+		BeginPaint (hDlg, &ps);		 
+		EndPaint (hDlg, &ps);		
 		// draw the graphics	
 		g_dg_ptr = DrawGraph(g_elsys.Report(), g_ang);			
 		g_dg_ptr.Draw(hDlg);
 		  
 		return TRUE;		
 		
-	case WM_INITDIALOG :
+	case WM_INITDIALOG:
           			
 		return TRUE ;
-
 		
-	case WM_CTLCOLORDLG :          
+	case WM_CTLCOLORDLG:          
 			
 		if ( (HWND) lParam  == hDlg )		  			
 		{             				
 			return (BOOL) hBrushWhite;		  			
-		}
-		 
+		}		 
 	
 	}
 
@@ -509,6 +547,47 @@ void DrawBezier (HDC hdc, POINT apt[])
 
 /////////////////////////////////
 
+// draw Bezier line to a window
+
+void DrawBezierToBlock(HWND hctrl, POINT_POSITION f_pp)
+{
+	POINT apt[4];
+
+	HDC hdc;
+     
+	RECT rect;
+
+	InvalidateRect (hctrl, NULL, TRUE);
+     
+	UpdateWindow (hctrl);
+
+	hdc = GetDC(hctrl);
+     
+	GetClientRect (hctrl, &rect);
+
+	apt[0].x = f_pp.p0.x;
+	apt[0].y = f_pp.p0.y;
+
+	apt[1].x = f_pp.p1.x;
+	apt[1].y = f_pp.p1.y;
+
+	apt[2].x = f_pp.p2.x;
+	apt[2].y = f_pp.p2.y;
+
+	apt[3].x = f_pp.p3.x;
+	apt[3].y = f_pp.p3.y;
+
+	SelectObject (hdc, hBrushWhite);
+
+	Rectangle (hdc, rect.left, rect.top, rect.right, rect.bottom);
+	
+	PolyBezier (hdc, apt, 4);
+
+	ReleaseDC (hctrl, hdc);
+}
+
+
+// dialog box procedure for basic line panel
 
 BOOL CALLBACK LineDlgProc (HWND hDlg, UINT message, 
                            WPARAM wParam, LPARAM lParam)
@@ -516,46 +595,100 @@ BOOL CALLBACK LineDlgProc (HWND hDlg, UINT message,
 
 	static HINSTANCE hInstance;
 	
+	RECT rect;
+
+	HDC hdc;
+
 	// since similar strucrur with color dialog box,
 	// similar variables
-    static HWND hCtrlCol_A, hCtrlCol_B, hCtrlCol_C, 
-		        hCtrlCol_D, hCtrlCol_E, hCtrlCol_F;
+    static HWND hCtrlLine_A, hCtrlLine_B, hCtrlLine_C, 
+		        hCtrlLine_D, hCtrlLine_E, hCtrlLine_F;
 
-
-	switch (message)
-     
+	switch (message)    
 	{
-
 		 
 	case WM_INITDIALOG:
-
 			 
-		hCtrlCol_A = GetDlgItem (hDlg, IDC_LINE_A);
-		hCtrlCol_B = GetDlgItem (hDlg, IDC_LINE_B);
-		hCtrlCol_C = GetDlgItem (hDlg, IDC_LINE_C);
-		hCtrlCol_D = GetDlgItem (hDlg, IDC_LINE_D);
-		hCtrlCol_E = GetDlgItem (hDlg, IDC_LINE_E);
-		 
+		// initialize the array for Bezier line A's points
+
+		hCtrlLine_A = GetDlgItem (hDlg, IDC_LINE_A);
+		hdc = GetDC(hCtrlLine_A);    	
+		GetClientRect (hCtrlLine_A, &rect);
+
+		pp_A = g_dg_ptr.bl_A.UpRect(rect);
+
+		// initialize the array for Bezier line B's points
+
+		hCtrlLine_B = GetDlgItem (hDlg, IDC_LINE_B);
+		hdc = GetDC(hCtrlLine_B);    	
+		GetClientRect (hCtrlLine_B, &rect);
+
+		pp_B = g_dg_ptr.bl_B.UpRect(rect);
+
+		// initialize the array for Bezier line C's points
+
+		hCtrlLine_C = GetDlgItem (hDlg, IDC_LINE_C);
+		hdc = GetDC(hCtrlLine_C);    	
+		GetClientRect (hCtrlLine_C, &rect);
+
+		pp_C = g_dg_ptr.bl_C.UpRect(rect);
+
+		// initialize the array for Bezier line D's points
+
+		hCtrlLine_D = GetDlgItem (hDlg, IDC_LINE_D);
+		hdc = GetDC(hCtrlLine_D);    	
+		GetClientRect (hCtrlLine_D, &rect);
+
+		pp_D = g_dg_ptr.bl_D.UpRect(rect);
+
+		// initialize the array for Bezier line E's points
+
+		hCtrlLine_E = GetDlgItem (hDlg, IDC_LINE_E);
+		hdc = GetDC(hCtrlLine_E);    	
+		GetClientRect (hCtrlLine_E, &rect);
+
+		pp_E = g_dg_ptr.bl_E.UpRect(rect);
+
+		// initialize the array for Bezier line F's points
+
+		hCtrlLine_F = GetDlgItem (hDlg, IDC_LINE_F);
+		hdc = GetDC(hCtrlLine_F);    	
+		GetClientRect (hCtrlLine_F, &rect);
+
+		pp_F = g_dg_ptr.bl_F.UpRect(rect);
+		
 		return FALSE;
 		 
 	case WM_CREATE:
           
-		hInstance = ((LPCREATESTRUCT) lParam)->hInstance ;
+		hInstance = ((LPCREATESTRUCT) lParam)->hInstance;
 		  
 		return FALSE;
 
- 
+	case WM_PAINT:
+
+		DrawBezierToBlock(hCtrlLine_A,pp_A);
+		DrawBezierToBlock(hCtrlLine_B,pp_B);
+		DrawBezierToBlock(hCtrlLine_C,pp_C);
+		DrawBezierToBlock(hCtrlLine_D,pp_D);
+		DrawBezierToBlock(hCtrlLine_E,pp_E);
+		DrawBezierToBlock(hCtrlLine_F,pp_F);
+
+		return FALSE;
 		  
 	case WM_COMMAND:
 			 
-		switch (LOWORD (wParam))
-			 
+		int i;
+
+		switch (LOWORD (wParam))			 
 		{
 				 
 		case IDOK:
 
- 
-			EndDialog (hDlg, TRUE);		 
+			g_dg_ptr.bl_A.UpPoints(pp_A);
+
+			EndDialog (hDlg, TRUE);	
+			
 			return TRUE;
 				 
 		case IDCANCEL:
@@ -564,139 +697,237 @@ BOOL CALLBACK LineDlgProc (HWND hDlg, UINT message,
 					 
 			return TRUE;
 
-
 		case IDC_BTN_LINE_A:
 
+			if (DialogBox (hInstance, TEXT ("BezierBox"), hCtrlLine_A, BezierDlgProc) )
+			{
+				/*
+				for (i=0; i<4; i++)			  
+				  {				  
+					  g_bez_pt_A[i].x = g_bez_pt[i].x;				  
+					  g_bez_pt_A[i].y = g_bez_pt[i].y;			  
+				  }
+				*/
+				pp_A = g_pp;
+				DrawBezierToBlock(hCtrlLine_A,pp_A);
+			}
 			return FALSE;
 
 		case IDC_BTN_LINE_B:
 
+			if (DialogBox (hInstance, TEXT ("BezierBox"), hCtrlLine_B, BezierDlgProc) )
+			{	
+				/*
+				for (i=0; i<4; i++)			  
+				  {				  
+					  g_bez_pt_B[i].x = g_bez_pt[i].x;				  
+					  g_bez_pt_B[i].y = g_bez_pt[i].y;			  
+				  }
+                */
+                pp_B = g_pp;
+
+				DrawBezierToBlock(hCtrlLine_B,pp_B);
+			}
 			return FALSE;
 
 		case IDC_BTN_LINE_C:
 
+			if (DialogBox (hInstance, TEXT ("BezierBox"), hCtrlLine_C, BezierDlgProc) )
+			{	
+				/*
+				for (i=0; i<4; i++)			  
+				  {				  
+					  g_bez_pt_C[i].x = g_bez_pt[i].x;				  
+					  g_bez_pt_C[i].y = g_bez_pt[i].y;			  
+				  }
+				  */
+                pp_C = g_pp;
+				DrawBezierToBlock(hCtrlLine_C,pp_C);
+			}
 			return FALSE;
 			
 		case IDC_BTN_LINE_D:
 
+			if (DialogBox (hInstance, TEXT ("BezierBox"), hCtrlLine_D, BezierDlgProc) )
+			{		
+				/*
+				  for (i=0; i<4; i++)			  
+				  {				  
+					  g_bez_pt_D[i].x = g_bez_pt[i].x;				  
+					  g_bez_pt_D[i].y = g_bez_pt[i].y;			  
+				  }
+				  */
+
+                pp_D = g_pp;
+				DrawBezierToBlock(hCtrlLine_D,pp_D);
+			}
 			return FALSE;
 
 		case IDC_BTN_LINE_E:
 
-			return FALSE;
-		 }
+			if (DialogBox (hInstance, TEXT ("BezierBox"), hCtrlLine_E, BezierDlgProc) )
+			{	
+				/*
+				for (i=0; i<4; i++)			  
+				  {				  
+					  g_bez_pt_E[i].x = g_bez_pt[i].x;				  
+					  g_bez_pt_E[i].y = g_bez_pt[i].y;			  
+				  }
+				  */
+                pp_E = g_pp;
+				DrawBezierToBlock(hCtrlLine_E,pp_E);
+			}
+			return FALSE;		 
      
 		case IDC_BTN_LINE_F:
 
+			if (DialogBox (hInstance, TEXT ("BezierBox"), hCtrlLine_F, BezierDlgProc) )
+			{	
+				/*
+				for (i=0; i<4; i++)			  
+				  {				  
+					  g_bez_pt_F[i].x = g_bez_pt[i].x;				  
+					  g_bez_pt_F[i].y = g_bez_pt[i].y;			  
+				  }
+				  */
+                pp_F = g_pp;
+				DrawBezierToBlock(hCtrlLine_F,pp_F);
+			}
 			return FALSE;
-	}
+		}
 	
+	}	
 		
 	return FALSE;
 
 }
 
-BOOL    CALLBACK BezierDlgProc (HWND hDlg, UINT message, 
+
+// dialog box procedure for Bezier Line editer dialog
+
+BOOL CALLBACK BezierDlgProc (HWND hDlg, UINT message, 
                            WPARAM wParam, LPARAM lParam)
 {
 
-	     
-	static POINT apt[4];
-    HDC hdc;
-    int cxClient, cyClient;
-    PAINTSTRUCT ps;
-
-	switch (message)
-     
+	switch (message)     
 	{
 
+	case WM_COMMAND:
+			 
+		switch (LOWORD (wParam))			 
+		{
+				 
+		case IDOK:					 
 
+			EndDialog (hDlg, TRUE);
+					 
+			return TRUE;
+				 
+		case IDCANCEL:
+					 
+			EndDialog (hDlg, FALSE);               
+					 
+			return TRUE; 
+		}
+	}
+	return FALSE;
+
+}
+
+
+// window procedure for Bezier Line editing control,it's a custom control
+
+LRESULT CALLBACK BezierLineWndProc (HWND hwnd, UINT message, 
+                                   WPARAM wParam, LPARAM lParam)
+{
+	static POINT apt[4];
+
+    HDC hdc;
+
+    int cxClient, cyClient;
+
+	static RECT rect;
+
+	PAINTSTRUCT ps;
+     
+	switch (message)    
+	{
+
+	case WM_CREATE:	
+
+		hdc = GetDC(hwnd);
+		GetClientRect (hwnd, &rect);
+
+		cxClient = rect.right;
+		cyClient = rect.bottom;
+
+		ReleaseDC (hwnd, hdc);
 		
-	case WM_SIZE:
-          
-		cxClient = LOWORD (lParam);
-        cyClient = HIWORD (lParam);
-          
-        apt[0].x = cxClient / 2;
-        apt[0].y = cyClient / 4;
-          
-        apt[1].x = cxClient / 4;
-        apt[1].y = cyClient / 2;
-          
-        apt[2].x = 3 * cxClient / 4;
-        apt[2].y =     cyClient / 2;
-          
-        apt[3].x =     cxClient / 2;
-        apt[3].y = 3 * cyClient / 4;
-          
-        return FALSE;
+		apt[0].x = cxClient / 2;
+		apt[0].y = 3 * cyClient / 4;
+
+		apt[1].x = cxClient / 2;
+		apt[1].y = 5 * cyClient / 8;
+
+		apt[2].x = cxClient / 2;
+        apt[2].y = 3 * cyClient / 8;
+
+		apt[3].x = cxClient / 2;
+        apt[3].y = cyClient / 4;
+
+		return FALSE;
+     
+	case WM_PAINT :
+		 
+		hdc = BeginPaint (hwnd, &ps) ;
+		DrawBezier (hdc, apt) ;
+		EndPaint (hwnd, &ps) ;
+
+		return 0 ;
 
 	case WM_LBUTTONDOWN:     
 	case WM_RBUTTONDOWN:     
 	case WM_MOUSEMOVE:
+          		
+		  if (wParam & MK_LBUTTON || wParam & MK_RBUTTON)        
+		
+		  {               			                            
+			
+			  if (wParam & MK_LBUTTON)              			
+			  {                   				
+				  apt[1].x = LOWORD(lParam);                    				
+				  apt[1].y = HIWORD(lParam);               			
+			  }                              			
+			  if (wParam & MK_RBUTTON)               			
+			  {                   				
+				  apt[2].x = LOWORD(lParam);                   				
+				  apt[2].y = HIWORD(lParam);             			
+			  }
 
-          
-		if (wParam & MK_LBUTTON || wParam & MK_RBUTTON)
-          
-		{
-               
-			hdc = GetDC (hDlg) ;
-               
-               
-			SelectObject (hdc, GetStockObject (WHITE_PEN)) ;
-               
-			DrawBezier (hdc, apt) ;
-               
-               
-			if (wParam & MK_LBUTTON)
-               
-			{
-                    
-				apt[1].x = LOWORD (lParam) ;
-                    
-				apt[1].y = HIWORD (lParam) ;
-               
-			}
-               
-               
-			if (wParam & MK_RBUTTON)
-               
-			{
-                    
-				apt[2].x = LOWORD (lParam) ;
-                    
-				apt[2].y = HIWORD (lParam) ;
-               
-			}
-               
-               
-			SelectObject (hdc, GetStockObject (BLACK_PEN)) ;
-               
-			DrawBezier (hdc, apt) ;
-               
-			ReleaseDC (hDlg, hdc) ;
-          
-		}
-          
-		return FALSE;
-          
-     
-	
-	case WM_PAINT:
-          
-		InvalidateRect (hDlg, NULL, TRUE) ;
-          
-          
-		hdc = BeginPaint (hDlg, &ps) ;
-          
-          
-		DrawBezier (hdc, apt) ;
-          
-          
-		EndPaint (hDlg, &ps) ;
-          
-		return FALSE;
-          
-	}
+			  InvalidateRect(hwnd, NULL, TRUE);
+				/*  
+			  for (int i=0; i<4; i++)			  				  
+			  {				  
+					  g_bez_pt[i].x = apt[i].x / SCALE_FACTOR;				  
+					  g_bez_pt[i].y = apt[i].y / SCALE_FACTOR;			  				  
+			  }	
+			  */
+			  g_pp.p0.x = apt[0].x / SCALE_FACTOR;
+			  g_pp.p0.y = apt[0].y / SCALE_FACTOR;
 
+			  g_pp.p1.x = apt[1].x / SCALE_FACTOR;
+			  g_pp.p1.y = apt[1].y / SCALE_FACTOR;
+
+			  g_pp.p2.x = apt[2].x / SCALE_FACTOR;
+			  g_pp.p2.y = apt[2].y / SCALE_FACTOR;
+
+			  g_pp.p3.x = apt[3].x / SCALE_FACTOR;
+			  g_pp.p3.y = apt[3].y / SCALE_FACTOR;
+
+
+			}
+
+		return FALSE;            
+	}    
+	return DefWindowProc (hwnd, message, wParam, lParam) ;
 }

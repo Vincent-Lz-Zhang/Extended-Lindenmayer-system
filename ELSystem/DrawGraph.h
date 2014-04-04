@@ -4,7 +4,7 @@
 
 #include <windows.h>
 #include <math.h>
-
+#include "BezierLine.h"
 
 #include <stack>
 #include <string>
@@ -56,7 +56,7 @@ private:
 	} crt_state;  // the current state
 */
 
-	STATE m_pst;
+	STATE m_pst;  // the current state
 
 	//COLOR cols[NUM_COLS];
 	static COLOR m_col_A, m_col_B, m_col_C, m_col_D, m_col_E, m_col_F;
@@ -68,6 +68,8 @@ private:
 	stack<STATE> m_sta_stat; 
 
 public:
+
+	BezierLine bl_A, bl_B, bl_C, bl_D, bl_E, bl_F;
 
 	DrawGraph( string str="F", int a=0);
 	~DrawGraph();

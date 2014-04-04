@@ -94,6 +94,10 @@ SOURCE=.\Alphabet.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\BezierLine.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\DrawGraph.cpp
 # End Source File
 # Begin Source File
@@ -119,6 +123,10 @@ SOURCE=.\ParaValidator.cpp
 # Begin Source File
 
 SOURCE=.\Alphabet.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\BezierLine.h
 # End Source File
 # Begin Source File
 

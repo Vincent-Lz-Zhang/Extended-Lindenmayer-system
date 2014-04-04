@@ -20,7 +20,7 @@ ELSystem::ELSystem() // default constructor
 
 	}
 
-	m_axiom = 'F';
+	m_axiom     = 'F';
 
     m_Maxiterat = 0;
 
@@ -29,8 +29,8 @@ ELSystem::ELSystem() // default constructor
 ELSystem::ELSystem(char * a, char * r, int o)
 
 {
-    m_axiom = a;
-    m_ruleStr = r;
+    m_axiom     = a;
+    m_ruleStr   = r;
     m_Maxiterat = o;
 }
 
@@ -46,8 +46,8 @@ void ELSystem::Filter()
 */
 void ELSystem::Update(char * a, char * r, int o)
 {
-    m_axiom = a;
-    m_ruleStr = r;
+    m_axiom     = a;
+    m_ruleStr   = r;
     m_Maxiterat = o;
 	
 }
@@ -128,26 +128,8 @@ void ELSystem::Gentree()
 
 	m_Tree = m_axiom;
 
-	//int * len_of_rules = new int[m_len_of_albet];
-    
-	/*
-    for (int i=0; i<m_len_of_albet; i++)
-	{
-		len_of_rules[i] = m_rules[i].length();
-	}
-    */
 	for ( int iter=0; iter<m_Maxiterat; iter++)
 	{
-		/*
-		int len_of_crt_tree = m_Tree.length(); // the length of current tree
-		int len_of_post_tree = 0; // the length of the tree after subsitution
-        for ( int pos=0; pos<len_of_crt_tree; pos++) // go through the whole m_Tree
-		{
-			char temp_letter = m_Tree[pos];
-			int pos_in_alph = m_Abet.Position(temp_letter);
-			len_of_post_tree += len_of_rules[pos_in_alph];
-		}
-        */
 
 		int len_of_crt_tree = m_Tree.length();
 
