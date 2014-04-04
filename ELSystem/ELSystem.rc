@@ -46,66 +46,6 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Dialog
-//
-
-CMDBOX DIALOG DISCARDABLE  16, 16, 309, 157
-STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION
-CAPTION "Command"
-FONT 10, "System"
-BEGIN
-    DEFPUSHBUTTON   "Apply",IDOK,166,112,32,14
-    PUSHBUTTON      "Cancel",IDCANCEL,242,112,34,14
-    LTEXT           "Axiom:",IDC_STATIC,23,19,24,8
-    EDITTEXT        IDC_AXIOM,56,16,42,14,ES_AUTOHSCROLL
-    LTEXT           "Replacement Rules:",IDC_STATIC,23,40,67,8
-    EDITTEXT        IDC_RULE,23,56,194,14,ES_AUTOHSCROLL
-    LTEXT           "Order:",IDC_STATIC,23,79,21,8
-    EDITTEXT        IDC_ORDER,52,76,40,14,ES_AUTOHSCROLL
-    LTEXT           "Angle:",IDC_STATIC,110,79,21,8
-    EDITTEXT        IDC_ANGLE,137,76,40,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "Reset",IDC_RESET,204,112,32,14
-END
-
-ABOUTBOX DIALOG DISCARDABLE  32, 32, 187, 96
-STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
-CAPTION "About Extended L-System"
-FONT 10, "System"
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,122,59,50,14
-    ICON            "ELSystem",IDC_STATIC,21,17,20,20
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO DISCARDABLE 
-BEGIN
-    "CMDBOX", DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 302
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 150
-    END
-
-    "ABOUTBOX", DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 180
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 89
-    END
-END
-#endif    // APSTUDIO_INVOKED
-
 #endif    // Chinese (P.R.C.) resources
 /////////////////////////////////////////////////////////////////////////////
 
@@ -118,6 +58,56 @@ END
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
 #endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+ABOUTBOX DIALOG DISCARDABLE  32, 32, 177, 135
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "About Extended L-System"
+FONT 10, "System"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,109,90,50,14
+    ICON            "ELSystem",IDC_STATIC,20,20,20,20
+END
+
+Graphics DIALOG DISCARDABLE  150, 25, 187, 96
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_VSCROLL | WS_HSCROLL | 
+    WS_SYSMENU | WS_THICKFRAME
+CAPTION "Graphics"
+FONT 10, "System"
+BEGIN
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    "ABOUTBOX", DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 170
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 128
+    END
+
+    "Graphics", DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 173
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 82
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -136,14 +126,10 @@ ELSYSTEM                ICON    DISCARDABLE     "elsystem.ico"
 ELSYSTEM MENU DISCARDABLE 
 BEGIN
     MENUITEM "&File",                       65535
-    POPUP "&Edit"
-    BEGIN
-        MENUITEM "Command",                     IDM_EDIT_CMD
-        MENUITEM SEPARATOR
-    END
+    MENUITEM "&Edit",                       65535
     POPUP "&Help"
     BEGIN
-        MENUITEM "&About ELSystem",             IDM_APP_ABOUT
+        MENUITEM "&About Extended L.",          IDM_APP_ABOUT
     END
 END
 
