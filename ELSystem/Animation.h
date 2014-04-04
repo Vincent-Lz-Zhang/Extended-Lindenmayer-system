@@ -23,6 +23,7 @@ DraeGraph's
 
 #define ANI_STEP 50  // due to the control windows' size in Bezier line panel
 
+#include <windows.h>
 #include "DrawGraph.h"
 
 class Animation
@@ -38,7 +39,7 @@ public:
 
 	Animation();
 	~Animation();
-	void DrawAni(HWND, double, double, DrawGraph &);
+	void DrawAni(HWND, double, double, double, DrawGraph &, BOOL fRanA, BOOL fRanL);
 	void ClearState();
 };
 

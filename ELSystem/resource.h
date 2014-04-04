@@ -34,7 +34,9 @@
 #define IDC_EDIT_FRM                    1029
 #define IDC_STATIC_LEN                  1030
 #define IDC_STATIC_ANG                  1031
+#define IDC_STATIC_ANGL                 1031
 #define IDC_EXPORT_NAME                 1032
+#define IDC_STATIC_ANGR                 1032
 #define IDC_SCRBAR_ANIM_LEN             1125
 #define IDC_SCRBAR_ANIM_ANG             1126
 #define IDM_APP_ABOUT                   40001
@@ -52,7 +54,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        114
 #define _APS_NEXT_COMMAND_VALUE         40009
-#define _APS_NEXT_CONTROL_VALUE         1033
+#define _APS_NEXT_CONTROL_VALUE         1035
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

@@ -48,10 +48,10 @@ public:
 	                                               // from L-System object, then update the element in 
 	                                               // POINT[], and return the variation of angle
 
-	double TranslatePointAni(int, int, bool,       // used for animation
+	double TranslatePointAni(int, int, bool,       // used for animation, the 6th parameter is ratio
 		                  double, POINT[],double) const; 
 
-	double TranslatePointRan(int, int, bool,       // used for random offset
+	double TranslatePointRan(int, int, bool,       // used for random mode, the 6th parameter is ratio
 		                     double, POINT[], double) const;
 
 	//////////////////////////////////////////////////////

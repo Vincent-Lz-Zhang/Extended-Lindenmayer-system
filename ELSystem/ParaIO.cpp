@@ -9,7 +9,7 @@ ParaIO::~ParaIO()
 {
 }
 
-void ParaIO::CopyFromClass(ELSystem & e,DrawGraph & d, int a)
+void ParaIO::CopyFromClass(ELSystem & e,DrawGraph & d, int l, int r)
 {	
 	if(!e.m_ruleStr.empty())
 	{
@@ -18,11 +18,12 @@ void ParaIO::CopyFromClass(ELSystem & e,DrawGraph & d, int a)
 
 	if(!e.m_axiom.empty())
 	{
-		m_axiom = e.m_axiom[0];
+		strcpy(m_axiom, e.m_axiom.c_str());
 	}
 
 	m_order = e.m_Maxiterat;
-	m_angle = a;
+	m_angleL = l;
+	m_angleR = r;
 
 	m_cA.index = d.m_col_A.index;
     m_cA.rgb = d.m_col_A.rgb;
@@ -79,7 +80,7 @@ const char * ParaIO::GetNameFromFile()
 }
 
 	
-void ParaIO::CopyToClass(ELSystem & e,DrawGraph & d)
+void ParaIO::CopyToClass(ELSystem & e,DrawGraph & d) const
 {
 
 	d.m_col_A.index = m_cA.index;
@@ -124,23 +125,28 @@ void ParaIO::CopyToClass(ELSystem & e,DrawGraph & d)
 
 }
 	
-const char * ParaIO::ReturnRules()
+const char * ParaIO::ReturnRules() const
 {
 	return m_rules;
 }
 
 	
-int ParaIO::ReturnOrder()
+int ParaIO::ReturnOrder() const
 {
 	return m_order;
 }
 	
-int ParaIO::ReturnAngle()
+int ParaIO::ReturnAngleL() const
 {
-	return m_angle;
+	return m_angleL;
+}
+
+int ParaIO::ReturnAngleR() const
+{
+	return m_angleR;
 }
 	
-char ParaIO::ReturnAxiom()
+const char * ParaIO::ReturnAxiom() const
 {
 	return m_axiom;
 }

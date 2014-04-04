@@ -32,7 +32,7 @@ private:
 
 public:
 
-	Alphabet(char * ptr="~+-[]ABCDEFG") ;
+	Alphabet(char * ptr="~+-[]ABCDEFGWXYZ") ;
 	~Alphabet();
     char Get(int) const;
 	int Len() const;

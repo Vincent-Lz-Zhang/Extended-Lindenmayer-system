@@ -50,12 +50,55 @@ void ParaValidator::Update(char * aCon, char * rCon, int oCon)
 void ParaValidator::AxmStrFilter()
 
 {
+
 	if( !m_rulContl.empty() )
 	{
-	
+		Alphabet temp_alp;
+		string alph_temp = temp_alp.ReturnAlph();
+
 		string strbuf = _strupr(_strdup(m_axmContl.c_str()));
-		m_outputAxm = strbuf[0];
-	}
+
+		if (strbuf.find_first_not_of(alph_temp, 0)==-1)  // there is no invalid symbol
+	
+		{
+		
+			m_outputAxm = strbuf;
+	
+		}
+
+		
+		else // // there are invalid symbol exiting
+	
+		{		
+			int start = 0, end = 0;
+		
+			while( (end=strbuf.find_first_not_of(alph_temp, start)) != -1 )  // found if there are any letter out of alphabet
+                                                                       // if there is, then go into the loop
+	
+			{
+		
+				string tempStr(&strbuf[start], &strbuf[end]);
+
+				m_outputAxm.append(tempStr);
+
+				start = end+1;
+	
+	
+			}  // end while
+
+		
+			end = strbuf.length();
+
+		
+			string tempStr(&strbuf[start], &strbuf[end]);
+
+	
+			m_outputAxm.append(tempStr);
+
+    
+		}  // end else
+		
+	} // end if
 
 }
 

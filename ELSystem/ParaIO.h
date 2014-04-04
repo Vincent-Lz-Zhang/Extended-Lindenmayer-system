@@ -40,22 +40,23 @@ private:
 		  m_lD[4], 
 		  m_lE[4], 
 		  m_lF[4]; 
-    int m_order, m_angle;
-    char m_axiom;
-    char m_rules[30]; 
+    int m_order, m_angleL, m_angleR;
+    char m_axiom[16];
+    char m_rules[62]; 
 	char m_name[20];
 public:
     ParaIO();
     ~ParaIO();
-    void CopyFromClass(ELSystem &,DrawGraph &, int);
+    void CopyFromClass(ELSystem &,DrawGraph &, int, int);
 
 	const char * GetNameFromFile();
 	void GetNameFromInput(const char *);
 	void RecoverFromFile();
-	void CopyToClass(ELSystem &,DrawGraph &);
-	const char * ReturnRules();
-	int ReturnOrder();
-	int ReturnAngle();
-	char ReturnAxiom();
+	void CopyToClass(ELSystem &,DrawGraph &) const;
+	const char * ReturnRules() const;
+	int ReturnOrder() const;
+	int ReturnAngleL() const;
+    int ReturnAngleR() const;
+	const char * ReturnAxiom() const;
 };
 #endif

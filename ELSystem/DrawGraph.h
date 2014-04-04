@@ -61,7 +61,8 @@ private:
 
 	string m_command;    // string of command
 
-	double m_delta;      // angle that the direction will be changed
+	double m_deltaL;      // angle that the direction will be changed
+	double m_deltaR;      // angle that the direction will be changed
 
 	stack<STATE> m_sta_stat;  // stack of current states
 
@@ -78,7 +79,7 @@ public:
 
 	DrawGraph();                                // command string and angle
 
-	void Update(string &, int);                 // the same parameters as constructor
+	void Update(string &, int, int);                 // the same parameters as constructor
 
 	~DrawGraph();                               // default destructor
 

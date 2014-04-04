@@ -35,6 +35,21 @@ void Frame::RemoveFrame(unsigned int num)
 	FrmMap.erase(num);
 }
 
+unsigned int Frame::ReturnMaxIndex() const
+{
+	FRAMEMAP::const_iterator end;
+
+	if(!FrmMap.empty())
+	{
+		end = FrmMap.end(); end--;
+		return (end->first);
+	}
+	else
+	{
+		return 0;
+	}
+}
+
 void Frame::UpdateFrmInfo(unsigned int num, FRAMEINFO & fi)
 {
 	FrmMap[num]=fi;
@@ -59,7 +74,7 @@ void Frame::FillStateArr(int idx, int *a) const
 
 }
 
-void Frame::FillAniArry(int *f, double *l, double *a) const
+void Frame::FillAniArry(int *f, double *l, double *al, double *ar) const
 {
 	FRAMEMAP::const_iterator pos;
 	FRAMEMAP::const_iterator pos_later;
@@ -84,8 +99,14 @@ void Frame::FillAniArry(int *f, double *l, double *a) const
 		// use the next frame's angle minus the current frame's angle
 		// then devide it by the difference of two frames' index numbers
 
-        a[i] = double( (pos_later->second.angle) - (pos->second.angle) )
-			  /double( (pos_later->first)        - (pos->first) );
+        al[i] = double( (pos_later->second.angleL) - (pos->second.angleL) )
+			   /double( (pos_later->first)         - (pos->first) );
+
+		// use the next frame's angle minus the current frame's angle
+		// then devide it by the difference of two frames' index numbers
+
+        ar[i] = double( (pos_later->second.angleR) - (pos->second.angleR) )
+			   /double( (pos_later->first)         - (pos->first) );
 
 		// the next frame's index num
 
@@ -105,18 +126,28 @@ unsigned int Frame::FrsFrmIndex() const
 	}
 }
 
-double Frame::FrsFrmAng() const
+double Frame::FrsFrmAngL() const
 {
 	if(!FrmMap.empty())
 	{
-		return ( FrmMap.begin() )->second.angle;
+		return ( FrmMap.begin() )->second.angleL;
 	}
 	else
 	{
 		return 0;
 	}
 }
-
+double Frame::FrsFrmAngR() const
+{
+	if(!FrmMap.empty())
+	{
+		return ( FrmMap.begin() )->second.angleR;
+	}
+	else
+	{
+		return 0;
+	}
+}
 double Frame::FrsFrmLen() const
 {
 	if(!FrmMap.empty())
@@ -135,7 +166,7 @@ void Frame::Show(unsigned int num)
 {
 	FRAMEINFO frmi;
         
-	TCHAR szFormatWH[] = TEXT ("%-04i %-04i %-04i"),              
+	TCHAR szFormatWH[] = TEXT ("%-04i %-04i %-04i %-04i"),              
 		  szBufferWH[30];
 
 	FRAMEMAP::const_iterator pos = FrmMap.find(num);
@@ -143,7 +174,7 @@ void Frame::Show(unsigned int num)
 	if (pos != FrmMap.end()) 
 	{               
 		frmi = pos->second;
-	    wsprintf (szBufferWH, szFormatWH, pos->first, (frmi.len_Ratio), (frmi.angle));
+	    wsprintf (szBufferWH, szFormatWH, pos->first, (frmi.len_Ratio), (frmi.angleL),  (frmi.angleR));
 
 		MessageBox (NULL, szBufferWH,
                       TEXT("Frame show"), MB_ICONINFORMATION);	
@@ -154,14 +185,14 @@ void Frame::Show(unsigned int num)
 void Frame::PrintAll()
 {
 	FRAMEINFO frmi;
-	TCHAR szFormatWH[] = TEXT ("%-04i %-04i %-04i"),              
+	TCHAR szFormatWH[] = TEXT ("%-04i %-04i %-04i %-04i"),              
 		  szBufferWH[30];
 
 	FRAMEMAP::const_iterator pos;
 	for(pos=FrmMap.begin();pos!=FrmMap.end();pos++)
 	{
 		frmi = pos->second;
-	    wsprintf (szBufferWH, szFormatWH, pos->first, (frmi.len_Ratio), (frmi.angle));
+	    wsprintf (szBufferWH, szFormatWH, pos->first, (frmi.len_Ratio), (frmi.angleL), (frmi.angleR));
 
 		MessageBox (NULL, szBufferWH,
                       TEXT("Frame show"), MB_ICONINFORMATION);	

@@ -25,8 +25,8 @@ COLOR DrawGraph::m_col_F = { RGB(0,0,0),'F' } ;
 DrawGraph::DrawGraph()
 {
 
-	m_delta    = 0;  // convert the unit from  degree to radian
-
+	m_deltaL    = 0;  // convert the unit from  degree to radian
+    m_deltaR    = 0;
 	//m_command  = str;
 
 	m_pst.nx   = 0;
@@ -44,9 +44,10 @@ DrawGraph::~DrawGraph()
 }
 
 
-void DrawGraph::Update(string &str, int a)
+void DrawGraph::Update(string &str, int l, int r)
 {
-	m_delta    = a*PI/180;  // convert the unit from  degree to radian
+	m_deltaL    = l*PI/180;  // convert the unit from  degree to radian
+	m_deltaR    = r*PI/180;  // convert the unit from  degree to radian
 
 	m_command  = str;
 }
@@ -222,14 +223,14 @@ RECT DrawGraph::CheckBoundary(HWND hdlg, BOOL fRanA, BOOL fRanL)
 	
 				case '+':
 		
-					m_pst.beta += (m_delta * (1 + m_ranAng[index_Ang]) );
+					m_pst.beta += (m_deltaR * (1 + m_ranAng[index_Ang]) );
 					index_Ang++;
 		
 					break;
 	
 				case '-':
 		
-					m_pst.beta -= (m_delta * (1 + m_ranAng[index_Ang]) );		
+					m_pst.beta -= (m_deltaL * (1 + m_ranAng[index_Ang]) );		
 					index_Ang++;
 		
 					break;
@@ -389,14 +390,14 @@ RECT DrawGraph::CheckBoundary(HWND hdlg, BOOL fRanA, BOOL fRanL)
 	
 				case '+':
 		
-					m_pst.beta += (m_delta * (1 + m_ranAng[index_Ang]) );
+					m_pst.beta += (m_deltaR * (1 + m_ranAng[index_Ang]) );
 					index_Ang++;
 		
 					break;
 	
 				case '-':
 		
-					m_pst.beta -= (m_delta * (1 + m_ranAng[index_Ang]) );		
+					m_pst.beta -= (m_deltaL * (1 + m_ranAng[index_Ang]) );		
 					index_Ang++;
 		
 					break;
@@ -565,13 +566,13 @@ RECT DrawGraph::CheckBoundary(HWND hdlg, BOOL fRanA, BOOL fRanL)
 	
 				case '+':
 		
-					m_pst.beta += m_delta;
+					m_pst.beta += m_deltaR;
 		
 					break;
 	
 				case '-':
 		
-					m_pst.beta -= m_delta;		
+					m_pst.beta -= m_deltaL;		
 		
 					break;
 	
@@ -730,13 +731,13 @@ RECT DrawGraph::CheckBoundary(HWND hdlg, BOOL fRanA, BOOL fRanL)
 	
 				case '+':
 		
-					m_pst.beta += m_delta;
+					m_pst.beta += m_deltaR;
 		
 					break;
 	
 				case '-':
 		
-					m_pst.beta -= m_delta;		
+					m_pst.beta -= m_deltaL;		
 		
 					break;
 	
@@ -974,14 +975,14 @@ void DrawGraph::Draw(HWND hdlg, int offset_x, int offset_y, BOOL fRanA, BOOL fRa
 					
 				case '+':			
 				
-					m_pst.beta += (m_delta * (1 + m_ranAng[index_Ang]) );			    
+					m_pst.beta += (m_deltaR * (1 + m_ranAng[index_Ang]) );			    
 					index_Ang++;
 			    
 					break;
 					
 				case '-':
 							
-					m_pst.beta -= (m_delta * (1 + m_ranAng[index_Ang]) );						
+					m_pst.beta -= (m_deltaL * (1 + m_ranAng[index_Ang]) );						
 					index_Ang++;
 			
 				break;
@@ -1161,14 +1162,14 @@ void DrawGraph::Draw(HWND hdlg, int offset_x, int offset_y, BOOL fRanA, BOOL fRa
 		
 				case '+':		
 		
-					m_pst.beta += (m_delta * (1 + m_ranAng[index_Ang]) );		
+					m_pst.beta += (m_deltaR * (1 + m_ranAng[index_Ang]) );		
 					index_Ang++;
 		
 					break;
 			
 				case '-':
 						
-					m_pst.beta -= (m_delta * (1 + m_ranAng[index_Ang]) );						
+					m_pst.beta -= (m_deltaL * (1 + m_ranAng[index_Ang]) );						
 					index_Ang++;			
 		
 					break;		
@@ -1361,13 +1362,13 @@ void DrawGraph::Draw(HWND hdlg, int offset_x, int offset_y, BOOL fRanA, BOOL fRa
 		
 				case '+':
 					
-					m_pst.beta += m_delta;		
+					m_pst.beta += m_deltaR;		
 			
 					break;
 				
 				case '-':
 					
-					m_pst.beta -= m_delta;						
+					m_pst.beta -= m_deltaL;						
 					
 					break;
 				
@@ -1549,13 +1550,13 @@ void DrawGraph::Draw(HWND hdlg, int offset_x, int offset_y, BOOL fRanA, BOOL fRa
 			
 				case '+':
 					
-					m_pst.beta += m_delta ;			 
+					m_pst.beta += m_deltaR ;			 
 			
 					break;		
 		
 				case '-':			
 		
-					m_pst.beta -= m_delta ;						
+					m_pst.beta -= m_deltaL ;						
 		
 					break;		
 		

@@ -40,15 +40,15 @@
 #define ID_STATIC_AXIOM 1
 #define ID_STATIC_RULES 2
 #define ID_STATIC_ORDER 3
-#define ID_STATIC_ANGLE 4
-
+#define ID_STATIC_ANGLEL 4
+#define ID_STATIC_ANGLER 24
 //------- edit controls -------//
 
 #define ID_EDIT_AXIOM 5
 #define ID_EDIT_RULES 6
 #define ID_EDIT_ORDER 7
-#define ID_EDIT_ANGLE 8
-
+#define ID_EDIT_ANGLEL 8
+#define ID_EDIT_ANGLER 28
 //------- buttons -------//
 
 #define ID_BTN_APPLY 9
@@ -103,12 +103,14 @@ HBRUSH hBrushWhite;
 //-----------------------------------////
 
 //// variables for L-system -------///
-char g_ax[3];          // axiom
-char g_ru[30];         // rules string
+char g_ax[15];          // axiom
+char g_ru[61];         // rules string
 int  g_ord;            // order
 char g_ordStr[4];      //
-int  g_ang;            // angle
-char g_angStr[10];     // 
+int  g_angL;            // angle
+char g_angStrL[10];     // 
+int  g_angR;            // angle
+char g_angStrR[10];     //
 ///--------------------/////////////
 char g_ranA[4];         // range of random offset ratio for angle
 int  g_ranAng = 0;
@@ -347,11 +349,16 @@ void RecoverPara(HWND hwnd, int i)
 		 wsprintf (g_ordStr, szFormat, g_pIO.ReturnOrder() );				  
 		 SetDlgItemText (hwnd, ID_EDIT_ORDER, g_ordStr);
 			  
-		 wsprintf (g_angStr, szFormat, g_pIO.ReturnAngle() );			  
-		 SetDlgItemText (hwnd, ID_EDIT_ANGLE, g_angStr);
+		 wsprintf (g_angStrL, szFormat, g_pIO.ReturnAngleL() );			  
+		 SetDlgItemText (hwnd, ID_EDIT_ANGLEL, g_angStrL);
 			  
-		 g_ax[0] = g_pIO.ReturnAxiom();
+		 wsprintf (g_angStrR, szFormat, g_pIO.ReturnAngleR() );			  
+		 SetDlgItemText (hwnd, ID_EDIT_ANGLER, g_angStrR);
+
+
+		 wsprintf (g_ax, g_pIO.ReturnAxiom() );			  
 		 SetDlgItemText (hwnd, ID_EDIT_AXIOM, g_ax);
+		 
 				  
 		 g_pIO.CopyToClass(g_elsys, g_dg);
 				  
@@ -368,14 +375,15 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	 TCHAR axiom[]    = TEXT ("Axiom:");
 	 TCHAR rule[]     = TEXT ("Replacement Rules:");
 	 TCHAR order[]    = TEXT ("Order:");
-	 TCHAR angle[]    = TEXT ("Angle:");
+	 TCHAR angleL[]   = TEXT ("AngleL:");
+	 TCHAR angleR[]   = TEXT ("AngleR:");
 	 TCHAR btnApply[] = TEXT ("Apply");
 	 TCHAR btnReset[] = TEXT ("Reset");
 	 TCHAR btnAnima[] = TEXT ("Animate");
 
 	 TCHAR group[]    = TEXT ("Frame Rate:");            // Group button
-     TCHAR cbtn_ang[] = TEXT ("Add random for angle");   // check button
-     TCHAR cbtn_len[] = TEXT ("Add random for length");  // check button
+     TCHAR cbtn_ang[] = TEXT ("Randomize angle");   // check button
+     TCHAR cbtn_len[] = TEXT ("Randomize length");  // check button
 	 TCHAR percent[]  = TEXT ("%");
 
 	 TCHAR rbtn_eig[] = TEXT ("8 fps");    // radio button
@@ -387,8 +395,8 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	 TCHAR empty[1];
 	 empty[0] = '\0';
 
-	 static HWND hwnd_Stic_Axm,  hwnd_Stic_Rule, hwnd_Stic_Ord, hwnd_Stic_Ang;
-     static HWND hwnd_Edit_Axm,  hwnd_Edit_Rule, hwnd_Edit_Ord, hwnd_Edit_Ang;
+	 static HWND hwnd_Stic_Axm,  hwnd_Stic_Rule, hwnd_Stic_Ord, hwnd_Stic_AngL, hwnd_Stic_AngR;
+     static HWND hwnd_Edit_Axm,  hwnd_Edit_Rule, hwnd_Edit_Ord, hwnd_Edit_AngL, hwnd_Edit_AngR;
 	 static HWND hwnd_Btn_Apply, hwnd_Btn_Reset, hwnd_Btn_Anima;
      static HWND hwnd_anim;
 
@@ -422,7 +430,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
           hwnd_Edit_Axm = CreateWindow ( TEXT ("edit"), 
 			                      NULL, 
 								  WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT,           
-                                  8 * cxChar, cyChar, 4*cxChar, 5 * cyChar / 4,
+                                  8 * cxChar, cyChar, 15*cxChar, 5 * cyChar / 4,
 								  hwnd, (HMENU) ID_EDIT_AXIOM,
                                   hInstance, NULL);
        
@@ -436,7 +444,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
           hwnd_Edit_Rule = CreateWindow ( TEXT ("edit"),
 			                       NULL, 
 								   WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT | ES_AUTOHSCROLL,
-                                   cxChar, 5 * cyChar, 30 * cxChar, 5 * cyChar / 4, 
+                                   cxChar, 5 * cyChar, 35 * cxChar, 5 * cyChar / 4, 
 								   hwnd, (HMENU) ID_EDIT_RULES,
                                    hInstance, NULL);
                                                  
@@ -450,24 +458,37 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
           hwnd_Edit_Ord = CreateWindow ( TEXT ("edit"), 
 			                      NULL, 
 								  WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT,
-                                  7 * cxChar, 7 * cyChar, 3 * cxChar, 5 * cyChar / 4,
+                                  7 * cxChar, 7 * cyChar, 4 * cxChar, 5 * cyChar / 4,
 								  hwnd, (HMENU) ID_EDIT_ORDER,
                                   hInstance, NULL); 
                               		  
-		  hwnd_Stic_Ang = CreateWindow ( TEXT( "STATIC"), 
-			                      angle, 
+		  hwnd_Stic_AngL = CreateWindow ( TEXT( "STATIC"), 
+			                      angleL, 
 								  WS_CHILD | WS_VISIBLE,
-			                      12 * cxChar, 7 * cyChar, 5 * cxChar, cyChar, 
-			                      hwnd, (HMENU) ID_STATIC_ANGLE, 
+			                      12 * cxChar, 7 * cyChar, 13 * cxChar / 2, cyChar, 
+			                      hwnd, (HMENU) ID_STATIC_ANGLEL, 
 								  hInstance, NULL);		  
              
-		  hwnd_Edit_Ang = CreateWindow ( TEXT ("edit"), 
+		  hwnd_Edit_AngL = CreateWindow ( TEXT ("edit"), 
 			                      NULL, 
 								  WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT,                    
-                                  18 * cxChar, 7 * cyChar, 4 * cxChar, 5 * cyChar / 4, 
-								  hwnd, (HMENU) ID_EDIT_ANGLE,
+                                  39 * cxChar / 2, 7 * cyChar, 4 * cxChar, 5 * cyChar / 4, 
+								  hwnd, (HMENU) ID_EDIT_ANGLEL,
                                   hInstance, NULL);
 
+		  hwnd_Stic_AngR = CreateWindow ( TEXT( "STATIC"), 
+			                      angleR, 
+								  WS_CHILD | WS_VISIBLE,
+			                      25 * cxChar, 7 * cyChar, 13 * cxChar / 2, cyChar, 
+			                      hwnd, (HMENU) ID_STATIC_ANGLER, 
+								  hInstance, NULL);		  
+             
+		  hwnd_Edit_AngR = CreateWindow ( TEXT ("edit"), 
+			                      NULL, 
+								  WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT,                    
+                                  32 * cxChar, 7 * cyChar, 4 * cxChar, 5 * cyChar / 4, 
+								  hwnd, (HMENU) ID_EDIT_ANGLER,
+                                  hInstance, NULL);
           //-------------------- buttons --------------------
 
 		  hwnd_Btn_Apply = CreateWindow ( TEXT("button"), 
@@ -499,7 +520,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
                                    cbtn_ang,
                                    WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX,
                                    cxChar, 9 * cyChar,
-                                   22 * cxChar, 5 * cyChar / 4,
+                                   18 * cxChar, 5 * cyChar / 4,
                                    hwnd, (HMENU) ID_CBTN_ANGRAN,
                                    hInstance, NULL);
 
@@ -527,7 +548,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
                                    cbtn_len,
                                    WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX,
                                    cxChar, 11 * cyChar,
-                                   22 * cxChar, 5 * cyChar / 4,
+                                   18 * cxChar, 5 * cyChar / 4,
                                    hwnd, (HMENU) ID_CBTN_LENRAN,
                                    hInstance, NULL);
 
@@ -679,12 +700,222 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			  }   
 			  break;
 
+		  case ID_DYNAMIC_START+11:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,10);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+12:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,11);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+13:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,12);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+14:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,13);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+15:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,14);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+16:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,15);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+17:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,16);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+18:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,17);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+19:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,18);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+20:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,19);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+21:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,20);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+22:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,21);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+23:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,22);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+24:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,LOWORD(wParam)-1-ID_DYNAMIC_START);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+25:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,LOWORD(wParam)-1-ID_DYNAMIC_START);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+26:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,LOWORD(wParam)-1-ID_DYNAMIC_START);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+27:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,LOWORD(wParam)-1-ID_DYNAMIC_START);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+28:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,LOWORD(wParam)-1-ID_DYNAMIC_START);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+29:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,LOWORD(wParam)-1-ID_DYNAMIC_START);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+30:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,LOWORD(wParam)-1-ID_DYNAMIC_START);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+31:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,LOWORD(wParam)-1-ID_DYNAMIC_START);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+32:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,LOWORD(wParam)-1-ID_DYNAMIC_START);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+33:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,LOWORD(wParam)-1-ID_DYNAMIC_START);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+34:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,LOWORD(wParam)-1-ID_DYNAMIC_START);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+35:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,LOWORD(wParam)-1-ID_DYNAMIC_START);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+36:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,LOWORD(wParam)-1-ID_DYNAMIC_START);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+37:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,LOWORD(wParam)-1-ID_DYNAMIC_START);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+38:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,LOWORD(wParam)-1-ID_DYNAMIC_START);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+39:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,LOWORD(wParam)-1-ID_DYNAMIC_START);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+40:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,LOWORD(wParam)-1-ID_DYNAMIC_START);   
+			  }   
+			  break;
+
 		  case IDM_FILE_EXPORT:
 
 			  if(DialogBox( hInstance, TEXT ("NameBox"), hwnd, ExportDlgProc))
 			  {				 
 				  g_pIO.GetNameFromInput(g_name);
-				  g_pIO.CopyFromClass(g_elsys, g_dg, g_ang);
+				  g_pIO.CopyFromClass(g_elsys, g_dg, g_angL, g_angR);
 
 				  ofstream fout(file, ios::out | ios::app | ios::binary);
     
@@ -762,10 +993,11 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			 }
 			  
 
-			  if( 0==GetDlgItemText (hwnd, ID_EDIT_AXIOM, g_ax, 2)     || 
-				  0==GetDlgItemText (hwnd, ID_EDIT_RULES, g_ru, 29)    || 
-				  0==GetDlgItemText (hwnd, ID_EDIT_ORDER, g_ordStr, 3) ||
-				  0==GetDlgItemText (hwnd, ID_EDIT_ANGLE, g_angStr, 4))
+			  if( 0==GetDlgItemText (hwnd, ID_EDIT_AXIOM, g_ax, 14)      || 
+				  0==GetDlgItemText (hwnd, ID_EDIT_RULES, g_ru, 60)      || 
+				  0==GetDlgItemText (hwnd, ID_EDIT_ORDER, g_ordStr, 3)   ||
+				  0==GetDlgItemText (hwnd, ID_EDIT_ANGLEL, g_angStrL, 4) || 
+				  0==GetDlgItemText (hwnd, ID_EDIT_ANGLER, g_angStrR, 4) )
 			  {
 				            
 				  MessageBox (NULL, TEXT ("Please type in a letter or a number!"),
@@ -787,7 +1019,8 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 				  }
 
 			      g_ord = atoi(g_ordStr);
-			      g_ang = atoi(g_angStr);
+			      g_angL = atoi(g_angStrL);
+				  g_angR = atoi(g_angStrR);
               
 			      // pass the variables to ParaValidator class object and process the strings if necessary
 
@@ -820,7 +1053,8 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
               SetDlgItemText(hwnd, ID_EDIT_AXIOM , empty);
               SetDlgItemText(hwnd, ID_EDIT_RULES , empty);
               SetDlgItemText(hwnd, ID_EDIT_ORDER , empty);
-              SetDlgItemText(hwnd, ID_EDIT_ANGLE , empty);
+              SetDlgItemText(hwnd, ID_EDIT_ANGLEL, empty);
+			  SetDlgItemText(hwnd, ID_EDIT_ANGLER, empty);
 
 			  break;
 
@@ -830,7 +1064,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 				                         NULL,
 										 WS_OVERLAPPEDWINDOW | WS_VISIBLE,
                                          CW_USEDEFAULT, CW_USEDEFAULT,
-                                         600, 600,
+                                         700, 700,
                                          NULL, NULL, hInstance, NULL);
 			  break;
           
@@ -1105,6 +1339,9 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 
 		rMax = g_dg.CheckBoundary(hDlg, fAng, fLen);
 
+		g_PrintRect(rMax, TEXT("RECT"));
+		g_PrintWH(cxClient, cyClient, TEXT("Win SIZE"));
+
 		///////judge the horizontal size//////////////////
 
 		if ( (rMax.left < 0) && (rMax.right > cxClient) ) // the horizontal width of graph is over the width of window
@@ -1118,16 +1355,24 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 			g_HorzNumPos = 2*temp_HorzNumPos1;
 
 		    SetScrollRange (hDlg, SB_HORZ, 0, g_HorzNumPos, TRUE);
-		    SetScrollPos (hDlg, SB_HORZ, temp_HorzNumPos1, TRUE);
+		    SetScrollPos (hDlg, SB_HORZ, temp_HorzNumPos1+ceil( (float(abs(rMax.right-cxClient)-abs(rMax.left))/2) / float(xUnit) ), TRUE);
 		}
 		else if(rMax.left < 0)   // the width of graph is not over the width of window, but exceed left edge
 		{
 			temp_HorzNumPos1 = ceil( fabs( float(rMax.left) / float(xUnit) ) );
+            g_HorzNumPos = 2*temp_HorzNumPos1;
+			if(  abs(rMax.left)<=abs(rMax.right-cxClient)  )
+			{				
+				SetScrollRange (hDlg, SB_HORZ, 0, g_HorzNumPos, TRUE);
+				SetScrollPos (hDlg, SB_HORZ, 0, TRUE);
+			}
+			else 
+			{
+				SetScrollRange (hDlg, SB_HORZ, 0, g_HorzNumPos, TRUE);
+				SetScrollPos (hDlg, SB_HORZ, ceil( ( float(abs(rMax.left)-abs(rMax.right-cxClient))/2) / float(xUnit) ), TRUE);
 
-			g_HorzNumPos = 2*temp_HorzNumPos1;
+			}
 
-		    SetScrollRange (hDlg, SB_HORZ, 0, g_HorzNumPos, TRUE);
-		    SetScrollPos (hDlg, SB_HORZ, temp_HorzNumPos1, TRUE);
 		}
 		else if(rMax.right > cxClient)  // the width of graph is not over the width of window, but exceed right edge
 		{
@@ -1135,8 +1380,20 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 
 			g_HorzNumPos = 2*temp_HorzNumPos1;
 
-		    SetScrollRange (hDlg, SB_HORZ, 0, g_HorzNumPos, TRUE);
-		    SetScrollPos (hDlg, SB_HORZ, temp_HorzNumPos1, TRUE);
+			if(  abs(rMax.right-cxClient)<=abs(rMax.left)  )
+			{				
+				SetScrollRange (hDlg, SB_HORZ, 0, g_HorzNumPos, TRUE);
+				SetScrollPos (hDlg, SB_HORZ, g_HorzNumPos, TRUE);
+			}
+			else 
+			{
+				SetScrollRange (hDlg, SB_HORZ, 0, g_HorzNumPos, TRUE);
+				SetScrollPos (hDlg, SB_HORZ, g_HorzNumPos-ceil( ( float(abs(rMax.right-cxClient)-abs(rMax.left))/2) / float(xUnit) ), TRUE);
+			}
+		}
+		else
+		{
+			SetScrollPos (hDlg, SB_HORZ, g_HorzNumPos/2, TRUE);
 		}
 
 		
@@ -1155,7 +1412,7 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 			g_VertNumPos = 2*temp_VertNumPos1;
 			
 		    SetScrollRange (hDlg, SB_VERT , 0, g_VertNumPos, TRUE);
-		    SetScrollPos (hDlg, SB_VERT , temp_VertNumPos1, TRUE);
+		    SetScrollPos (hDlg, SB_VERT , temp_VertNumPos1+ceil( (float(abs(rMax.bottom-cyClient)-abs(rMax.top))/2) / float(yUnit) ), TRUE);
 
 		}
 		else if(rMax.top < 0)   // the height of graph is not over the height of window, but exceed top edge
@@ -1164,8 +1421,18 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 
 			g_VertNumPos = 2*temp_VertNumPos1;
 			
-		    SetScrollRange (hDlg, SB_VERT , 0, g_VertNumPos, TRUE);
-		    SetScrollPos (hDlg, SB_VERT , temp_VertNumPos1, TRUE);
+			if(  abs(rMax.top)<=abs(rMax.bottom-cyClient)  )
+			{				
+				SetScrollRange (hDlg, SB_VERT , 0, g_VertNumPos, TRUE);
+				SetScrollPos (hDlg, SB_VERT, 0, TRUE);
+			}
+
+			else 
+			{
+
+				SetScrollRange (hDlg, SB_VERT , 0, g_VertNumPos, TRUE);
+                SetScrollPos (hDlg, SB_VERT , ceil( (  float(abs(rMax.top)-abs(rMax.bottom-cyClient) )/2) / float(yUnit) ), TRUE);
+			}
 
 		}
 		else if(rMax.bottom > cyClient)   // the height of graph is not over the height of window, but exceed bottom edge
@@ -1174,11 +1441,26 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 
 			g_VertNumPos = 2*temp_VertNumPos1;
 			
-		    SetScrollRange (hDlg, SB_VERT , 0, g_VertNumPos, TRUE);
-		    SetScrollPos (hDlg, SB_VERT , temp_VertNumPos1, TRUE);
+			if(  abs(rMax.top)<=abs(rMax.bottom-cyClient)  )
+			{				
+				SetScrollRange (hDlg, SB_VERT , 0, g_VertNumPos, TRUE);
+				SetScrollPos (hDlg, SB_VERT, g_VertNumPos, TRUE);
+			}
+
+			else 
+			{
+
+				SetScrollRange (hDlg, SB_VERT , 0, g_VertNumPos, TRUE);
+                SetScrollPos (hDlg, SB_VERT , g_VertNumPos-ceil( (float (abs(rMax.bottom-cyClient)-abs(rMax.top))/2) / float(yUnit) ), TRUE);
+			}
 
 		}
+		else
+		{
+			SetScrollPos (hDlg, SB_VERT, g_VertNumPos/2, TRUE);
+		}
 
+		InvalidateRect (hDlg, NULL, TRUE);
 
 		return TRUE;
 
@@ -1186,9 +1468,12 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 
 		int temp_VertNumPos, temp_HorzNumPos;
 
-		g_dg.Update(g_elsys.Report(), g_ang);
+		g_dg.Update(g_elsys.Report(), g_angL, g_angR);
 
 		rMax = g_dg.CheckBoundary(hDlg, fAng, fLen);
+
+		g_PrintRect(rMax, TEXT("RECT"));
+		g_PrintWH(cxClient, cyClient, TEXT("Win SIZE"));
 
 		//-------------------- judge the horizontal size --------------------///
 
@@ -1203,7 +1488,7 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 			g_HorzNumPos = 2*temp_HorzNumPos;
 
 		    SetScrollRange (hDlg, SB_HORZ, 0, g_HorzNumPos, TRUE);
-		    SetScrollPos (hDlg, SB_HORZ, temp_HorzNumPos, TRUE);
+		    SetScrollPos (hDlg, SB_HORZ, temp_HorzNumPos+ceil( (float(abs(rMax.right-cxClient)-abs(rMax.left))/2) / float(xUnit) ), TRUE);
 		}
 		else if(rMax.left < 0)   // the width of graph is not over the width of window, but exceed left edge
 		{
@@ -1211,8 +1496,16 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 
 			g_HorzNumPos = 2*temp_HorzNumPos;
 
-		    SetScrollRange (hDlg, SB_HORZ, 0, g_HorzNumPos, TRUE);
-		    SetScrollPos (hDlg, SB_HORZ, temp_HorzNumPos, TRUE);
+			if(  abs(rMax.left)<=abs(rMax.right-cxClient)  )
+			{				
+				SetScrollRange (hDlg, SB_HORZ, 0, g_HorzNumPos, TRUE);
+				SetScrollPos (hDlg, SB_HORZ, 0, TRUE);
+			}
+			else 
+			{
+				SetScrollRange (hDlg, SB_HORZ, 0, g_HorzNumPos, TRUE);
+				SetScrollPos (hDlg, SB_HORZ, ceil( (float (abs(rMax.left)-abs(rMax.right-cxClient))/2) / float(xUnit) ), TRUE);
+			}
 		}
 		else if(rMax.right > cxClient)  // the width of graph is not over the width of window, but exceed right edge
 		{
@@ -1220,8 +1513,20 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 
 			g_HorzNumPos = 2*temp_HorzNumPos;
 
-		    SetScrollRange (hDlg, SB_HORZ, 0, g_HorzNumPos, TRUE);
-		    SetScrollPos (hDlg, SB_HORZ, temp_HorzNumPos, TRUE);
+			if(  abs(rMax.right-cxClient)<=abs(rMax.left)  )
+			{				
+				SetScrollRange (hDlg, SB_HORZ, 0, g_HorzNumPos, TRUE);
+				SetScrollPos (hDlg, SB_HORZ, g_HorzNumPos, TRUE);
+			}
+			else 
+			{
+				SetScrollRange (hDlg, SB_HORZ, 0, g_HorzNumPos, TRUE);
+				SetScrollPos (hDlg, SB_HORZ, g_HorzNumPos-ceil((float(abs(rMax.right-cxClient)-abs(rMax.left))/2) / float(xUnit) ), TRUE);
+			}
+		}
+		else
+		{
+			SetScrollPos (hDlg, SB_HORZ, g_HorzNumPos/2, TRUE);
 		}
 			
 		//--------------------------------------------------------------------------------------//	
@@ -1239,7 +1544,7 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 			g_VertNumPos = 2*temp_VertNumPos;
 			
 		    SetScrollRange (hDlg, SB_VERT , 0, g_VertNumPos, TRUE);
-		    SetScrollPos (hDlg, SB_VERT , temp_VertNumPos, TRUE);
+		    SetScrollPos (hDlg, SB_VERT , temp_VertNumPos+ceil( (float(abs(rMax.bottom-cyClient)-abs(rMax.top))/2) / float(yUnit) ), TRUE);
 
 		}
 		else if(rMax.top < 0)  // the height of graph is not over the height of window, but exceed top edge
@@ -1248,8 +1553,18 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 
 			g_VertNumPos = 2*temp_VertNumPos;
 			
-		    SetScrollRange (hDlg, SB_VERT , 0, g_VertNumPos, TRUE);
-		    SetScrollPos (hDlg, SB_VERT , temp_VertNumPos, TRUE);
+			if(  abs(rMax.top)<=abs(rMax.bottom-cyClient)  )
+			{				
+				SetScrollRange (hDlg, SB_VERT , 0, g_VertNumPos, TRUE);
+				SetScrollPos (hDlg, SB_VERT, 0, TRUE);
+			}
+
+			else 
+			{
+
+				SetScrollRange (hDlg, SB_VERT , 0, g_VertNumPos, TRUE);
+                SetScrollPos (hDlg, SB_VERT , ceil( ( float(abs(rMax.top)-abs(rMax.bottom-cyClient) ) / 2 ) / float(yUnit) ), TRUE);
+			}
 
 		}
 		else if(rMax.bottom > cyClient)    // the height of graph is not over the height of window, but exceed bottom edge
@@ -1258,9 +1573,22 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 
 			g_VertNumPos = 2*temp_VertNumPos;
 			
-		    SetScrollRange (hDlg, SB_VERT , 0, g_VertNumPos, TRUE);
-		    SetScrollPos (hDlg, SB_VERT , temp_VertNumPos, TRUE);
+			if(  abs(rMax.bottom-cyClient)<=abs(rMax.top)  )
+			{				
+				SetScrollRange (hDlg, SB_VERT , 0, g_VertNumPos, TRUE);
+				SetScrollPos (hDlg, SB_VERT, g_VertNumPos, TRUE);
+			}
 
+			else 
+			{
+
+				SetScrollRange (hDlg, SB_VERT , 0, g_VertNumPos, TRUE);
+                SetScrollPos (hDlg, SB_VERT , g_VertNumPos-ceil((float(abs(rMax.bottom-cyClient)-abs(rMax.top))/2) / float(yUnit) ), TRUE);
+			}
+		}
+		else
+		{
+			SetScrollPos (hDlg, SB_VERT, g_VertNumPos/2, TRUE);
 		}
 	
 		InvalidateRect (hDlg, NULL, TRUE);
@@ -1802,7 +2130,7 @@ LRESULT CALLBACK FrameEdtWndProc (HWND hwnd, UINT message,
 
 	static int index;  // indicate the selected frame
 
-	static HWND hParent, ctl_LenR, ctl_Ang;
+	static HWND hParent, ctl_LenR, ctl_AngL, ctl_AngR;
 	HDC hdc ;  
     RECT  rect_frm ;
 	HRGN hrgn;
@@ -1841,7 +2169,7 @@ LRESULT CALLBACK FrameEdtWndProc (HWND hwnd, UINT message,
 
         cyUnit   = 5 * FRMWIDTH;
 		cyClient = FRMNUM * FRMWIDTH;
-        iMax     = FRMNUM;
+        iMax     = max(FRMNUM, g_frame.ReturnMaxIndex() + 5 -(g_frame.ReturnMaxIndex()%5) );
 
 	    //-------------------------------//
 
@@ -1900,8 +2228,9 @@ LRESULT CALLBACK FrameEdtWndProc (HWND hwnd, UINT message,
 		{	
 		case IDM_FRAME_INSERT:
 				
-			fi_tmp.angle     = GetDlgItemInt(hParent, IDC_STATIC_ANG, NULL, FALSE);			    
-			fi_tmp.len_Ratio = GetDlgItemInt(hParent, IDC_STATIC_LEN, NULL, FALSE);
+			fi_tmp.angleL     = GetDlgItemInt(hParent, IDC_STATIC_ANGL, NULL, FALSE);
+			fi_tmp.angleR     = GetDlgItemInt(hParent, IDC_STATIC_ANGR, NULL, FALSE);
+			fi_tmp.len_Ratio  = GetDlgItemInt(hParent, IDC_STATIC_LEN, NULL, FALSE);
 			    
 			g_frame.AddFrame(frmarry_offset + pos_x/FRMWIDTH, fi_tmp);
    							    
@@ -1961,8 +2290,9 @@ LRESULT CALLBACK FrameEdtWndProc (HWND hwnd, UINT message,
 			}
 			else // this frame does not exist, add it 
 			{			
-				fi_tmp.angle     = GetDlgItemInt(hParent, IDC_STATIC_ANG, NULL, FALSE);
-			    fi_tmp.len_Ratio = GetDlgItemInt(hParent, IDC_STATIC_LEN, NULL, FALSE);
+				fi_tmp.angleL     = GetDlgItemInt(hParent, IDC_STATIC_ANGL, NULL, FALSE);
+				fi_tmp.angleR     = GetDlgItemInt(hParent, IDC_STATIC_ANGR, NULL, FALSE);
+			    fi_tmp.len_Ratio  = GetDlgItemInt(hParent, IDC_STATIC_LEN, NULL, FALSE);
 
 			    g_frame.AddFrame(frmarry_offset + pos_x/FRMWIDTH, fi_tmp);
    				
@@ -2124,7 +2454,7 @@ LRESULT CALLBACK FrameEdtWndProc (HWND hwnd, UINT message,
 
 // draw sample graphics to a window, parameters are length ratio and angle
 
-void DrawSampleToBlock(HWND hctrl, double ra, double ag)
+void DrawSampleToBlock(HWND hctrl, double ra, double agL, double agR)
 {
 	HDC hdc;
      
@@ -2151,15 +2481,16 @@ void DrawSampleToBlock(HWND hctrl, double ra, double ag)
 	SelectObject (hdc, hPen);
 
 
+
 	LineTo(hdc, 0,  - (length * ra));
 	
 	MoveToEx(hdc, 0, 0, NULL);
 	
-	LineTo(hdc, length*ra*sin(ag), - (length*ra*cos(ag)) );
+	LineTo(hdc, length*ra*sin(agL),  -(length*ra*cos(agL)) );
 	
 	MoveToEx(hdc, 0, 0, NULL);
 
-	LineTo(hdc, length*ra*sin(2*ag), - (length*ra*cos(2*ag)) );
+	LineTo(hdc, -length*ra*sin(agR),  -(length*ra*cos(agR)) );
 
 	ReleaseDC (hctrl, hdc);
 				
@@ -2171,7 +2502,7 @@ BOOL CALLBACK AnimDlgProc (HWND hDlg, UINT message,
                            WPARAM wParam, LPARAM lParam)
 {
 
-	static HWND hCtrl_Len, hCtrl_Ang, hStic ;
+	static HWND hCtrl_Len, hCtrl_AngL, hCtrl_AngR, hStic ;
 		
 	HWND hCtrl;
 
@@ -2185,7 +2516,7 @@ BOOL CALLBACK AnimDlgProc (HWND hDlg, UINT message,
 
 	static int crt_frame = 1;
 
-	static int len_ratio = 20, degree = 0;
+	static int len_ratio = 20, degreeL = 0, degreeR = 0;
 
 	switch (message)     
 	{		
@@ -2203,16 +2534,26 @@ BOOL CALLBACK AnimDlgProc (HWND hDlg, UINT message,
 
 		// disable the scroll bars initially
 
-		hCtrl_Ang = GetDlgItem (hDlg, 1126);
-		SetScrollRange (hCtrl_Ang, SB_CTL, 0, 359, FALSE);
-        SetScrollPos   (hCtrl_Ang, SB_CTL, 0, FALSE);
-		SetDlgItemInt (hDlg,  IDC_STATIC_ANG, degree, FALSE) ;
+		hCtrl_AngL = GetDlgItem (hDlg, 1126);
+		SetScrollRange (hCtrl_AngL, SB_CTL, 0, 359, FALSE);
+        SetScrollPos   (hCtrl_AngL, SB_CTL, 0, FALSE);
+		SetDlgItemInt (hDlg,  IDC_STATIC_ANGL, degreeL, FALSE) ;
 
-		EnableWindow (hCtrl_Ang, FALSE);
+		EnableWindow (hCtrl_AngL, FALSE);
+	
+		// disable the scroll bars initially
+
+		hCtrl_AngR = GetDlgItem (hDlg, 1127);
+		SetScrollRange (hCtrl_AngR, SB_CTL, 0, 359, FALSE);
+        SetScrollPos   (hCtrl_AngR, SB_CTL, 0, FALSE);
+		SetDlgItemInt (hDlg,  IDC_STATIC_ANGR, degreeR, FALSE) ;
+
+		EnableWindow (hCtrl_AngR, FALSE);
 		
+		////
 		hStic = GetDlgItem(hDlg, 1130);
 
-		DrawSampleToBlock(hStic, double(len_ratio)/100, double(degree) * PI /180);
+		DrawSampleToBlock(hStic, double(len_ratio)/100, double(degreeL) * PI /180, double(degreeR) * PI /180);
 
 		return TRUE;
 
@@ -2258,34 +2599,34 @@ BOOL CALLBACK AnimDlgProc (HWND hDlg, UINT message,
 			  SetScrollPos  (hCtrl_Len, SB_CTL, len_ratio, TRUE) ;          
 			  SetDlgItemInt (hDlg, IDC_STATIC_LEN, len_ratio, FALSE) ;
 		  }
-		  else if( hCtrl == hCtrl_Ang)
+		  else if( hCtrl == hCtrl_AngL)
 		  {
 			  switch (LOWORD (wParam))          
 			  {                   
 			  case SB_LINERIGHT :
                
-				  degree = min (300, degree + 1) ;               
+				  degreeL = min (300, degreeL + 1) ;               
 				  break ;
           
 			  case SB_LINELEFT :
                
-				  degree = max (0, degree - 1) ;
+				  degreeL = max (0, degreeL - 1) ;
                   break ;
     
 			  case SB_PAGELEFT:
          
-				  degree = max (0, degree - 15) ;
+				  degreeL = max (0, degreeL - 15) ;
 				  break ;
                        
 			  case SB_PAGERIGHT:
           
-				  degree = min (300, degree + 15) ;
+				  degreeL = min (300, degreeL + 15) ;
 				  break ;
 				  
 			  case SB_THUMBPOSITION :          
 			  case SB_THUMBTRACK :
                
-				  degree = HIWORD (wParam) ;
+				  degreeL = HIWORD (wParam) ;
                   break ;
        
 			  default :
@@ -2293,16 +2634,56 @@ BOOL CALLBACK AnimDlgProc (HWND hDlg, UINT message,
 				  return FALSE ;         
 			  }
 	          		  
-			  SetScrollPos  (hCtrl_Ang, SB_CTL, degree, TRUE) ;         
-			  SetDlgItemInt (hDlg, IDC_STATIC_ANG, degree, FALSE) ;
+			  SetScrollPos  (hCtrl_AngL, SB_CTL, degreeL, TRUE) ;         
+			  SetDlgItemInt (hDlg, IDC_STATIC_ANGL, degreeL, FALSE) ;
+			
+		  }
+		  else if( hCtrl == hCtrl_AngR)
+		  {
+			  switch (LOWORD (wParam))          
+			  {                   
+			  case SB_LINERIGHT :
+               
+				  degreeR = min (300, degreeR + 1) ;               
+				  break ;
+          
+			  case SB_LINELEFT :
+               
+				  degreeR = max (0, degreeR - 1) ;
+                  break ;
+    
+			  case SB_PAGELEFT:
+         
+				  degreeR = max (0, degreeR - 15) ;
+				  break ;
+                       
+			  case SB_PAGERIGHT:
+          
+				  degreeR = min (300, degreeR + 15) ;
+				  break ;
+				  
+			  case SB_THUMBPOSITION :          
+			  case SB_THUMBTRACK :
+               
+				  degreeR = HIWORD (wParam) ;
+                  break ;
+       
+			  default :
+               
+				  return FALSE ;         
+			  }
+	          		  
+			  SetScrollPos  (hCtrl_AngR, SB_CTL, degreeR, TRUE) ;         
+			  SetDlgItemInt (hDlg, IDC_STATIC_ANGR, degreeR, FALSE) ;
 			
 		  }
 
-          fi_tmp.angle = degree;
+          fi_tmp.angleL = degreeL;
+		  fi_tmp.angleR = degreeR;
           fi_tmp.len_Ratio = len_ratio;
 		  g_frame.UpdateFrmInfo(crt_frame, fi_tmp);
 
-		  DrawSampleToBlock(hStic, double(len_ratio)/100, double(degree) * PI /180);
+		  DrawSampleToBlock(hStic, double(len_ratio)/100, double(degreeL) * PI /180, double(degreeR) * PI /180);
 		  return TRUE ;
 
 		  
@@ -2323,20 +2704,27 @@ BOOL CALLBACK AnimDlgProc (HWND hDlg, UINT message,
 		 
 		 // enable angle scroll bar and set its value
 
-		 EnableWindow(hCtrl_Ang, TRUE);
-         degree = fi_tmp.angle;    // get data of the frame
-		 SetScrollPos  (hCtrl_Ang, SB_CTL, degree, TRUE) ;         		
-		 SetDlgItemInt (hDlg, IDC_STATIC_ANG, degree, FALSE) ; // set static text
+		 EnableWindow(hCtrl_AngL, TRUE);
+         degreeL = fi_tmp.angleL;    // get data of the frame
+		 SetScrollPos  (hCtrl_AngL, SB_CTL, degreeL, TRUE) ;         		
+		 SetDlgItemInt (hDlg, IDC_STATIC_ANGL, degreeL, FALSE) ; // set static text
 
-		 DrawSampleToBlock(hStic, double(len_ratio)/100, double(degree) * PI /180);
+		 // enable angle scroll bar and set its value
+
+		 EnableWindow(hCtrl_AngR, TRUE);
+         degreeR = fi_tmp.angleL;    // get data of the frame
+		 SetScrollPos  (hCtrl_AngR, SB_CTL, degreeR, TRUE) ;         		
+		 SetDlgItemInt (hDlg, IDC_STATIC_ANGR, degreeR, FALSE) ; // set static text
+
+		 DrawSampleToBlock(hStic, double(len_ratio)/100, double(degreeL) * PI /180, double(degreeR) * PI /180);
 
 		 return TRUE;
 	
 	 case WM_DISABLE_CONTROLS:
 
 		 EnableWindow(hCtrl_Len, FALSE);
-		 EnableWindow(hCtrl_Ang, FALSE);
-
+		 EnableWindow(hCtrl_AngL, FALSE);
+		 EnableWindow(hCtrl_AngR, FALSE);
 		 return TRUE;
 
 	 case WM_COMMAND:
@@ -2390,12 +2778,13 @@ LRESULT CALLBACK PlayWndProc (HWND hwnd, UINT message,
 	static Animation g_anim;
 
 	static double * lenarry;
-	static double * angarry;
+	static double * angLarry;
+	static double * angRarry;
 	static int * frmarray;
 
 	static int crt_idx; // indicate the current location of arrays
     static int frmcount;
-	static double a, r;
+	static double al, ar, r;
 
 	switch (message)		 	
 	{
@@ -2406,15 +2795,17 @@ LRESULT CALLBACK PlayWndProc (HWND hwnd, UINT message,
 		{
 			frmarray = new int[g_frame.MapSize()-1];
 			lenarry = new double[g_frame.MapSize()-1];
-			angarry = new double[g_frame.MapSize()-1];
+			angLarry = new double[g_frame.MapSize()-1];
+			angRarry = new double[g_frame.MapSize()-1];
 
-			g_frame.FillAniArry(frmarray, lenarry, angarry);
+			g_frame.FillAniArry(frmarray, lenarry, angLarry, angRarry);
 
 			SetTimer (hwnd, ID_TIMER, interval, NULL);
 
 			crt_idx = 0;
 			frmcount = g_frame.FrsFrmIndex();
-			a = g_frame.FrsFrmAng();
+			al = g_frame.FrsFrmAngL();
+			ar = g_frame.FrsFrmAngR();
 			r = g_frame.FrsFrmLen();
 		}
 
@@ -2424,7 +2815,8 @@ LRESULT CALLBACK PlayWndProc (HWND hwnd, UINT message,
 
 		frmcount++;
 
-		a += angarry[crt_idx];
+		al += angLarry[crt_idx];
+		ar += angRarry[crt_idx];
 		r += lenarry[crt_idx];
 
 		if(frmcount>frmarray[crt_idx])
@@ -2451,7 +2843,7 @@ LRESULT CALLBACK PlayWndProc (HWND hwnd, UINT message,
 
 		if(g_frame.MapSize()>0)
 		{		
-			g_anim.DrawAni(hwnd, r/100, a, g_dg);
+			g_anim.DrawAni(hwnd, r/100, al, ar, g_dg, fAng, fLen);
 		}
 		return 0;
 	
@@ -2461,7 +2853,8 @@ LRESULT CALLBACK PlayWndProc (HWND hwnd, UINT message,
 
 		delete [] frmarray;
 		delete [] lenarry;         
-		delete [] angarry;
+		delete [] angLarry;
+		delete [] angRarry;
 		
 		return 0 ;
 	}
