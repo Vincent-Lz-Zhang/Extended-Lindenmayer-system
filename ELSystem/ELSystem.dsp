@@ -94,6 +94,10 @@ SOURCE=.\Alphabet.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\DrawGraph.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\ELSystem.cpp
 # End Source File
 # Begin Source File
@@ -115,6 +119,10 @@ SOURCE=.\ParaValidator.cpp
 # Begin Source File
 
 SOURCE=.\Alphabet.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\DrawGraph.h
 # End Source File
 # Begin Source File
 

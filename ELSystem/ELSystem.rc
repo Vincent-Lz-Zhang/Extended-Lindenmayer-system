@@ -81,6 +81,47 @@ FONT 10, "System"
 BEGIN
 END
 
+ColorBox DIALOG DISCARDABLE  24, 24, 218, 178
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Color Editing"
+FONT 10, "System"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,55,147,22,10
+    PUSHBUTTON      "Cancel",IDCANCEL,85,147,27,10
+    CTEXT           "A",IDC_STATIC,14,14,8,8
+    CTEXT           "B",IDC_STATIC,107,14,8,8
+    CTEXT           "C",IDC_STATIC,14,40,8,8
+    CTEXT           "D",IDC_STATIC,107,40,8,8
+    CTEXT           "E",IDC_STATIC,14,66,8,8
+    CTEXT           "F",IDC_STATIC,107,66,8,8
+    LTEXT           "",IDC_COLOR_A,32,14,8,8
+    LTEXT           "",IDC_COLOR_B,126,14,8,8
+    LTEXT           "",IDC_COLOR_C,32,40,8,8
+    LTEXT           "",IDC_COLOR_D,126,40,8,8
+    LTEXT           "",IDC_COLOR_E,32,66,8,8
+    LTEXT           "",IDC_COLOR_F,126,66,8,8
+    PUSHBUTTON      "Edit",IDC_BTN_COR_A,50,14,19,9
+    PUSHBUTTON      "Edit",IDC_BTN_COR_C,50,40,19,9
+    PUSHBUTTON      "Edit",IDC_BTN_COR_E,50,66,19,9
+    PUSHBUTTON      "Edit",IDC_BTN_COR_F,144,66,19,9
+    PUSHBUTTON      "Edit",IDC_BTN_COR_D,144,40,19,9
+    PUSHBUTTON      "Edit",IDC_BTN_COR_B,144,14,19,9
+END
+
+ColorScrollBox DIALOG DISCARDABLE  40, 40, 212, 93
+STYLE WS_POPUP | WS_VISIBLE | WS_BORDER
+FONT 10, "System"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,58,66,34,12
+    PUSHBUTTON      "Cancel",IDCANCEL,107,66,34,12
+    SCROLLBAR       IDC_SCROLLBAR_RED,47,16,114,8
+    SCROLLBAR       IDC_SCROLLBAR_GREEN,47,31,114,8
+    SCROLLBAR       IDC_SCROLLBAR_BLUE,47,46,114,8
+    CTEXT           "red",IDC_STATIC,17,16,12,8
+    CTEXT           "green",IDC_STATIC,17,31,20,8
+    CTEXT           "blue",IDC_STATIC,17,46,15,8
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -105,6 +146,22 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 195
     END
+
+    "ColorBox", DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 211
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 171
+    END
+
+    "ColorScrollBox", DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 205
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 86
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -126,7 +183,10 @@ ELSYSTEM                ICON    DISCARDABLE     "elsystem.ico"
 ELSYSTEM MENU DISCARDABLE 
 BEGIN
     MENUITEM "&File",                       65535
-    MENUITEM "&Edit",                       65535
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "Edit &Color",                 IDM_EDIT_COLOR
+    END
     POPUP "&Help"
     BEGIN
         MENUITEM "&About Extended L.",          IDM_APP_ABOUT

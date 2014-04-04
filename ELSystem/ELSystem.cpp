@@ -31,7 +31,7 @@ ELSystem::ELSystem(char * a, char * r, int o)
 {
     m_axiom = a;
     m_ruleStr = r;
-    m_Maxiterat = 0;
+    m_Maxiterat = o;
 }
 
 ELSystem::~ELSystem()
@@ -136,7 +136,7 @@ void ELSystem::Gentree()
 		len_of_rules[i] = m_rules[i].length();
 	}
     */
-	for ( int iter=0; iter< m_Maxiterat; iter++)
+	for ( int iter=0; iter<m_Maxiterat; iter++)
 	{
 		/*
 		int len_of_crt_tree = m_Tree.length(); // the length of current tree
@@ -158,7 +158,7 @@ void ELSystem::Gentree()
 			char temp_letter = m_Tree[pos];
 
 			int pos_in_alph = m_Abet.Position(temp_letter);
-			buf_Tree.append( m_rules[pos_in_alph]);
+			buf_Tree += m_rules[pos_in_alph];
 		}
 
 		m_Tree = buf_Tree;
