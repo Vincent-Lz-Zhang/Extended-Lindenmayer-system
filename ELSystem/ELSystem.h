@@ -40,12 +40,14 @@ public:
 
     string Report() { return m_Tree; }  // return m_tree
 
-    void Update(string, string, int);   // reset m_axiom, m_ruleStr and m_Maxiterat (namely the order)
+    void Update(string &, string &, int);   // reset m_axiom, m_ruleStr and m_Maxiterat (namely the order)
 
 	int Pick();                         // split the string of rules into rules which are unique for each letter,
 		                                // then put them into the rules array ,the return value indicate the number 
 					                    // of valid rules
     void Gentree();                     // apply the replacement rules to generate m_tree
+
+	void FreshRules();                       // clear the rules
 
     int ReportLen();                    //
 

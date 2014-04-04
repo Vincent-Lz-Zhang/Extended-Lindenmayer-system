@@ -57,15 +57,17 @@ public:
 	BezierLine m_bl_A, m_bl_B, m_bl_C,   // BezierLine objects
 		       m_bl_D, m_bl_E, m_bl_F;
 
-	DrawGraph(string str="F", int a=0);  // command string and angle
+	DrawGraph();  // command string and angle
 
-	void Update(string, int);            // the same parameters as constructor
+	void Update(string &, int);            // the same parameters as constructor
 
 	~DrawGraph();                        // default destructor
 
-	void Draw(HWND, int, int, bool, bool);                // paint on the graphic dialog
+	RECT CheckBoundary(HWND);                 //                    //
 
-	COLOR FindCol(char c);               // get the COLOR structur by character as index
+	void Draw(HWND, int, int);                // paint on the graphic dialog
+
+	COLOR FindCol(char c) const;               // get the COLOR structur by character as index
 
 	void SetCol(char c, COLOR col);      // set the COLOR structur by character as index
 

@@ -6,13 +6,19 @@
 --------------------Configuration: ELSystem - Win32 Debug--------------------
 </h3>
 <h3>Command Lines</h3>
-Creating temporary file "C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP48.tmp" with contents
+Creating command line "rc.exe /l 0x804 /fo"Debug/ELSystem.res" /d "_DEBUG" "E:\CSIT691\30thMar\ELSystem_v0.39\ELSystem.rc"" 
+Creating temporary file "C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP4D.tmp" with contents
 [
 /nologo /MLd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /FR"Debug/" /Fp"Debug/ELSystem.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
-"E:\CSIT691\27thMar\ELSystem_v0.31_test\Main.cpp"
+"E:\CSIT691\30thMar\ELSystem_v0.39\Alphabet.cpp"
+"E:\CSIT691\30thMar\ELSystem_v0.39\BezierLine.cpp"
+"E:\CSIT691\30thMar\ELSystem_v0.39\DrawGraph.cpp"
+"E:\CSIT691\30thMar\ELSystem_v0.39\ELSystem.cpp"
+"E:\CSIT691\30thMar\ELSystem_v0.39\Main.cpp"
+"E:\CSIT691\30thMar\ELSystem_v0.39\ParaValidator.cpp"
 ]
-Creating command line "cl.exe @C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP48.tmp" 
-Creating temporary file "C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP49.tmp" with contents
+Creating command line "cl.exe @C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP4D.tmp" 
+Creating temporary file "C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP4E.tmp" with contents
 [
 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /incremental:yes /pdb:"Debug/ELSystem.pdb" /debug /machine:I386 /out:"Debug/ELSystem.exe" /pdbtype:sept 
 .\Debug\Alphabet.obj
@@ -23,10 +29,16 @@ kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32
 .\Debug\ParaValidator.obj
 .\Debug\ELSystem.res
 ]
-Creating command line "link.exe @C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP49.tmp"
+Creating command line "link.exe @C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP4E.tmp"
 <h3>Output Window</h3>
+Compiling resources...
 Compiling...
+Alphabet.cpp
+BezierLine.cpp
+DrawGraph.cpp
+ELSystem.cpp
 Main.cpp
+ParaValidator.cpp
 Linking...
 Creating command line "bscmake.exe /nologo /o"Debug/ELSystem.bsc"  .\Debug\Alphabet.sbr .\Debug\BezierLine.sbr .\Debug\DrawGraph.sbr .\Debug\ELSystem.sbr .\Debug\Main.sbr .\Debug\ParaValidator.sbr"
 Creating browse info file...

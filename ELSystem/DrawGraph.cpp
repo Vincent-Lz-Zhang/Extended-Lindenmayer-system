@@ -11,12 +11,12 @@ COLOR DrawGraph::m_col_F = { RGB(0,0,0),'F' } ;
 
 
 
-DrawGraph::DrawGraph(string str,int a)
+DrawGraph::DrawGraph()
 {
 
-	m_delta    = a*PI/180;  // convert the unit from  degree to radian
+	m_delta    = 0;  // convert the unit from  degree to radian
 
-	m_command  = str;
+	//m_command  = str;
 
 	m_pst.nx   = 0;
 	m_pst.ny   = 0;
@@ -33,15 +33,206 @@ DrawGraph::~DrawGraph()
 }
 
 
-void DrawGraph::Update(string str, int a)
+void DrawGraph::Update(string &str, int a)
 {
 	m_delta    = a*PI/180;  // convert the unit from  degree to radian
 
 	m_command  = str;
 }
 
+RECT DrawGraph::CheckBoundary(HWND hdlg)
+{
 
-void DrawGraph::Draw(HWND hdlg, int offset_x, int offset_y, bool bHorz, bool bVert)
+	HDC    hdc;
+	RECT   rect;
+
+	POINT TLBR[2];
+
+	TLBR[0].x = TLBR[0].y = TLBR[1].x = TLBR[1].y = 0;
+
+	hdc = GetDC (hdlg) ;
+
+    GetClientRect (hdlg, &rect) ;
+
+	POINT tempt[4];
+
+	double r;
+
+	SetMapMode (hdc, MM_LOENGLISH) ;
+
+	SetViewportOrgEx (hdc, rect.right/2, rect.bottom / 2, NULL) ;
+
+	int cx,cy;
+	int new_x,new_y;
+
+	for ( int i=0; i<m_command.length(); i++)
+	{
+		switch (m_command[i])
+		{
+		case 'A':
+
+			r = m_bl_A.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);
+  
+			m_pst.beta += r;
+
+			m_pst.nx = tempt[3].x;
+			m_pst.ny = tempt[3].y;
+
+			TLBR[0].x = min(TLBR[0].x,m_pst.nx);
+            TLBR[0].y = max(TLBR[0].y,m_pst.ny);
+
+			TLBR[1].x = max(TLBR[1].x,m_pst.nx);
+			TLBR[1].y = min(TLBR[1].y,m_pst.ny);
+
+			break;
+
+		case 'B':
+
+			r = m_bl_B.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);
+  
+			m_pst.beta += r;
+
+			m_pst.nx = tempt[3].x;
+			m_pst.ny = tempt[3].y;
+
+			TLBR[0].x = min(TLBR[0].x,m_pst.nx);
+            TLBR[0].y = max(TLBR[0].y,m_pst.ny);
+
+			TLBR[1].x = max(TLBR[1].x,m_pst.nx);
+			TLBR[1].y = min(TLBR[1].y,m_pst.ny);
+
+			break;
+
+		case 'C':
+
+
+			r = m_bl_C.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);
+  
+			m_pst.beta += r;
+
+			m_pst.nx = tempt[3].x;
+			m_pst.ny = tempt[3].y;
+
+			TLBR[0].x = min(TLBR[0].x,m_pst.nx);
+            TLBR[0].y = max(TLBR[0].y,m_pst.ny);
+
+			TLBR[1].x = max(TLBR[1].x,m_pst.nx);
+			TLBR[1].y = min(TLBR[1].y,m_pst.ny);
+
+
+			break;
+		case 'D':
+
+			r = m_bl_D.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);
+
+			m_pst.beta += r;
+
+			m_pst.nx = tempt[3].x;
+			m_pst.ny = tempt[3].y;
+
+			TLBR[0].x = min(TLBR[0].x,m_pst.nx);
+            TLBR[0].y = max(TLBR[0].y,m_pst.ny);
+
+			TLBR[1].x = max(TLBR[1].x,m_pst.nx);
+			TLBR[1].y = min(TLBR[1].y,m_pst.ny);
+
+			break;
+		case 'E':
+
+			r = m_bl_E.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);
+
+			m_pst.beta += r;
+
+			m_pst.nx = tempt[3].x;
+			m_pst.ny = tempt[3].y;
+
+			TLBR[0].x = min(TLBR[0].x,m_pst.nx);
+            TLBR[0].y = max(TLBR[0].y,m_pst.ny);
+
+			TLBR[1].x = max(TLBR[1].x,m_pst.nx);
+			TLBR[1].y = min(TLBR[1].y,m_pst.ny);
+
+
+			break;
+		case 'F':
+
+			r = m_bl_F.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);
+
+			m_pst.beta += r;
+
+			m_pst.nx = tempt[3].x;
+			m_pst.ny = tempt[3].y;
+
+			TLBR[0].x = min(TLBR[0].x,m_pst.nx);
+            TLBR[0].y = max(TLBR[0].y,m_pst.ny);
+
+			TLBR[1].x = max(TLBR[1].x,m_pst.nx);
+			TLBR[1].y = min(TLBR[1].y,m_pst.ny);
+
+
+			break;
+		case 'G':
+
+			cx  = m_pst.size*sin(m_pst.beta);
+			cy  = m_pst.size*cos(m_pst.beta);
+
+			new_x = m_pst.nx+cx;
+			new_y = m_pst.ny+cy;
+
+			m_pst.nx = new_x;
+			m_pst.ny = new_y;
+
+			TLBR[0].x = min(TLBR[0].x,m_pst.nx);
+            TLBR[0].y = max(TLBR[0].y,m_pst.ny);
+
+			TLBR[1].x = max(TLBR[1].x,m_pst.nx);
+			TLBR[1].y = min(TLBR[1].y,m_pst.ny);
+
+			break;
+
+		case '~':
+			m_pst.flip = (m_pst.flip?false:true);
+			break;
+		case '+':
+			m_pst.beta += m_delta;
+			break;
+		case '-':
+			m_pst.beta -= m_delta;
+			break;
+		case '[':
+			m_sta_stat.push(m_pst);
+
+			break;
+
+		case ']':
+			m_pst = m_sta_stat.top();
+			m_sta_stat.pop();
+
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	LPtoDP(hdc,TLBR,2);
+
+	ReleaseDC (hdlg, hdc);
+
+    ClearState();
+
+    RECT MaxRect;
+
+	MaxRect.left = TLBR[0].x;
+	MaxRect.right = TLBR[1].x;
+	MaxRect.top = TLBR[0].y;
+	MaxRect.bottom = TLBR[1].y;
+
+	return MaxRect;
+
+}
+
+void DrawGraph::Draw(HWND hdlg, int offset_x, int offset_y)
 {
 	HPEN   hPen; 
 	HDC    hdc;
@@ -54,33 +245,20 @@ void DrawGraph::Draw(HWND hdlg, int offset_x, int offset_y, bool bHorz, bool bVe
 
 	double r;
 
-	///////////////////
-	/* it seems that setting mapping mode 
+	///-------------------------------////
+	/* *********************************
+	it seems that setting mapping mode 
 	  and changing the origin point must
      be located here, in Draw() function
-    */
+    ************************************/
 
 	SetMapMode (hdc, MM_LOENGLISH) ;
 
 	SetViewportOrgEx (hdc, rect.right/2, rect.bottom / 2, NULL) ;
 
-	if(bHorz)
-	{
-		if(bVert)
-		{
 		
-			SetWindowOrgEx(hdc, offset_x, offset_y, NULL);
-		}
-		else
-		{
-			SetWindowOrgEx(hdc, offset_x, 0, NULL);
-		}
-	}
-	else if(bVert)
-	{
-	
-		SetWindowOrgEx(hdc, 0, offset_y, NULL);
-	}
+	SetWindowOrgEx(hdc, offset_x, offset_y, NULL);
+
 
 
 	int cx,cy;
@@ -248,10 +426,10 @@ void DrawGraph::Draw(HWND hdlg, int offset_x, int offset_y, bool bHorz, bool bVe
 	}
 
 	ReleaseDC (hdlg, hdc);
-
+    ClearState();
 }
 
-COLOR DrawGraph::FindCol(char c)
+COLOR DrawGraph::FindCol(char c) const
 
 {
 	COLOR _col= { RGB(0,0,0),'X' };

@@ -1,4 +1,4 @@
-/* --------------------------------------------
+/**********************************************
   CSIT691 Independent Project 
   Extended L-System
   ZHANG Lingzhang 5th Mar 2009 
@@ -7,7 +7,8 @@
   Revised at 19th Mar by ZHANG Lingzhang
   Revised at 21th Mar by ZHANG Lingzhang
   Revised at 23th Mar by ZHANG Lingzhang
-----------------------------------------------*/
+  Revised at 30th Mar by ZHANG Lingzhang
+**********************************************/
 
 #include <windows.h>
 #include "resource.h"
@@ -16,73 +17,108 @@
 #include "ParaValidator.h"
 
 #include <commdlg.h>
-
+#include <math.h>
 
 #define SCALE_FACTOR 3
+
+//----------------------------//
+// resouse identities///////////
+
+//------- static texts -------//
 
 #define ID_STATIC_AXIOM 1
 #define ID_STATIC_RULES 2
 #define ID_STATIC_ORDER 3
 #define ID_STATIC_ANGLE 4
 
+//------- edit controls -------//
+
 #define ID_EDIT_AXIOM 5
 #define ID_EDIT_RULES 6
 #define ID_EDIT_ORDER 7
 #define ID_EDIT_ANGLE 8
 
+//------- buttons -------//
+
 #define ID_BTN_APPLY 9
 #define ID_BTN_RESET 10
 #define ID_BTN_CONCEAL 11
 
-#define WM_CON_SIZE 0x0500
-//   Global   variables
+////////////////////////////////
 
+//-------------------------------------------------------------------------------------------------------//
+#define WM_CON_SIZE 0x0500  // new message for graphic dialog, indicates that the apply button is hit, and 
+                            // the new graphics size should be calculated to get the scroll bars' range,
+                            // and then, redraw the client area in the window
+//-------------------------------------------------------------------------------------------------------//
+//   Global   variables ////////////////
+
+
+//// handle of windows or dialogs /////
 HWND   hDMlesGraph;
+//-----------------------------------////
+//// handle color obj
 HBRUSH hBrushWhite;      
+//-----------------------------------////
 
+//// variables for L-system -------///
 char g_ax[3];          // axiom
 char g_ru[30];         // rules string
 int  g_ord;            // order
 char g_ordStr[4];      //
 int  g_ang;            // angle
 char g_angStr[10];     // 
+///--------------------/////////////
 
+/// the objects of classes that implement the functions //
 ELSystem      g_elsys;     // object of ELSystem
 DrawGraph     g_dg;        // object of DrawGraph
 ParaValidator g_pv;        // object of ParaValidator
+//----------------------------------------------------///
 
-POINT     g_bez_pt[4];
+/////--------------------- for the information of Bezier lines --------------////////
 
-POINT     g_bez_pt_A[4];  // global point array and is scaled 
-POINT     g_bez_pt_B[4];  // global point array and is scaled 
-POINT     g_bez_pt_C[4];  // global point array and is scaled 
-POINT     g_bez_pt_D[4];  // global point array and is scaled 
-POINT     g_bez_pt_E[4];  // global point array and is scaled 
-POINT     g_bez_pt_F[4];  // global point array and is scaled 
+POINT     g_bez_pt[4];    //
+
+POINT     g_bez_pt_A[4];  // global point array and is scaled for BezierLine object A
+POINT     g_bez_pt_B[4];  // global point array and is scaled for BezierLine object B
+POINT     g_bez_pt_C[4];  // global point array and is scaled for BezierLine object C
+POINT     g_bez_pt_D[4];  // global point array and is scaled for BezierLine object D
+POINT     g_bez_pt_E[4];  // global point array and is scaled for BezierLine object E
+POINT     g_bez_pt_F[4];  // global point array and is scaled for BezierLine object F
      
+//--------------------------------------------------------------------------------///
+
+/// color information //////////////////////////////////
 static COLOR col_A, col_B, col_C, col_D, col_E, col_F;
+//---------------------------------------------------///
 
+////------------- scroll bars' information ------------//////
+//int g_VertNumPos=0, g_HorzNumPos=0;  
+//---------------------------------------------------///
 
-int iMaxWidth=310, iMaxHeight=450;
+// the size of page //
 
 const int xUnit = 50;
 const int yUnit = 50;
+//////////////////////
 
 
-///////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////// debugging functions///////////////////////////////////////
+//---------------------------------------------------------------------------------------//
+//------------------------------ debugging functions -----------------------------------///
 
-///////////////////// these functions are only for debugging purpose///////////////////////
+//-------------------- these functions are only for debugging purpose ------------------/////
 
 void g_PrintPoints(POINT[], LPCTSTR);                     /////////////////////////////////  
 
 void g_PrintRect(RECT &, LPCTSTR);                        /////////////////////////////////
 
 void g_PrintWH(int, int, LPCTSTR);
-///////////////////////////////////////////////////////////////////////////////////////////
+//---------------------------------------------------------------------------------------//
 
 
-/////////////////////////////////////////////////////////////////////
+//---------------------------------------------------------------------------------------//
+//------------------------------- windows procedures ------------------------------------//
 
 LRESULT CALLBACK WndProc           (HWND, UINT, WPARAM, LPARAM);
 BOOL    CALLBACK AboutDlgProc      (HWND, UINT, WPARAM, LPARAM);
@@ -91,6 +127,8 @@ BOOL    CALLBACK ColorDlgProc      (HWND, UINT, WPARAM, LPARAM);
 BOOL    CALLBACK LineDlgProc       (HWND, UINT, WPARAM, LPARAM);
 BOOL    CALLBACK BezierDlgProc     (HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK BezierLineWndProc (HWND, UINT, WPARAM, LPARAM);
+
+//---------------------------------------------------------------------------------------//
 
 int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
                     PSTR szCmdLine, int iCmdShow)
@@ -138,7 +176,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
      RegisterClass (&wndclass) ;
 
-     ///////////////////////////////////////////////////////////////
+     ///----------------------------------------///--------------------
 
      hwnd = CreateWindow (szAppName, TEXT ("Extended L-System"),
                           WS_OVERLAPPEDWINDOW ,
@@ -196,51 +234,67 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
           hInstance = ((LPCREATESTRUCT) lParam)->hInstance;
 
-		  //////////////////////////////////////
+		  ///----------------------------------------////
 		  // initialize the GDIs
-		  /////////////////////////////
+		  //----------------------------------------//
 
-          hwnd_Stic_Axm = CreateWindow ( TEXT( "STATIC"), axiom, WS_CHILD | WS_VISIBLE,
-			  cxChar, cyChar, 5 * cxChar, cyChar, 
-			  hwnd, (HMENU) ID_STATIC_AXIOM, hInstance, NULL);
+          hwnd_Stic_Axm = CreateWindow ( TEXT( "STATIC"), 
+			                      axiom, 
+								  WS_CHILD | WS_VISIBLE,
+			                      cxChar, cyChar, 5 * cxChar, cyChar, 
+			                      hwnd, (HMENU) ID_STATIC_AXIOM,
+								  hInstance, NULL);
 						
-          hwnd_Edit_Axm = CreateWindow (TEXT ("edit"), NULL,
-                         WS_CHILD | WS_VISIBLE |
-                                   WS_BORDER | ES_LEFT ,
-                         8 * cxChar, cyChar, 4*cxChar, cyChar, hwnd, (HMENU) ID_EDIT_AXIOM,
-                          hInstance, NULL);
+          hwnd_Edit_Axm = CreateWindow ( TEXT ("edit"), 
+			                      NULL, 
+								  WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT,           
+                                  8 * cxChar, cyChar, 4*cxChar, cyChar,
+								  hwnd, (HMENU) ID_EDIT_AXIOM,
+                                  hInstance, NULL);
        
-		  hwnd_Stic_Rule = CreateWindow ( TEXT( "STATIC"), rule, WS_CHILD | WS_VISIBLE,
-			  cxChar, 3 * cyChar, 16 * cxChar, cyChar, 
-			  hwnd, (HMENU) ID_STATIC_RULES, hInstance, NULL);		  
+		  hwnd_Stic_Rule = CreateWindow ( TEXT( "STATIC"), 
+			                       rule, 
+								   WS_CHILD | WS_VISIBLE,
+			                       cxChar, 3 * cyChar, 16 * cxChar, cyChar, 
+			                       hwnd, (HMENU) ID_STATIC_RULES,
+								   hInstance, NULL);		  
          
-          hwnd_Edit_Rule = CreateWindow (TEXT ("edit"), NULL,
-                         WS_CHILD | WS_VISIBLE |
-                                   WS_BORDER | ES_LEFT ,
-                         cxChar, 5 * cyChar, 30 * cxChar, cyChar, hwnd, (HMENU) ID_EDIT_RULES,
-                          hInstance, NULL);
-
-		  hwnd_Stic_Ord = CreateWindow ( TEXT( "STATIC"), order, WS_CHILD | WS_VISIBLE,
-			  cxChar, 7 * cyChar, 5 * cxChar, cyChar, 
-			  hwnd, (HMENU) ID_STATIC_ORDER, hInstance, NULL);	
+          hwnd_Edit_Rule = CreateWindow ( TEXT ("edit"),
+			                       NULL, 
+								   WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT,
+                                   cxChar, 5 * cyChar, 30 * cxChar, cyChar, 
+								   hwnd, (HMENU) ID_EDIT_RULES,
+                                   hInstance, NULL);
+                                                 
+		  hwnd_Stic_Ord = CreateWindow ( TEXT( "STATIC"), 
+			                      order, 
+								  WS_CHILD | WS_VISIBLE,
+			                      cxChar, 7 * cyChar, 5 * cxChar, cyChar, 
+			                      hwnd, (HMENU) ID_STATIC_ORDER, 
+								  hInstance, NULL);	
 		  
-          hwnd_Edit_Ord = CreateWindow (TEXT ("edit"), NULL,
-                         WS_CHILD | WS_VISIBLE |
-                                   WS_BORDER | ES_LEFT ,
-                         7 * cxChar, 7 * cyChar, 3 * cxChar, cyChar, hwnd, (HMENU) ID_EDIT_ORDER,
-                          hInstance, NULL);     		  
-
-		  hwnd_Stic_Ang = CreateWindow ( TEXT( "STATIC"), angle, WS_CHILD | WS_VISIBLE,
-			  12 * cxChar, 7 * cyChar, 5 * cxChar, cyChar, 
-			  hwnd, (HMENU) ID_STATIC_ANGLE, hInstance, NULL);		  
+          hwnd_Edit_Ord = CreateWindow ( TEXT ("edit"), 
+			                      NULL, 
+								  WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT,
+                                  7 * cxChar, 7 * cyChar, 3 * cxChar, cyChar,
+								  hwnd, (HMENU) ID_EDIT_ORDER,
+                                  hInstance, NULL); 
+                              		  
+		  hwnd_Stic_Ang = CreateWindow ( TEXT( "STATIC"), 
+			                      angle, 
+								  WS_CHILD | WS_VISIBLE,
+			                      12 * cxChar, 7 * cyChar, 5 * cxChar, cyChar, 
+			                      hwnd, (HMENU) ID_STATIC_ANGLE, 
+								  hInstance, NULL);		  
              
-		  hwnd_Edit_Ang = CreateWindow (TEXT ("edit"), NULL,
-                         WS_CHILD | WS_VISIBLE |
-                                   WS_BORDER | ES_LEFT ,
-                         18 * cxChar, 7 * cyChar, 4 * cxChar, cyChar, hwnd, (HMENU) ID_EDIT_ANGLE,
-                          hInstance, NULL);
+		  hwnd_Edit_Ang = CreateWindow ( TEXT ("edit"), 
+			                      NULL, 
+								  WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT,                    
+                                  18 * cxChar, 7 * cyChar, 4 * cxChar, cyChar, 
+								  hwnd, (HMENU) ID_EDIT_ANGLE,
+                                  hInstance, NULL);
 
-          // buttons 
+          //-------------------- buttons --------------------
 
 		  hwnd_Btn_Apply = CreateWindow ( TEXT("button"), 
                                    btnApply,
@@ -304,22 +358,28 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			      g_ord = atoi(g_ordStr);
 			      g_ang = atoi(g_angStr);
               
-			      // pass the variables to ELSystem class object and generate the m_Tree
+			      // pass the variables to ParaValidator class object and process the strings if necessary
 
 			      g_pv.Update(g_ax, g_ru, g_ord);
 			      g_pv.RulStrFilter();
 			      g_pv.AxmStrFilter();
 
+				  // clear the rules defined last time, 
+
+				  g_elsys.FreshRules();
+
+				  // pass the variables to ELSystem object, generate the tree string
+
 			      g_elsys.Update(g_pv.ReturnAxm(), g_pv.ReturnRul(), g_pv.ReturnOrd());
 			      g_elsys.Pick();
                   g_elsys.Gentree();
 
-				  iMaxWidth = 2*g_elsys.ReportLen()*3;
-                  iMaxHeight = 2*g_elsys.ReportLen()*3;
-
+                  // send message to Graph dialog Procedue, tell it should redraw the client
+				  
 				  SendMessage(hDMlesGraph, WM_CON_SIZE, 0, 0);
+
 			      // course the graphics window being redrawn 
-			      InvalidateRect (hDMlesGraph, NULL, TRUE) ;
+			      //InvalidateRect (hDMlesGraph, NULL, TRUE) ;
 			  }
 
 			  break;
@@ -529,78 +589,226 @@ BOOL CALLBACK ColorDlgProc (HWND hDlg, UINT message,
 BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message, 
                            WPARAM wParam, LPARAM lParam)
 {
-    //HDC  hdc ;
+    HDC  hdc ;
+
+	RECT rect;
+
+	RECT rMax;  // this is a RECT structure that describes the edges of the graphics should be drawn
+
+	//rMax.top = rMax.bottom = rMax.left = rMax.right = 0;
+
     PAINTSTRUCT  ps ;
 
-	CREATESTRUCT* pcs;
+	static int g_VertNumPos, g_HorzNumPos;  
 
-	int VertNumPos=6, HorzNumPos=6;
-    
-    static int  cxClient, cyClient;  
+    static int cxClient, cyClient;  
 
-	int iVertPos=0, iHorzPos=0;
+	static int iVertPos, iHorzPos;
+
 
 	switch (message)		 	
 	{
      
-/*	case WM_CREATE:
+	case WM_CREATE:
+   
 
-		///////////////
-        g_PrintWH(iMaxWidth,iMaxHeight,TEXT("This is iMax before Dialog created."));
-		//////////////
-
-        pcs = (CREATESTRUCT*)(lParam);
-        iMaxWidth = pcs->cx;
-		iMaxHeight = pcs->cy;
-
-		///////////////
-        g_PrintWH(iMaxWidth,iMaxHeight,TEXT("This is iMax after Dialog created. in WM_CREA"));
-		//////////////
-
-
+		iVertPos = 0;			  		  
+		iHorzPos = 0;		
+		  
+		SetScrollRange (hDlg, SB_VERT, 0, 1, FALSE) ;          				  
+		SetScrollPos   (hDlg, SB_VERT, iVertPos, TRUE) ;
+				  
+		SetScrollRange (hDlg, SB_HORZ, 0, 1, FALSE) ;         				  
+		SetScrollPos   (hDlg, SB_HORZ, iHorzPos, TRUE) ;
+		
 		return TRUE;
-*/
-	case WM_CON_SIZE:
 
-	    ///////////////
-        //g_PrintWH(iMaxWidth,iMaxHeight,TEXT("This is iMax after Dialog created.in WM_CON"));
-		//////////////
+	case WM_INITDIALOG:
 
-		if (iMaxWidth > cxClient )
-		{
-			HorzNumPos = 2*(iMaxWidth-cxClient)/xUnit;
-			SetScrollRange (hDlg, SB_HORZ, 0, HorzNumPos, TRUE);
-			SetScrollPos (hDlg, SB_HORZ, HorzNumPos/2, TRUE);
-		}
+		hdc = GetDC(hDlg);
 
-		if (iMaxHeight > cyClient )
-		{
-			VertNumPos = 2*(iMaxHeight-cyClient)/yUnit;
-			SetScrollRange (hDlg, SB_VERT , 0, VertNumPos, TRUE);
-			SetScrollPos (hDlg, SB_VERT , VertNumPos/2, TRUE);
-		}
+		GetClientRect(hDlg, &rect);
+
+		cxClient = rect.right;
+		cyClient = rect.bottom;
+
+		ReleaseDC (hDlg, hdc);
 
 		return TRUE;
 
 	case WM_SIZE :
 
-		///////////////
-        //g_PrintWH(iMaxWidth,iMaxHeight,TEXT("This is iMax after Dialog created. in WM_SIZE"));
-		//////////////
 
 		cxClient = LOWORD (lParam);        
 		cyClient = HIWORD (lParam);
 
-		InvalidateRect (hDlg, NULL, TRUE) ;
+		int temp_VertNumPos1, temp_HorzNumPos1;
+
+		rMax = g_dg.CheckBoundary(hDlg);
+
+		///////judge the horizontal size//////////////////
+
+		if ( (rMax.left < 0) && (rMax.right > cxClient) ) // the horizontal width of graph is over the width of window
+			                                              // this is detected by both sides of the window are exceeded
+														  // then find the side with larger margin and use it to cal-
+														  // culate the number of scroll bar's positions 
+		{
+			temp_HorzNumPos1 = ceil( float(max( abs(rMax.left), abs(rMax.right-cxClient) ) ) / 
+				                     float(xUnit) );
+
+			g_HorzNumPos = 2*temp_HorzNumPos1;
+
+		    SetScrollRange (hDlg, SB_HORZ, 0, g_HorzNumPos, TRUE);
+		    SetScrollPos (hDlg, SB_HORZ, temp_HorzNumPos1, TRUE);
+		}
+		else if(rMax.left < 0)   // the width of graph is not over the width of window, but exceed left edge
+		{
+			temp_HorzNumPos1 = ceil( fabs( float(rMax.left) / float(xUnit) ) );
+
+			g_HorzNumPos = 2*temp_HorzNumPos1;
+
+		    SetScrollRange (hDlg, SB_HORZ, 0, g_HorzNumPos, TRUE);
+		    SetScrollPos (hDlg, SB_HORZ, temp_HorzNumPos1, TRUE);
+		}
+		else if(rMax.right > cxClient)  // the width of graph is not over the width of window, but exceed right edge
+		{
+			temp_HorzNumPos1 = ceil( float(rMax.right - cxClient/2) / float(xUnit) );
+
+			g_HorzNumPos = 2*temp_HorzNumPos1;
+
+		    SetScrollRange (hDlg, SB_HORZ, 0, g_HorzNumPos, TRUE);
+		    SetScrollPos (hDlg, SB_HORZ, temp_HorzNumPos1, TRUE);
+		}
+
+		
+		//------------------------------------------------------------------//	
+
+        //-------------------- judge the vertical size--------------------///
+
+		if ( (rMax.top < 0) && (rMax.bottom > cyClient) ) // the horizontal height of graph is over the heighth of window
+			                                              // this is detected by both sides of the window are exceeded
+														  // then find the side with larger margin and use it to cal-
+														  // culate the number of scroll bar's positions 
+		{
+			temp_VertNumPos1 = ceil( float(max( abs(rMax.top), abs(rMax.bottom-cyClient) ) ) / 
+				                     float(yUnit) );
+
+			g_VertNumPos = 2*temp_VertNumPos1;
+			
+		    SetScrollRange (hDlg, SB_VERT , 0, g_VertNumPos, TRUE);
+		    SetScrollPos (hDlg, SB_VERT , temp_VertNumPos1, TRUE);
+
+		}
+		else if(rMax.top < 0)   // the height of graph is not over the height of window, but exceed top edge
+		{
+			temp_VertNumPos1 = ceil( fabs( float(rMax.top) / float(yUnit) ) );
+
+			g_VertNumPos = 2*temp_VertNumPos1;
+			
+		    SetScrollRange (hDlg, SB_VERT , 0, g_VertNumPos, TRUE);
+		    SetScrollPos (hDlg, SB_VERT , temp_VertNumPos1, TRUE);
+
+		}
+		else if(rMax.bottom > cyClient)   // the height of graph is not over the height of window, but exceed bottom edge
+		{
+			temp_VertNumPos1 = ceil( float(rMax.bottom - cyClient/2 ) / float(yUnit) );
+
+			g_VertNumPos = 2*temp_VertNumPos1;
+			
+		    SetScrollRange (hDlg, SB_VERT , 0, g_VertNumPos, TRUE);
+		    SetScrollPos (hDlg, SB_VERT , temp_VertNumPos1, TRUE);
+
+		}
+
+
+		return TRUE;
+
+	case WM_CON_SIZE:
+
+		int temp_VertNumPos, temp_HorzNumPos;
+
+		g_dg.Update(g_elsys.Report(), g_ang);
+
+		rMax = g_dg.CheckBoundary(hDlg);
+
+		//-------------------- judge the horizontal size --------------------///
+
+		if ( (rMax.left < 0) && (rMax.right > cxClient) ) // the horizontal width of graph is over the width of window
+			                                              // this is detected by both sides of the window are exceeded
+														  // then find the side with larger margin and use it to cal-
+														  // culate the number of scroll bar's positions 
+		{
+			temp_HorzNumPos = ceil( float(max( abs(rMax.left), abs(rMax.right-cxClient) ) ) / 
+				                    float(xUnit) );
+
+			g_HorzNumPos = 2*temp_HorzNumPos;
+
+		    SetScrollRange (hDlg, SB_HORZ, 0, g_HorzNumPos, TRUE);
+		    SetScrollPos (hDlg, SB_HORZ, temp_HorzNumPos, TRUE);
+		}
+		else if(rMax.left < 0)   // the width of graph is not over the width of window, but exceed left edge
+		{
+			temp_HorzNumPos = ceil( fabs( float(rMax.left) / float(xUnit) ) );
+
+			g_HorzNumPos = 2*temp_HorzNumPos;
+
+		    SetScrollRange (hDlg, SB_HORZ, 0, g_HorzNumPos, TRUE);
+		    SetScrollPos (hDlg, SB_HORZ, temp_HorzNumPos, TRUE);
+		}
+		else if(rMax.right > cxClient)  // the width of graph is not over the width of window, but exceed right edge
+		{
+			temp_HorzNumPos = ceil( float(rMax.right - cxClient/2) / float(xUnit) );
+
+			g_HorzNumPos = 2*temp_HorzNumPos;
+
+		    SetScrollRange (hDlg, SB_HORZ, 0, g_HorzNumPos, TRUE);
+		    SetScrollPos (hDlg, SB_HORZ, temp_HorzNumPos, TRUE);
+		}
+			
+		//--------------------------------------------------------------------------------------//	
+
+        //-------------------- judge the vertical size ----------------------------------------//
+
+		if ( (rMax.top < 0) && (rMax.bottom > cyClient) ) // the horizontal height of graph is over the heighth of window
+			                                              // this is detected by both sides of the window are exceeded
+														  // then find the side with larger margin and use it to cal-
+														  // culate the number of scroll bar's positions 
+		{
+			temp_VertNumPos = ceil( float(max( abs(rMax.top), abs(rMax.bottom-cyClient) ) ) / 
+				                    float(yUnit) );
+
+			g_VertNumPos = 2*temp_VertNumPos;
+			
+		    SetScrollRange (hDlg, SB_VERT , 0, g_VertNumPos, TRUE);
+		    SetScrollPos (hDlg, SB_VERT , temp_VertNumPos, TRUE);
+
+		}
+		else if(rMax.top < 0)  // the height of graph is not over the height of window, but exceed top edge
+		{
+			temp_VertNumPos = ceil( fabs( float(rMax.top) / float(yUnit) ) );
+
+			g_VertNumPos = 2*temp_VertNumPos;
+			
+		    SetScrollRange (hDlg, SB_VERT , 0, g_VertNumPos, TRUE);
+		    SetScrollPos (hDlg, SB_VERT , temp_VertNumPos, TRUE);
+
+		}
+		else if(rMax.bottom > cyClient)    // the height of graph is not over the height of window, but exceed bottom edge
+		{
+			temp_VertNumPos = ceil( float(rMax.bottom - cyClient/2 ) / float(yUnit) );
+
+			g_VertNumPos = 2*temp_VertNumPos;
+			
+		    SetScrollRange (hDlg, SB_VERT , 0, g_VertNumPos, TRUE);
+		    SetScrollPos (hDlg, SB_VERT , temp_VertNumPos, TRUE);
+
+		}
+	
+		InvalidateRect (hDlg, NULL, TRUE);
 
 		return TRUE;
 
      case WM_VSCROLL:		
-
-
-		///////////////
-        //g_PrintWH(iVertPos,iHorzPos,TEXT("This is iPos after Dialog created. in WM_VSCR"));
-		//////////////
 
 		 iVertPos = GetScrollPos (hDlg, SB_VERT);
           
@@ -611,7 +819,7 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
                break ;
                
           case SB_BOTTOM:
-               iVertPos = VertNumPos;
+               iVertPos = g_VertNumPos;
                break ;
                
           case SB_LINEUP:
@@ -639,7 +847,7 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
           }
  
 
-          iVertPos = max (0, min (iVertPos, VertNumPos)) ;
+          iVertPos = max (0, min (iVertPos, g_VertNumPos)) ;
 
 
           if (GetScrollPos (hDlg, SB_VERT) != iVertPos)
@@ -650,10 +858,6 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
           return TRUE ;
           
      case WM_HSCROLL:
-
-		///////////////
-        //g_PrintWH(iVertPos,iHorzPos,TEXT("This is iPos after Dialog created. in WM_HSCR"));
-		//////////////
 
 
 		 iHorzPos = GetScrollPos (hDlg, SB_HORZ);
@@ -685,7 +889,7 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
                break ;
           }
 
-          iHorzPos = max (0, min (iHorzPos, HorzNumPos)) ;
+          iHorzPos = max (0, min (iHorzPos, g_HorzNumPos)) ;
 
           if (GetScrollPos (hDlg, SB_HORZ) != iHorzPos)
           {                    
@@ -694,52 +898,53 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
           }
 
           return TRUE ;
-          
-	 
+
+     case WM_KEYDOWN:
+
+          switch (wParam)
+          {
+          case VK_HOME:
+               SendMessage (hDlg, WM_VSCROLL, SB_TOP, 0) ;
+               break ;
+               
+          case VK_END:
+               SendMessage (hDlg, WM_VSCROLL, SB_BOTTOM, 0) ;
+               break ;
+               
+          case VK_PRIOR:
+               SendMessage (hDlg, WM_VSCROLL, SB_PAGEUP, 0) ;
+               break ;
+               
+          case VK_NEXT:
+               SendMessage (hDlg, WM_VSCROLL, SB_PAGEDOWN, 0) ;
+               break ;
+               
+          case VK_UP:
+               SendMessage (hDlg, WM_VSCROLL, SB_LINEUP, 0) ;
+               break ;
+
+          case VK_DOWN:
+               SendMessage (hDlg, WM_VSCROLL, SB_LINEDOWN, 0) ;
+               break ;
+               
+          case VK_LEFT:
+               SendMessage (hDlg, WM_HSCROLL, SB_PAGEUP, 0) ;
+               break ;
+               
+          case VK_RIGHT:
+               SendMessage (hDlg, WM_HSCROLL, SB_PAGEDOWN, 0) ;
+               break ;
+          }          
+
+		  return TRUE;
+
 	case WM_PAINT :
 		 
 		BeginPaint (hDlg, &ps);		 
 		EndPaint (hDlg, &ps);		
 		
-		// draw the graphics
-		g_dg.ClearState();
-		g_dg.Update(g_elsys.Report(), g_ang);
-	
-		///////////////
-        //g_PrintWH(iMaxWidth,iMaxHeight,TEXT("This is iMax before paint."));
-		//////////////		
-
-		if (iMaxWidth > cxClient )
-		{
-				
-
-
-			if (iMaxHeight > cyClient )
-			{	
-				
-			///////////////
-        
-			//g_PrintWH((iHorzPos-HorzNumPos/2) * xUnit,(iVertPos-VertNumPos/2) * yUnit,TEXT("This is offset before passed."));
-		
-			//////////////
-
-				g_dg.Draw(hDlg, (iHorzPos-HorzNumPos/2) * xUnit, (iVertPos-VertNumPos/2) * yUnit, true, true);
-			}
-			else
-			{
-				g_dg.Draw(hDlg, (iHorzPos-HorzNumPos/2) * xUnit, (iVertPos-VertNumPos/2) * yUnit, true, false);
-			}
-
-		}
-		else if (iMaxHeight > cyClient )
-		{
-
-			g_dg.Draw(hDlg, (iHorzPos-HorzNumPos/2) * xUnit, (iVertPos-VertNumPos/2) * yUnit, false, true);
-		}
-		else
-		{
-			g_dg.Draw(hDlg, (iHorzPos-HorzNumPos/2) * xUnit, (iVertPos-VertNumPos/2) * yUnit, false, false);
-		}
+		g_dg.Draw(hDlg, ( GetScrollPos(hDlg, SB_HORZ) - g_HorzNumPos/2 ) * xUnit, 
+			            ( g_VertNumPos/2 - GetScrollPos(hDlg, SB_VERT) ) * yUnit);
 
 		return TRUE;		
 
@@ -770,7 +975,7 @@ void DrawBezier (HDC hdc, POINT apt[])
      LineTo   (hdc, apt[3].x, apt[3].y) ;
 }
 
-/////////////////////////////////
+//----------------------------------------//
 
 // draw Bezier line to a window
 
@@ -1045,7 +1250,7 @@ LRESULT CALLBACK BezierLineWndProc (HWND hwnd, UINT message,
 
     HDC hdc;
 
-    int cxClient, cyClient;
+    static int cxClient, cyClient;
 
 	static RECT rect;
 

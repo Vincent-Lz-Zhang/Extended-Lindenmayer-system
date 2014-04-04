@@ -21,10 +21,10 @@ public:
 
 	Alphabet(char * ptr="~+-[]ABCDEFG") ;
 	~Alphabet();
-    char Get(int);
-	int Len();
-	int Position(char);
-	string ReturnAlph();
+    char Get(int) const;
+	int Len() const;
+	int Position(char) const;
+	string ReturnAlph() const;
 };
 
 

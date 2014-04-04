@@ -40,11 +40,23 @@ ELSystem::ELSystem(string a, string r, int o)
 ELSystem::~ELSystem()
 
 {
+	delete [] m_rules;
 
 }
 
 
-void ELSystem::Update(string a, string r, int o)
+void ELSystem::FreshRules()
+{
+
+	for ( int i=0; i<m_len_of_albet; i++ )
+	{
+		m_rules[i]=(1, m_Abet.Get(i));
+
+	}
+
+}
+
+void ELSystem::Update(string &a, string &r, int o)
 {
 	if( (!a.empty()) && (!r.empty()) )
 	{
