@@ -10,6 +10,7 @@
   Revised at 30th Mar by ZHANG Lingzhang
   Fixed by Zhang Lingzhang at 12th Apr
   Revised by ZHANG Lingzhang at 16th Apr
+  Revised by ZHANG Lingzhang at 22th Apr
 **********************************************/
 
 #include <windows.h>
@@ -19,9 +20,12 @@
 #include "ParaValidator.h"
 #include "Frame.h"
 #include "Animation.h"
-
+#include "ParaIO.h"
 #include <commdlg.h>
 #include <math.h>
+#include <fstream>
+#include <iomanip>
+#include <cstdlib>
 
 //----------------------------//
 #define SCALE_FACTOR 3
@@ -51,6 +55,8 @@
 #define ID_BTN_RESET 10
 #define ID_BTN_ANIMATE 11
 
+//------------------------------//
+#define ID_DYNAMIC_START 50     // used for the identifier of danamic menu's items
 //------------------------------//
 
 #define ID_GB_FRMRATE 12
@@ -105,16 +111,24 @@ int  g_ang;            // angle
 char g_angStr[10];     // 
 ///--------------------/////////////
 char g_ranA[4];         // range of random offset ratio for angle
-int  g_ranAng;
+int  g_ranAng = 0;
 char g_ranL[4];         // range of random offset ratio for length ratio
-int  g_ranLen;
+int  g_ranLen = 0;
+
+char g_name[20];
 /// the objects of classes that implement the functions //
 ELSystem      g_elsys;     // object of ELSystem
 DrawGraph     g_dg;        // object of DrawGraph
 ParaValidator g_pv;        // object of ParaValidator
 
 Frame         g_frame;      // object of Frame
+ParaIO        g_pIO;        // objet of ParaIO
 //----------------------------------------------------///
+
+//-----------------For File IO--------------------------//
+const char * file = "lib.dat";  // the external file's name
+static int lib_cnt;  // count the number of items in the library
+//----------------------------------------------------//
 
 /////--------------------- for the information of Bezier lines --------------////////
 
@@ -166,6 +180,7 @@ BOOL    CALLBACK LineDlgProc       (HWND, UINT, WPARAM, LPARAM);
 BOOL    CALLBACK BezierDlgProc     (HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK BezierLineWndProc (HWND, UINT, WPARAM, LPARAM);
 
+BOOL    CALLBACK ExportDlgProc     (HWND, UINT, WPARAM, LPARAM);
 //---------------------------------------------------------------------------------------//
 
 //-----------------------------------Animation Part--------------------------------------//
@@ -179,7 +194,11 @@ LRESULT CALLBACK PlayWndProc       (HWND, UINT, WPARAM, LPARAM);
 int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
                     PSTR szCmdLine, int iCmdShow)
 
-   {
+{
+		
+	ifstream fin;
+			 
+	static HMENU hMenu, hMenuPopup;
 
      hBrushWhite = CreateSolidBrush(RGB(255, 255, 255));   
 
@@ -263,6 +282,23 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
                           310, 450,
                           NULL, NULL, hInstance, NULL) ;
      
+	 hMenu = LoadMenu (hInstance, szAppName) ;
+	 hMenuPopup = CreateMenu () ;
+    		  
+	 fin.open(file, ios::in |ios::binary);
+		  		   		  
+	 if (fin.is_open())  		  
+	 {		 			  
+		 while (fin.read((char *) & g_pIO, sizeof g_pIO))       		  
+		 {				  
+			 lib_cnt++;		   
+			 InsertMenu(hMenu, IDM_MARK, MF_STRING, ID_DYNAMIC_START+lib_cnt, g_pIO.GetNameFromFile() );
+		 }				   
+	 }
+ 
+	 SetMenu(hwnd,hMenu);		  
+	 fin.close();
+
      ShowWindow (hwnd, iCmdShow) ;
      UpdateWindow (hwnd) ; 
      
@@ -281,6 +317,48 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	 DeleteObject(hBrushWhite); 
 
      return msg.wParam ;
+}
+
+void RecoverPara(HWND hwnd, int i)
+{
+	 TCHAR szFormat[] = TEXT ("%-03i");
+     ifstream fin;
+			  
+	 fin.clear();    // not required for some implementations, but won't hurt    
+			  
+	 fin.open(file, ios::in | ios::binary);
+		  
+	 if (fin.is_open())			  
+	 {					  
+		 streampos place = i * sizeof g_pIO;  // convert to streampos type    		
+				  
+		 fin.seekg(place);    // random access    
+						  
+		 if (fin.fail())    						  
+		 {   					  
+			 MessageBox (NULL, TEXT ("Can not seek the file!"),                   								  
+				 TEXT("Error"), MB_ICONERROR); 		   						  
+		 }
+ 					  
+		 fin.read((char *) &g_pIO, sizeof g_pIO);
+       							  
+		 SetDlgItemText (hwnd, ID_EDIT_RULES, g_pIO.ReturnRules() );
+		 
+		 wsprintf (g_ordStr, szFormat, g_pIO.ReturnOrder() );				  
+		 SetDlgItemText (hwnd, ID_EDIT_ORDER, g_ordStr);
+			  
+		 wsprintf (g_angStr, szFormat, g_pIO.ReturnAngle() );			  
+		 SetDlgItemText (hwnd, ID_EDIT_ANGLE, g_angStr);
+			  
+		 g_ax[0] = g_pIO.ReturnAxiom();
+		 SetDlgItemText (hwnd, ID_EDIT_AXIOM, g_ax);
+				  
+		 g_pIO.CopyToClass(g_elsys, g_dg);
+				  
+		 if (fin.eof())       									  
+			 fin.clear();     // clear eof flag				  
+	 }    			  
+	 fin.close();
 }
 
 LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -357,7 +435,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
          
           hwnd_Edit_Rule = CreateWindow ( TEXT ("edit"),
 			                       NULL, 
-								   WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT,
+								   WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT | ES_AUTOHSCROLL,
                                    cxChar, 5 * cyChar, 30 * cxChar, 5 * cyChar / 4, 
 								   hwnd, (HMENU) ID_EDIT_RULES,
                                    hInstance, NULL);
@@ -527,8 +605,102 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		return 0 ;
 
      case WM_COMMAND :
+
           switch (LOWORD (wParam))
           {
+
+		  case ID_DYNAMIC_START+1:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,0);   
+			  }
+			  break;
+
+		  case ID_DYNAMIC_START+2:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,1);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+3:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,2);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+4:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,3);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+5:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,4);   
+			  }  
+			  break;
+
+		  case ID_DYNAMIC_START+6:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,5);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+7:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,6);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+8:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,7);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+9:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,8);   
+			  }   
+			  break;
+
+		  case ID_DYNAMIC_START+10:
+			  if(LOWORD (wParam) <= ID_DYNAMIC_START+lib_cnt)
+			  {
+				  RecoverPara(hwnd,9);   
+			  }   
+			  break;
+
+		  case IDM_FILE_EXPORT:
+
+			  if(DialogBox( hInstance, TEXT ("NameBox"), hwnd, ExportDlgProc))
+			  {				 
+				  g_pIO.GetNameFromInput(g_name);
+				  g_pIO.CopyFromClass(g_elsys, g_dg, g_ang);
+
+				  ofstream fout(file, ios::out | ios::app | ios::binary);
+    
+				  if (!fout.is_open())    
+				  {        
+					  MessageBox (NULL, TEXT ("Can not open the file!"),
+                    
+					             TEXT("Error"), MB_ICONINFORMATION);    
+				  }
+
+				  fout.write((char *) &g_pIO, sizeof g_pIO);
+                  fout.close();
+
+			  }
+			  break;
+
           case IDM_APP_ABOUT :
                
 			  DialogBox (hInstance, TEXT ("AboutBox"), hwnd, AboutDlgProc);
@@ -568,7 +740,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 					 g_dg.ClearDyAryA();      // remove all previous random numbers, free the memory 			
 					 g_ranAng = atoi(g_ranA); // get the user input
-					 g_dg.GenRandomA(g_elsys.CountSymbol(), g_ranAng); // generate new random numbers for angle
+					 
 				 }
 			 }
 
@@ -585,7 +757,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 					 
 					 g_dg.ClearDyAryL();      // remove all previous random numbers, free the memory 
 					 g_ranLen = atoi(g_ranL); // get the user input
-					 g_dg.GenRandomL(g_elsys.CountLetter(), g_ranLen); // generate new random numbers for length
+					 
 				 }
 			 }
 			  
@@ -604,6 +776,15 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			  {
 			  
 				  // retrieve the values from controls
+
+				  if(fAng)
+				  {				  
+					  g_dg.GenRandomA(g_elsys.CountSymbol(), g_ranAng); // generate new random numbers for angle
+				  }
+				  if(fLen)
+				  {
+					  g_dg.GenRandomL(g_elsys.CountLetter(), g_ranLen); // generate new random numbers for length
+				  }
 
 			      g_ord = atoi(g_ordStr);
 			      g_ang = atoi(g_angStr);
@@ -624,19 +805,9 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			      g_elsys.Pick();
                   g_elsys.Gentree();
 
-				  if(g_elsys.ReportLen()>200)
-				  {
-					  MessageBox (NULL, TEXT ("Sorry there are more than 200 characters, I have to reject."),
-                    
-					              TEXT("Program may crash"), MB_ICONWARNING);
-				  }
-  
-				  else
-				  {
                   // send message to Graph dialog Procedue, tell it should redraw the client				  
 				  
-					  SendMessage(hDMlesGraph, WM_CON_SIZE, 0, 0);
-				  }
+				  SendMessage(hDMlesGraph, WM_CON_SIZE, 0, 0);
 			      // course the graphics window being redrawn 
 			      //InvalidateRect (hDMlesGraph, NULL, TRUE) ;
 			  }
@@ -2298,3 +2469,39 @@ LRESULT CALLBACK PlayWndProc (HWND hwnd, UINT message,
 
 }
 
+
+BOOL CALLBACK ExportDlgProc (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+     switch (message)
+     {
+     case WM_INITDIALOG :
+          return FALSE ;
+          
+     case WM_COMMAND :
+
+          switch (LOWORD (wParam))
+          {
+          case IDOK :
+              if(0==GetDlgItemText(hDlg, IDC_EXPORT_NAME, g_name, 19))
+			  {
+				  MessageBox(NULL, TEXT ("Please type in a letter!"),
+                    
+					  TEXT("Invalid Input"), MB_ICONINFORMATION);
+			  }
+			  else
+			  {
+
+				  EndDialog (hDlg, TRUE) ;
+			  }
+			  return TRUE;
+			  
+          case IDCANCEL :
+               
+			  EndDialog (hDlg, FALSE) ;
+              
+			  return TRUE ;
+          }
+          break ;
+     }
+     return FALSE ;
+}

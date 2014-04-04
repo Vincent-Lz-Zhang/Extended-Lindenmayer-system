@@ -16,7 +16,7 @@
 #include "Alphabet.h"
 #include <string>
 using namespace std;
-
+class ParaIO;
 class ELSystem
 
 {
@@ -39,6 +39,8 @@ private:
 	string m_Tree;         // the string after subtitution
 
 public:
+
+	friend class ParaIO;
 
 	ELSystem();                             // default constructor
 

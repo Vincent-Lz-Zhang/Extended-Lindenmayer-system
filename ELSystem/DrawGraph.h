@@ -47,7 +47,7 @@ typedef struct
 COLOR;
 
 class Animation;
-
+class ParaIO;
 class DrawGraph
 {
 private:
@@ -71,6 +71,7 @@ private:
 public:
 	
 	friend class Animation;
+	friend class ParaIO;
 
 	BezierLine m_bl_A, m_bl_B, m_bl_C,          // BezierLine objects
 		       m_bl_D, m_bl_E, m_bl_F;

@@ -16,7 +16,7 @@
 #include <math.h>
 #include <windows.h>
 
-
+class ParaIO;
 class BezierLine
 
 {
@@ -31,6 +31,7 @@ private:
 
 public:
 
+    friend class ParaIO;
 
 	BezierLine(int nx=90, int ny=100);       // constructor, indeed 90 and 100 are the 
 	                                         // size of static control in Basic Line Panel

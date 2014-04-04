@@ -126,6 +126,10 @@ SOURCE=.\Main.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\ParaIO.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\ParaValidator.cpp
 # End Source File
 # End Group
@@ -155,6 +159,10 @@ SOURCE=.\ELSystem.h
 # Begin Source File
 
 SOURCE=.\Frame.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ParaIO.h
 # End Source File
 # Begin Source File
 

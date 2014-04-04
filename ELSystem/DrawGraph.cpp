@@ -1660,9 +1660,19 @@ void DrawGraph::GenRandomA(int a, int range)
 	m_ranAng = new double[a];
 	range = min(100, range);
 	srand(unsigned(time(NULL)));
-	for(int i=0; i<a; i++)
+	if(0==range)
 	{
-		m_ranAng[i] = ( double(rand()%(2*range)) - range)/100;
+		for(int i=0; i<a; i++)	
+		{		
+			m_ranAng[i] = 0;	
+		}
+	}
+	else
+	{	
+		for(int i=0; i<a; i++)	
+		{		
+			m_ranAng[i] = ( double(rand()%(2*range)) - range)/100;	
+		}
 	}
 }
 			
@@ -1671,9 +1681,19 @@ void DrawGraph::GenRandomL(int l, int range)
 	m_ranLen = new double[l];
 	range = min(100,range);
 	srand(unsigned(time(NULL)));
-	for(int i=0; i<l; i++)
+	if(0==range)
 	{
-		m_ranLen[i] = ( double(rand()%(2*range)) - range)/100;
+		for(int i=0; i<l; i++)	
+		{		
+			m_ranLen[i] = 0;	
+		}
+	}
+	else
+	{	
+		for(int i=0; i<l; i++)	
+		{		
+			m_ranLen[i] = ( double(rand()%(2*range)) - range)/100;	
+		}
 	}
 }
 
