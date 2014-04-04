@@ -140,6 +140,12 @@ void ParaIO::CopyToClass(ELSystem & e,DrawGraph & d, Frame & f) const
 
 	}
 
+	// clear frame information firstly, before fill in the data
+	if( !f.FrmMap.empty() )
+	{
+		f.FrmMap.clear();
+	}
+
 	if(m_count!=0)
 	{
 		for(int i=0; i<m_count; i++)

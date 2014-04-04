@@ -1368,7 +1368,7 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 			else 
 			{
 				SetScrollRange (hDlg, SB_HORZ, 0, g_HorzNumPos, TRUE);
-				SetScrollPos (hDlg, SB_HORZ, ceil(float((abs(rMax.left)-abs(rMax.right-cxClient))/2) / float(xUnit) ), TRUE);
+				SetScrollPos (hDlg, SB_HORZ, ceil((float(abs(rMax.left)-abs(rMax.right-cxClient))/2) / float(xUnit) ), TRUE);
 			}
 		}
 		else if(rMax.right > cxClient)  // the width of graph is not over the width of window, but exceed right edge
@@ -1385,11 +1385,14 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 			else 
 			{
 				SetScrollRange (hDlg, SB_HORZ, 0, g_HorzNumPos, TRUE);
-				SetScrollPos (hDlg, SB_HORZ, ceil(float((abs(rMax.right-cxClient)-abs(rMax.left))/2) / float(xUnit) ), TRUE);
+				SetScrollPos (hDlg, SB_HORZ, g_HorzNumPos-ceil((float(abs(rMax.right-cxClient)-abs(rMax.left))/2) / float(xUnit) ), TRUE);
 			}
 
 		}
-
+		else
+		{
+			SetScrollPos (hDlg, SB_HORZ, g_HorzNumPos/2, TRUE);
+		}
 		
 		//------------------------------------------------------------------//	
 
@@ -1425,7 +1428,7 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 			{
 
 				SetScrollRange (hDlg, SB_VERT , 0, g_VertNumPos, TRUE);
-                SetScrollPos (hDlg, SB_VERT , ceil(float((abs(rMax.top)-abs(rMax.bottom-cyClient))/2) / float(yUnit) ), TRUE);
+                SetScrollPos (hDlg, SB_VERT , ceil((float(abs(rMax.top)-abs(rMax.bottom-cyClient))/2) / float(yUnit) ), TRUE);
 			}
 		    		    
 
@@ -1446,9 +1449,13 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 			{
 
 				SetScrollRange (hDlg, SB_VERT , 0, g_VertNumPos, TRUE);
-                SetScrollPos (hDlg, SB_VERT , ceil(float((abs(rMax.bottom-cyClient)-abs(rMax.top))/2) / float(yUnit) ), TRUE);
+                SetScrollPos (hDlg, SB_VERT , g_VertNumPos-ceil((float(abs(rMax.bottom-cyClient)-abs(rMax.top))/2) / float(yUnit) ), TRUE);
 			}
 
+		}
+		else
+		{
+			SetScrollPos (hDlg, SB_VERT, g_VertNumPos/2, TRUE);
 		}
 
 		InvalidateRect (hDlg, NULL, TRUE);
@@ -1492,7 +1499,7 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 			else 
 			{
 				SetScrollRange (hDlg, SB_HORZ, 0, g_HorzNumPos, TRUE);
-				SetScrollPos (hDlg, SB_HORZ, ceil(float((abs(rMax.left)-abs(rMax.right-cxClient))/2) / float(xUnit) ), TRUE);
+				SetScrollPos (hDlg, SB_HORZ, ceil((float(abs(rMax.left)-abs(rMax.right-cxClient))/2) / float(xUnit) ), TRUE);
 			}
 		}
 		else if(rMax.right > cxClient)  // the width of graph is not over the width of window, but exceed right edge
@@ -1509,10 +1516,13 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 			else 
 			{
 				SetScrollRange (hDlg, SB_HORZ, 0, g_HorzNumPos, TRUE);
-				SetScrollPos (hDlg, SB_HORZ, ceil(float((abs(rMax.right-cxClient)-abs(rMax.left))/2) / float(xUnit) ), TRUE);
+				SetScrollPos (hDlg, SB_HORZ, g_HorzNumPos-ceil((float(abs(rMax.right-cxClient)-abs(rMax.left))/2) / float(xUnit) ), TRUE);
 			}
 		}
-			
+		else
+		{
+			SetScrollPos (hDlg, SB_HORZ, g_HorzNumPos/2, TRUE);
+		}			
 		//--------------------------------------------------------------------------------------//	
 
         //-------------------- judge the vertical size ----------------------------------------//
@@ -1547,7 +1557,7 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 			{
 
 				SetScrollRange (hDlg, SB_VERT , 0, g_VertNumPos, TRUE);
-                SetScrollPos (hDlg, SB_VERT , ceil(float((abs(rMax.top)-abs(rMax.bottom-cyClient))/2) / float(yUnit) ), TRUE);
+                SetScrollPos (hDlg, SB_VERT , ceil((float(abs(rMax.top)-abs(rMax.bottom-cyClient))/2) / float(yUnit) ), TRUE);
 			}
 
 		}
@@ -1567,11 +1577,15 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 			{
 
 				SetScrollRange (hDlg, SB_VERT , 0, g_VertNumPos, TRUE);
-                SetScrollPos (hDlg, SB_VERT , ceil(float((abs(rMax.bottom-cyClient)-abs(rMax.top))/2) / float(yUnit) ), TRUE);
+                SetScrollPos (hDlg, SB_VERT , g_VertNumPos-ceil((float(abs(rMax.bottom-cyClient)-abs(rMax.top))/2) / float(yUnit) ), TRUE);
 			}
 
 		}
-	
+		else
+		{
+			SetScrollPos (hDlg, SB_VERT, g_VertNumPos/2, TRUE);
+		}
+		
 		InvalidateRect (hDlg, NULL, TRUE);
 
 		return TRUE;
