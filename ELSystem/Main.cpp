@@ -29,7 +29,7 @@
 #define ID_TIMER    1
 //----------------------------//
 
-// resouse identities///////////
+//-----resouse identities-----//
 
 //------- static texts -------//
 
@@ -52,6 +52,25 @@
 #define ID_BTN_ANIMATE 11
 
 //------------------------------//
+
+#define ID_GB_FRMRATE 12
+//radio buttons
+#define ID_RBTN_EIGHT   13
+#define ID_RBTN_TEN     14
+#define ID_RBTN_TWELVE  15
+#define ID_RBTN_FORTEEN 16
+#define ID_RBTN_SIXTEEN 17
+
+//autocheck button
+#define ID_CBTN_ANGRAN  18
+#define ID_CBTN_LENRAN  19
+
+//edit control for offset
+#define ID_EDIT_ANGRAN_OFS 20
+#define ID_EDIT_LENRAN_OFS 21
+//static text %
+#define ID_STATIC_PERANG  22
+#define ID_STATIC_PERLEN  23
 
 //-----------------------------------------My Defining Messages------------------------------------------//
 //-------------------------------------------------------------------------------------------------------//
@@ -85,7 +104,10 @@ char g_ordStr[4];      //
 int  g_ang;            // angle
 char g_angStr[10];     // 
 ///--------------------/////////////
-
+char g_ranA[4];         // range of random offset ratio for angle
+int  g_ranAng;
+char g_ranL[4];         // range of random offset ratio for length ratio
+int  g_ranLen;
 /// the objects of classes that implement the functions //
 ELSystem      g_elsys;     // object of ELSystem
 DrawGraph     g_dg;        // object of DrawGraph
@@ -117,8 +139,9 @@ static COLOR col_A, col_B, col_C, col_D, col_E, col_F;
 const int xUnit = 50;
 const int yUnit = 50;
 //------------------------//
-
-
+int interval = 83;    // used for animation
+//------------------------//
+static BOOL fAng, fLen;  // used for random offset of length and angle
 //---------------------------------------------------------------------------------------//
 //------------------------------ debugging functions -----------------------------------///
 
@@ -264,13 +287,24 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
      static HINSTANCE hInstance ;
 
-	 TCHAR axiom[]    = TEXT ("Axiom");
-	 TCHAR rule[]     = TEXT ("Replacement Rules");
-	 TCHAR order[]    = TEXT ("Order");
-	 TCHAR angle[]    = TEXT ("Angle");
+	 TCHAR axiom[]    = TEXT ("Axiom:");
+	 TCHAR rule[]     = TEXT ("Replacement Rules:");
+	 TCHAR order[]    = TEXT ("Order:");
+	 TCHAR angle[]    = TEXT ("Angle:");
 	 TCHAR btnApply[] = TEXT ("Apply");
 	 TCHAR btnReset[] = TEXT ("Reset");
 	 TCHAR btnAnima[] = TEXT ("Animate");
+
+	 TCHAR group[]    = TEXT ("Frame Rate:");            // Group button
+     TCHAR cbtn_ang[] = TEXT ("Add random for angle");   // check button
+     TCHAR cbtn_len[] = TEXT ("Add random for length");  // check button
+	 TCHAR percent[]  = TEXT ("%");
+
+	 TCHAR rbtn_eig[] = TEXT ("8 fps");    // radio button
+	 TCHAR rbtn_ten[] = TEXT ("10 fps");    // radio button
+	 TCHAR rbtn_twl[] = TEXT ("12 fps");    // radio button
+	 TCHAR rbtn_fur[] = TEXT ("14 fps");    // radio button
+	 TCHAR rbtn_six[] = TEXT ("16 fps");    // radio button
 
 	 TCHAR empty[1];
 	 empty[0] = '\0';
@@ -279,6 +313,12 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
      static HWND hwnd_Edit_Axm,  hwnd_Edit_Rule, hwnd_Edit_Ord, hwnd_Edit_Ang;
 	 static HWND hwnd_Btn_Apply, hwnd_Btn_Reset, hwnd_Btn_Anima;
      static HWND hwnd_anim;
+
+     static HWND hwnd_Grp,      hwnd_Stic_perA, hwnd_Stic_perL, hwnd_Cbtn_Ang, 
+		         hwnd_Cbtn_Len, hwnd_Edit_RanA, hwnd_Edit_RanL;
+	 static HWND hwnd_Rbtn_Eig, hwnd_Rbtn_Ten, hwnd_Rbtn_Twl, hwnd_Rbtn_Fur,
+		         hwnd_Rbtn_Six;
+
      static int cxChar, cyChar;
 
      switch (message)
@@ -297,28 +337,28 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
           hwnd_Stic_Axm = CreateWindow ( TEXT( "STATIC"), 
 			                      axiom, 
 								  WS_CHILD | WS_VISIBLE,
-			                      cxChar, cyChar, 5 * cxChar, cyChar, 
+			                      cxChar, cyChar, 6 * cxChar, cyChar, 
 			                      hwnd, (HMENU) ID_STATIC_AXIOM,
 								  hInstance, NULL);
 						
           hwnd_Edit_Axm = CreateWindow ( TEXT ("edit"), 
 			                      NULL, 
 								  WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT,           
-                                  8 * cxChar, cyChar, 4*cxChar, cyChar,
+                                  8 * cxChar, cyChar, 4*cxChar, 5 * cyChar / 4,
 								  hwnd, (HMENU) ID_EDIT_AXIOM,
                                   hInstance, NULL);
        
 		  hwnd_Stic_Rule = CreateWindow ( TEXT( "STATIC"), 
 			                       rule, 
 								   WS_CHILD | WS_VISIBLE,
-			                       cxChar, 3 * cyChar, 16 * cxChar, cyChar, 
+			                       cxChar, 3 * cyChar, 17 * cxChar, cyChar, 
 			                       hwnd, (HMENU) ID_STATIC_RULES,
 								   hInstance, NULL);		  
          
           hwnd_Edit_Rule = CreateWindow ( TEXT ("edit"),
 			                       NULL, 
 								   WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT,
-                                   cxChar, 5 * cyChar, 30 * cxChar, cyChar, 
+                                   cxChar, 5 * cyChar, 30 * cxChar, 5 * cyChar / 4, 
 								   hwnd, (HMENU) ID_EDIT_RULES,
                                    hInstance, NULL);
                                                  
@@ -332,7 +372,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
           hwnd_Edit_Ord = CreateWindow ( TEXT ("edit"), 
 			                      NULL, 
 								  WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT,
-                                  7 * cxChar, 7 * cyChar, 3 * cxChar, cyChar,
+                                  7 * cxChar, 7 * cyChar, 3 * cxChar, 5 * cyChar / 4,
 								  hwnd, (HMENU) ID_EDIT_ORDER,
                                   hInstance, NULL); 
                               		  
@@ -346,7 +386,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		  hwnd_Edit_Ang = CreateWindow ( TEXT ("edit"), 
 			                      NULL, 
 								  WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT,                    
-                                  18 * cxChar, 7 * cyChar, 4 * cxChar, cyChar, 
+                                  18 * cxChar, 7 * cyChar, 4 * cxChar, 5 * cyChar / 4, 
 								  hwnd, (HMENU) ID_EDIT_ANGLE,
                                   hInstance, NULL);
 
@@ -355,7 +395,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		  hwnd_Btn_Apply = CreateWindow ( TEXT("button"), 
                                    btnApply,
                                    WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-                                   14 * cxChar, 20 * cyChar,
+                                   14 * cxChar, 22 * cyChar,
                                    6 * cxChar, 7 * cyChar / 4,
                                    hwnd, (HMENU) ID_BTN_APPLY,
                                    hInstance, NULL);
@@ -363,20 +403,128 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		  hwnd_Btn_Reset = CreateWindow ( TEXT("button"), 
                                    btnReset,
                                    WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-                                   21 * cxChar, 20 * cyChar,
+                                   21 * cxChar, 22 * cyChar,
                                    7 * cxChar, 7 * cyChar / 4,
                                    hwnd, (HMENU) ID_BTN_RESET,
                                    hInstance, NULL);
 
 		  hwnd_Btn_Anima = CreateWindow ( TEXT("button"), 
                                    btnAnima,
-                                   WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
-                                   29 * cxChar, 20 * cyChar,
+                                   WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+                                   29 * cxChar, 22 * cyChar,
                                    8 * cxChar, 7 * cyChar / 4,
                                    hwnd, (HMENU) ID_BTN_ANIMATE,
                                    hInstance, NULL);
+		  //---------------------------------------------------------------------------//
 
-		  return 0 ;
+		  hwnd_Cbtn_Ang = CreateWindow ( TEXT("button"), 
+                                   cbtn_ang,
+                                   WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX,
+                                   cxChar, 9 * cyChar,
+                                   22 * cxChar, 5 * cyChar / 4,
+                                   hwnd, (HMENU) ID_CBTN_ANGRAN,
+                                   hInstance, NULL);
+
+
+		  hwnd_Edit_RanA = CreateWindow ( TEXT("edit"), 
+                                   NULL,
+                                   WS_CHILD | WS_VISIBLE |  WS_BORDER | ES_LEFT,
+                                   24 * cxChar, 9 * cyChar,
+                                   4 * cxChar, 5 * cyChar / 4,
+                                   hwnd, (HMENU) ID_EDIT_ANGRAN_OFS,
+                                   hInstance, NULL);
+
+
+         hwnd_Stic_perA = CreateWindow ( TEXT("static"), 
+                                   percent,
+                                   WS_CHILD | WS_VISIBLE ,
+                                   29 * cxChar, 9 * cyChar,
+                                   2 * cxChar, 5 * cyChar / 4,
+                                   hwnd, (HMENU) ID_STATIC_PERANG,
+                                   hInstance, NULL);
+ 
+		  //-----------------------------------------------------------------------//
+
+		  hwnd_Cbtn_Len = CreateWindow ( TEXT("button"), 
+                                   cbtn_len,
+                                   WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX,
+                                   cxChar, 11 * cyChar,
+                                   22 * cxChar, 5 * cyChar / 4,
+                                   hwnd, (HMENU) ID_CBTN_LENRAN,
+                                   hInstance, NULL);
+
+		  hwnd_Edit_RanL = CreateWindow ( TEXT("edit"), 
+                                   NULL,
+                                   WS_CHILD | WS_VISIBLE |  WS_BORDER | ES_LEFT,
+                                   24 * cxChar, 11 * cyChar,
+                                   4 * cxChar, 5 * cyChar / 4,
+                                   hwnd, (HMENU) ID_EDIT_LENRAN_OFS,
+                                   hInstance, NULL);
+
+
+         hwnd_Stic_perL = CreateWindow ( TEXT("static"), 
+                                   percent,
+                                   WS_CHILD | WS_VISIBLE ,
+                                   29 * cxChar, 11 * cyChar,
+                                   2 * cxChar, 5 * cyChar / 4,
+                                   hwnd, (HMENU) ID_STATIC_PERLEN,
+                                   hInstance, NULL);
+
+		 //---------------------------------------------------------------------------//
+		 hwnd_Grp = CreateWindow ( TEXT("button"), 
+                                   group,
+                                   WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+                                   cxChar, 13 * cyChar,
+                                   21 * cxChar, 8 * cyChar,
+                                   hwnd, (HMENU) ID_GB_FRMRATE,
+                                   hInstance, NULL);
+
+		 hwnd_Rbtn_Eig = CreateWindow ( TEXT("button"), 
+                                   rbtn_eig,
+                                   WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON,
+                                   2 * cxChar , 15 * cyChar ,
+                                   8 * cxChar, 5 * cyChar / 4,
+                                   hwnd, (HMENU) ID_RBTN_EIGHT,
+                                   hInstance, NULL); 
+			 
+		hwnd_Rbtn_Ten = CreateWindow ( TEXT("button"), 
+                                   rbtn_ten,
+                                   WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON,
+                                   2 * cxChar , 17 * cyChar ,
+                                   8 * cxChar, 5 * cyChar / 4,
+                                   hwnd, (HMENU) ID_RBTN_TEN,
+                                   hInstance, NULL); 	 
+		
+		hwnd_Rbtn_Twl = CreateWindow ( TEXT("button"), 
+                                   rbtn_twl,
+                                   WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON,
+                                   2 * cxChar , 19 * cyChar ,
+                                   8 * cxChar, 5 * cyChar / 4,
+                                   hwnd, (HMENU) ID_RBTN_TWELVE,
+                                   hInstance, NULL); 	 
+		
+		hwnd_Rbtn_Fur = CreateWindow ( TEXT("button"), 
+                                   rbtn_fur,
+                                   WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON,
+                                   12 * cxChar , 15 * cyChar ,
+                                   8 * cxChar, 5 * cyChar / 4,
+                                   hwnd, (HMENU) ID_RBTN_FORTEEN,
+                                   hInstance, NULL); 	 
+		
+		hwnd_Rbtn_Six = CreateWindow ( TEXT("button"), 
+                                   rbtn_six,
+                                   WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON,
+                                   12 * cxChar , 17 * cyChar ,
+                                   8 * cxChar, 5 * cyChar / 4,
+                                   hwnd, (HMENU) ID_RBTN_SIXTEEN,
+                                   hInstance, NULL);
+	
+		EnableWindow(hwnd_Edit_RanA, FALSE);
+		EnableWindow(hwnd_Edit_RanL, FALSE);		  
+	
+		CheckRadioButton (hwnd, ID_RBTN_EIGHT, ID_RBTN_SIXTEEN, ID_RBTN_TWELVE);
+	
+		return 0 ;
 
      case WM_COMMAND :
           switch (LOWORD (wParam))
@@ -406,6 +554,40 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			  break;
 
 		  case ID_BTN_APPLY :
+
+			 if(fAng)
+			 {
+				 if( 0==GetDlgItemText (hwnd, ID_EDIT_ANGRAN_OFS, g_ranA, 3) )
+				 {
+					 MessageBox (NULL, TEXT ("No input for angle random offset range!"), 
+					  
+						 TEXT("Invalid Input"), MB_ICONINFORMATION);
+				 }
+				 else
+				 {
+
+					 g_dg.ClearDyAryA();      // remove all previous random numbers, free the memory 			
+					 g_ranAng = atoi(g_ranA); // get the user input
+					 g_dg.GenRandomA(g_elsys.CountSymbol(), g_ranAng); // generate new random numbers for angle
+				 }
+			 }
+
+			 if(fLen)
+			 {
+				 if( 0==GetDlgItemText (hwnd, ID_EDIT_LENRAN_OFS, g_ranL, 3) )
+				 {
+					 MessageBox (NULL, TEXT ("No input for length random offset range!"), 
+					  
+						 TEXT("Invalid Input"), MB_ICONINFORMATION);
+				 }
+				 else
+				 {
+					 
+					 g_dg.ClearDyAryL();      // remove all previous random numbers, free the memory 
+					 g_ranLen = atoi(g_ranL); // get the user input
+					 g_dg.GenRandomL(g_elsys.CountLetter(), g_ranLen); // generate new random numbers for length
+				 }
+			 }
 			  
 
 			  if( 0==GetDlgItemText (hwnd, ID_EDIT_AXIOM, g_ax, 2)     || 
@@ -442,10 +624,19 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			      g_elsys.Pick();
                   g_elsys.Gentree();
 
-                  // send message to Graph dialog Procedue, tell it should redraw the client
+				  if(g_elsys.ReportLen()>200)
+				  {
+					  MessageBox (NULL, TEXT ("Sorry there are more than 200 characters, I have to reject."),
+                    
+					              TEXT("Program may crash"), MB_ICONWARNING);
+				  }
+  
+				  else
+				  {
+                  // send message to Graph dialog Procedue, tell it should redraw the client				  
 				  
-				  SendMessage(hDMlesGraph, WM_CON_SIZE, 0, 0);
-
+					  SendMessage(hDMlesGraph, WM_CON_SIZE, 0, 0);
+				  }
 			      // course the graphics window being redrawn 
 			      //InvalidateRect (hDMlesGraph, NULL, TRUE) ;
 			  }
@@ -464,14 +655,49 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		  case ID_BTN_ANIMATE:
 
-              hwnd_anim = CreateWindow ( TEXT("PlayBox"),
+              hwnd_anim = CreateWindow ( TEXT("PlayWnd"),
 				                         NULL,
 										 WS_OVERLAPPEDWINDOW | WS_VISIBLE,
                                          CW_USEDEFAULT, CW_USEDEFAULT,
-                                         500, 450,
+                                         600, 600,
                                          NULL, NULL, hInstance, NULL);
 			  break;
-          }
+          
+		  case ID_RBTN_EIGHT:
+			  interval = 125;
+			  break;
+
+		  case ID_RBTN_TEN:
+			  interval = 100;
+			  break;
+
+		  case ID_RBTN_TWELVE:
+			  interval = 83;
+			  break;
+
+		  case ID_RBTN_FORTEEN:
+			  interval = 71;
+			  break;
+
+		  case ID_RBTN_SIXTEEN:
+			  interval = 63;
+			  break;
+
+		  case ID_CBTN_ANGRAN:
+
+			  fAng ^= 1;			  		
+			  EnableWindow(hwnd_Edit_RanA, fAng);
+		
+			  break;
+
+		 case ID_CBTN_LENRAN:
+
+			  fLen ^= 1;
+			  EnableWindow(hwnd_Edit_RanL, fLen);
+
+			  break;
+
+		  }
           return 0 ;
           
      case WM_DESTROY :
@@ -706,7 +932,7 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 
 		int temp_VertNumPos1, temp_HorzNumPos1;
 
-		rMax = g_dg.CheckBoundary(hDlg);
+		rMax = g_dg.CheckBoundary(hDlg, fAng, fLen);
 
 		///////judge the horizontal size//////////////////
 
@@ -791,7 +1017,7 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 
 		g_dg.Update(g_elsys.Report(), g_ang);
 
-		rMax = g_dg.CheckBoundary(hDlg);
+		rMax = g_dg.CheckBoundary(hDlg, fAng, fLen);
 
 		//-------------------- judge the horizontal size --------------------///
 
@@ -1006,7 +1232,8 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
 		EndPaint (hDlg, &ps);		
 		
 		g_dg.Draw(hDlg, ( GetScrollPos(hDlg, SB_HORZ) - g_HorzNumPos/2 ) * xUnit, 
-			            ( g_VertNumPos/2 - GetScrollPos(hDlg, SB_VERT) ) * yUnit);
+			            ( g_VertNumPos/2 - GetScrollPos(hDlg, SB_VERT) ) * yUnit,
+						  fAng, fLen);
 
 		return TRUE;		
 
@@ -1393,10 +1620,14 @@ LRESULT CALLBACK FrameEdtWndProc (HWND hwnd, UINT message,
 
 	const static int PAGE = 7;
 
+	static HMENU hMenu;
+
+	static HINSTANCE hInst;
+
 	static BOOL state[FRMNUM];
 	static int frmarry_offset = 1;
 
-	int pos_x,pos_y;  // cuser position
+	static int pos_x,pos_y;  // cuser position
 
 	static int index;  // indicate the selected frame
 
@@ -1406,7 +1637,7 @@ LRESULT CALLBACK FrameEdtWndProc (HWND hwnd, UINT message,
 	HRGN hrgn;
 	PAINTSTRUCT ps;
 	HBRUSH hBrush;
-
+    POINT point;
 	TCHAR szBuffer[4]; // frames' number
 
 	FRAMEINFO fi_tmp;
@@ -1428,6 +1659,11 @@ LRESULT CALLBACK FrameEdtWndProc (HWND hwnd, UINT message,
 
 	case WM_CREATE:
 
+		hInst = ((LPCREATESTRUCT) lParam)->hInstance;
+
+        hMenu = LoadMenu (hInst, TEXT("FRAMEMENU")) ;
+        hMenu = GetSubMenu (hMenu, 0) ;
+
 		hParent  = GetParent(hwnd);
 
 	    //-------------------------------//
@@ -1447,7 +1683,75 @@ LRESULT CALLBACK FrameEdtWndProc (HWND hwnd, UINT message,
 
 		return 0;
      
-		     
+     
+	case WM_RBUTTONUP:
+          
+		pos_x = point.x = LOWORD (lParam) ;          
+		pos_y = point.y = HIWORD (lParam) ;
+          
+		ClientToScreen (hwnd, &point) ;
+
+		if( pos_y>15 && pos_y<43 )
+		{  
+			index = pos_x/FRMWIDTH ;
+			InvalidateRect (hwnd, NULL, TRUE) ;
+
+			if(state[index]) // this frame does exist, enable scroll bars 
+			{                
+			    SendMessage (hParent, WM_ENABLE_CONTROLS, frmarry_offset+pos_x/FRMWIDTH, 0) ;	
+			}
+			else // does not exist, just disable the scroll bars
+			{
+				SendMessage (hParent, WM_DISABLE_CONTROLS, 0, 0) ;
+			}
+
+            // 
+			if(state[pos_x/FRMWIDTH]) // this frame does exist, enable the remove menu, disable the insert
+			{
+                EnableMenuItem (hMenu, IDM_FRAME_INSERT, MF_GRAYED);
+                EnableMenuItem (hMenu, IDM_FRAME_DELETE, MF_ENABLED);
+			}
+			else // this frame does not exist, enable the insert menu, disable the remove
+			{			
+                EnableMenuItem (hMenu, IDM_FRAME_DELETE, MF_GRAYED);
+                EnableMenuItem (hMenu, IDM_FRAME_INSERT, MF_ENABLED);
+			}
+		}          
+          
+		TrackPopupMenu (hMenu, TPM_RIGHTBUTTON, point.x, point.y, 
+                          0, hwnd, NULL) ;
+          
+		return 0 ;
+     
+	case WM_COMMAND:
+
+		switch (LOWORD (wParam))          
+		{	
+		case IDM_FRAME_INSERT:
+				
+			fi_tmp.angle     = GetDlgItemInt(hParent, IDC_STATIC_ANG, NULL, FALSE);			    
+			fi_tmp.len_Ratio = GetDlgItemInt(hParent, IDC_STATIC_LEN, NULL, FALSE);
+			    
+			g_frame.AddFrame(frmarry_offset + pos_x/FRMWIDTH, fi_tmp);
+   							    
+			InvalidateRect (hwnd, NULL, TRUE) ;					
+				
+			SendMessage (hParent, WM_ENABLE_CONTROLS, frmarry_offset+pos_x/FRMWIDTH, 0) ;                
+
+			return 0;
+
+		case IDM_FRAME_DELETE:
+
+			g_frame.RemoveFrame(frmarry_offset + pos_x/FRMWIDTH);
+			
+			InvalidateRect (hwnd, NULL, TRUE) ;	
+			
+			SendMessage (hParent, WM_DISABLE_CONTROLS, 0, 0) ;
+	
+			return 0;
+		}
+		break;
+
 	case WM_LBUTTONDOWN :
 
 		pos_x = LOWORD (lParam);
@@ -1490,10 +1794,7 @@ LRESULT CALLBACK FrameEdtWndProc (HWND hwnd, UINT message,
 			    fi_tmp.len_Ratio = GetDlgItemInt(hParent, IDC_STATIC_LEN, NULL, FALSE);
 
 			    g_frame.AddFrame(frmarry_offset + pos_x/FRMWIDTH, fi_tmp);
-   
-				//test
-				g_frame.Show(frmarry_offset + pos_x/FRMWIDTH);
-				
+   				
 			    InvalidateRect (hwnd, NULL, TRUE) ;	
 				
 				SendMessage (hParent, WM_ENABLE_CONTROLS, frmarry_offset+pos_x/FRMWIDTH, 0) ;
@@ -1650,13 +1951,58 @@ LRESULT CALLBACK FrameEdtWndProc (HWND hwnd, UINT message,
 	return DefWindowProc (hwnd, message, wParam, lParam) ;
 }
 
+// draw sample graphics to a window, parameters are length ratio and angle
+
+void DrawSampleToBlock(HWND hctrl, double ra, double ag)
+{
+	HDC hdc;
+     
+	RECT rect;
+	HPEN hPen;
+	InvalidateRect (hctrl, NULL, TRUE);
+     
+	UpdateWindow (hctrl);
+
+	hdc = GetDC(hctrl);
+     
+	GetClientRect (hctrl, &rect);
+
+	SelectObject (hdc, hBrushWhite);
+
+	Rectangle (hdc, rect.left, rect.top, rect.right, rect.bottom);
+
+	double length = rect.bottom / 6;
+	
+	SetViewportOrgEx (hdc, rect.right/2, rect.bottom/2, NULL) ;
+
+	hPen = CreatePen (PS_SOLID, 1, RGB(123,0,0)) ;
+       
+	SelectObject (hdc, hPen);
+
+
+	LineTo(hdc, 0,  - (length * ra));
+	
+	MoveToEx(hdc, 0, 0, NULL);
+	
+	LineTo(hdc, length*ra*sin(ag), - (length*ra*cos(ag)) );
+	
+	MoveToEx(hdc, 0, 0, NULL);
+
+	LineTo(hdc, length*ra*sin(2*ag), - (length*ra*cos(2*ag)) );
+
+	ReleaseDC (hctrl, hdc);
+				
+	DeleteObject (hPen);
+}
+
+
 BOOL CALLBACK AnimDlgProc (HWND hDlg, UINT message, 
                            WPARAM wParam, LPARAM lParam)
 {
 
-	static HWND hCtrl_Len, hCtrl_Ang; 
+	static HWND hCtrl_Len, hCtrl_Ang, hStic ;
 		
-	HWND	hCtrl;
+	HWND hCtrl;
 
 	FRAMEINFO fi_tmp;
 
@@ -1683,6 +2029,7 @@ BOOL CALLBACK AnimDlgProc (HWND hDlg, UINT message,
 
 		EnableWindow (hCtrl_Len, FALSE);
 
+
 		// disable the scroll bars initially
 
 		hCtrl_Ang = GetDlgItem (hDlg, 1126);
@@ -1690,7 +2037,11 @@ BOOL CALLBACK AnimDlgProc (HWND hDlg, UINT message,
         SetScrollPos   (hCtrl_Ang, SB_CTL, 0, FALSE);
 		SetDlgItemInt (hDlg,  IDC_STATIC_ANG, degree, FALSE) ;
 
-		EnableWindow (hCtrl_Ang, FALSE);			
+		EnableWindow (hCtrl_Ang, FALSE);
+		
+		hStic = GetDlgItem(hDlg, 1130);
+
+		DrawSampleToBlock(hStic, double(len_ratio)/100, double(degree) * PI /180);
 
 		return TRUE;
 
@@ -1773,12 +2124,14 @@ BOOL CALLBACK AnimDlgProc (HWND hDlg, UINT message,
 	          		  
 			  SetScrollPos  (hCtrl_Ang, SB_CTL, degree, TRUE) ;         
 			  SetDlgItemInt (hDlg, IDC_STATIC_ANG, degree, FALSE) ;
+			
 		  }
 
           fi_tmp.angle = degree;
           fi_tmp.len_Ratio = len_ratio;
 		  g_frame.UpdateFrmInfo(crt_frame, fi_tmp);
 
+		  DrawSampleToBlock(hStic, double(len_ratio)/100, double(degree) * PI /180);
 		  return TRUE ;
 
 		  
@@ -1803,6 +2156,8 @@ BOOL CALLBACK AnimDlgProc (HWND hDlg, UINT message,
          degree = fi_tmp.angle;    // get data of the frame
 		 SetScrollPos  (hCtrl_Ang, SB_CTL, degree, TRUE) ;         		
 		 SetDlgItemInt (hDlg, IDC_STATIC_ANG, degree, FALSE) ; // set static text
+
+		 DrawSampleToBlock(hStic, double(len_ratio)/100, double(degree) * PI /180);
 
 		 return TRUE;
 	
@@ -1862,96 +2217,84 @@ LRESULT CALLBACK PlayWndProc (HWND hwnd, UINT message,
 	PAINTSTRUCT ps;
 
 	static Animation g_anim;
-	static double r;
 
-	static double offsetr;
+	static double * lenarry;
+	static double * angarry;
+	static int * frmarray;
 
-	static double aph;
-
-	double offseta = 5;
+	static int crt_idx; // indicate the current location of arrays
+    static int frmcount;
+	static double a, r;
 
 	switch (message)		 	
 	{
-     
-	
+     	
 	case WM_CREATE:
 
-		SetTimer (hwnd, ID_TIMER, 104, NULL);
+		if(g_frame.MapSize()>1)
+		{
+			frmarray = new int[g_frame.MapSize()-1];
+			lenarry = new double[g_frame.MapSize()-1];
+			angarry = new double[g_frame.MapSize()-1];
 
+			g_frame.FillAniArry(frmarray, lenarry, angarry);
 
+			SetTimer (hwnd, ID_TIMER, interval, NULL);
 
-		r = 0.66666;
-		//offsetr = 0.1;
-		aph = 0;
-		//MessageBox(NULL, TEXT("CREATE"), TEXT("TEST"), MB_ICONINFORMATION);
-		
+			crt_idx = 0;
+			frmcount = g_frame.FrsFrmIndex();
+			a = g_frame.FrsFrmAng();
+			r = g_frame.FrsFrmLen();
+		}
+
 		return 0;
      
 	case WM_TIMER:
-		          
-		//MessageBeep (-1);
-		//r += offsetr;
-		aph += offseta;
-		InvalidateRect (hwnd, NULL, TRUE);
-        if( aph>180) KillTimer (hwnd, ID_TIMER); 
-		return 0;
-          
+
+		frmcount++;
+
+		a += angarry[crt_idx];
+		r += lenarry[crt_idx];
+
+		if(frmcount>frmarray[crt_idx])
+		{
+			crt_idx++;
+		}
+
+        if( crt_idx == g_frame.MapSize())
+		{
+			crt_idx = 0;
+			KillTimer (hwnd, ID_TIMER); 
+		}
+		else
+		{		
+			InvalidateRect (hwnd, NULL, TRUE);
+		}
+
+		return 0;         
      
 	case WM_PAINT:
 
 		BeginPaint (hwnd, &ps);	
 		EndPaint (hwnd, &ps);
 
-		g_anim.DrawAni(hwnd, r, aph, g_dg);
-
+		if(g_frame.MapSize()>0)
+		{		
+			g_anim.DrawAni(hwnd, r/100, a, g_dg);
+		}
 		return 0;
+	
+	case WM_DESTROY:
+          
+		KillTimer (hwnd, ID_TIMER) ;
+
+		delete [] frmarray;
+		delete [] lenarry;         
+		delete [] angarry;
+		
+		return 0 ;
 	}
 	return DefWindowProc (hwnd, message, wParam, lParam) ;
 
 }
-//////////////////////////////////////////////////////////////////////////////////////////////
-/// thesw functions are only for debugging purpose////////////////////////////////////////
 
-void g_PrintPoints(POINT* pts, LPCTSTR lpTitle)
-{
-
-        TCHAR szFormatpts[] = TEXT ("%-04i %-04i %-04i %-04i %-04i %-04i %-04i %-04i"),
-              szBufferpts[50];
-
-        wsprintf (szBufferpts, szFormatpts, pts[0].x, pts[0].y,
-                                            pts[1].x, pts[1].y,
-									        pts[2].x, pts[2].y,
-								        	pts[3].x, pts[3].y);
-		MessageBox (NULL, szBufferpts,
-                      lpTitle, MB_ICONINFORMATION);
-
-}
-
-void g_PrintRect(RECT & f_rect, LPCTSTR lpTitle)
-{
-
-        TCHAR szFormatrec[] = TEXT ("%-04i %-04i %-04i %-04i"),
-              szBufferrec[30];
-
-        wsprintf (szBufferrec, szFormatrec, f_rect.top,    f_rect.left,
-			                                f_rect.bottom, f_rect.right);
-
-		MessageBox (NULL, szBufferrec,
-                      lpTitle, MB_ICONINFORMATION);
-
-}
-
-void g_PrintWH(int Width, int Height, LPCTSTR lpTitle)
-{
-
-        TCHAR szFormatWH[] = TEXT ("%-04i %-04i"),
-              szBufferWH[30];
-
-        wsprintf (szBufferWH, szFormatWH, Width, Height);
-
-		MessageBox (NULL, szBufferWH,
-                      lpTitle, MB_ICONINFORMATION);
-
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////

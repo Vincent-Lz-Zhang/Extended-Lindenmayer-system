@@ -102,6 +102,10 @@ SOURCE=.\BezierLine.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\Debugging.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\DrawGraph.cpp
 # End Source File
 # Begin Source File

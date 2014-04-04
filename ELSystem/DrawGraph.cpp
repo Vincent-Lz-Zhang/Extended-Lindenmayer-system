@@ -12,6 +12,8 @@
 **********************************************/
 
 #include "DrawGraph.h"
+#include   <cstdlib>    
+#include   <ctime>
 
 COLOR DrawGraph::m_col_A = { RGB(0,0,0),'A' } ;
 COLOR DrawGraph::m_col_B = { RGB(0,0,0),'B' } ;
@@ -19,9 +21,6 @@ COLOR DrawGraph::m_col_C = { RGB(0,0,0),'C' } ;
 COLOR DrawGraph::m_col_D = { RGB(0,0,0),'D' } ; 
 COLOR DrawGraph::m_col_E = { RGB(0,0,0),'E' } ; 
 COLOR DrawGraph::m_col_F = { RGB(0,0,0),'F' } ;
-
-
-
 
 DrawGraph::DrawGraph()
 {
@@ -39,9 +38,9 @@ DrawGraph::DrawGraph()
 }
 
 DrawGraph::~DrawGraph()
-
 {
-
+	ClearDyAryA();
+	ClearDyAryL();
 }
 
 
@@ -52,7 +51,7 @@ void DrawGraph::Update(string &str, int a)
 	m_command  = str;
 }
 
-RECT DrawGraph::CheckBoundary(HWND hdlg)
+RECT DrawGraph::CheckBoundary(HWND hdlg, BOOL fRanA, BOOL fRanL)
 {
 
 	HDC    hdc;
@@ -77,155 +76,691 @@ RECT DrawGraph::CheckBoundary(HWND hdlg)
 	int cx,cy;
 	int new_x,new_y;
 
-	for ( int i=0; i<m_command.length(); i++)
+	int index_Ang = 0;
+    int index_Len = 0;
+
+	if(fRanA)
 	{
-		switch (m_command[i])
+		if(fRanL)
 		{
-		case 'A':
-
-			r = m_bl_A.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);
-  
-			m_pst.beta += r;
-
-			m_pst.nx = tempt[3].x;
-			m_pst.ny = tempt[3].y;
-
-			TLBR[0].x = min(TLBR[0].x,m_pst.nx);
-            TLBR[0].y = max(TLBR[0].y,m_pst.ny);
-
-			TLBR[1].x = max(TLBR[1].x,m_pst.nx);
-			TLBR[1].y = min(TLBR[1].y,m_pst.ny);
-
-			break;
-
-		case 'B':
-
-			r = m_bl_B.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);
-  
-			m_pst.beta += r;
-
-			m_pst.nx = tempt[3].x;
-			m_pst.ny = tempt[3].y;
-
-			TLBR[0].x = min(TLBR[0].x,m_pst.nx);
-            TLBR[0].y = max(TLBR[0].y,m_pst.ny);
-
-			TLBR[1].x = max(TLBR[1].x,m_pst.nx);
-			TLBR[1].y = min(TLBR[1].y,m_pst.ny);
-
-			break;
-
-		case 'C':
-
-
-			r = m_bl_C.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);
-  
-			m_pst.beta += r;
-
-			m_pst.nx = tempt[3].x;
-			m_pst.ny = tempt[3].y;
-
-			TLBR[0].x = min(TLBR[0].x,m_pst.nx);
-            TLBR[0].y = max(TLBR[0].y,m_pst.ny);
-
-			TLBR[1].x = max(TLBR[1].x,m_pst.nx);
-			TLBR[1].y = min(TLBR[1].y,m_pst.ny);
-
-
-			break;
-		case 'D':
-
-			r = m_bl_D.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);
-
-			m_pst.beta += r;
-
-			m_pst.nx = tempt[3].x;
-			m_pst.ny = tempt[3].y;
-
-			TLBR[0].x = min(TLBR[0].x,m_pst.nx);
-            TLBR[0].y = max(TLBR[0].y,m_pst.ny);
-
-			TLBR[1].x = max(TLBR[1].x,m_pst.nx);
-			TLBR[1].y = min(TLBR[1].y,m_pst.ny);
-
-			break;
-		case 'E':
-
-			r = m_bl_E.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);
-
-			m_pst.beta += r;
-
-			m_pst.nx = tempt[3].x;
-			m_pst.ny = tempt[3].y;
-
-			TLBR[0].x = min(TLBR[0].x,m_pst.nx);
-            TLBR[0].y = max(TLBR[0].y,m_pst.ny);
-
-			TLBR[1].x = max(TLBR[1].x,m_pst.nx);
-			TLBR[1].y = min(TLBR[1].y,m_pst.ny);
-
-
-			break;
-		case 'F':
-
-			r = m_bl_F.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);
-
-			m_pst.beta += r;
-
-			m_pst.nx = tempt[3].x;
-			m_pst.ny = tempt[3].y;
-
-			TLBR[0].x = min(TLBR[0].x,m_pst.nx);
-            TLBR[0].y = max(TLBR[0].y,m_pst.ny);
-
-			TLBR[1].x = max(TLBR[1].x,m_pst.nx);
-			TLBR[1].y = min(TLBR[1].y,m_pst.ny);
-
-
-			break;
-		case 'G':
-
-			cx  = m_pst.size*sin(m_pst.beta);
-			cy  = m_pst.size*cos(m_pst.beta);
-
-			new_x = m_pst.nx+cx;
-			new_y = m_pst.ny+cy;
-
-			m_pst.nx = new_x;
-			m_pst.ny = new_y;
-
-			TLBR[0].x = min(TLBR[0].x,m_pst.nx);
-            TLBR[0].y = max(TLBR[0].y,m_pst.ny);
-
-			TLBR[1].x = max(TLBR[1].x,m_pst.nx);
-			TLBR[1].y = min(TLBR[1].y,m_pst.ny);
-
-			break;
-
-		case '~':
-			m_pst.flip = (m_pst.flip?false:true);
-			break;
-		case '+':
-			m_pst.beta += m_delta;
-			break;
-		case '-':
-			m_pst.beta -= m_delta;
-			break;
-		case '[':
-			m_sta_stat.push(m_pst);
-
-			break;
-
-		case ']':
-			m_pst = m_sta_stat.top();
-			m_sta_stat.pop();
-
-			break;
-
-		default:
-			break;
+			for ( int i=0; i<m_command.length(); i++)	
+			{		
+				switch (m_command[i])	
+				{	
+				case 'A':
+		
+					r = m_bl_A.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);
+					index_Len++;
+  		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+		
+					TLBR[0].x = min(TLBR[0].x,m_pst.nx);         
+					TLBR[0].y = max(TLBR[0].y,m_pst.ny);
+		
+					TLBR[1].x = max(TLBR[1].x,m_pst.nx);		
+					TLBR[1].y = min(TLBR[1].y,m_pst.ny);
+		
+					break;
+	
+				case 'B':
+		
+					r = m_bl_B.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);
+					index_Len++;
+  		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+		
+					TLBR[0].x = min(TLBR[0].x,m_pst.nx);          
+					TLBR[0].y = max(TLBR[0].y,m_pst.ny);
+		
+					TLBR[1].x = max(TLBR[1].x,m_pst.nx);		
+					TLBR[1].y = min(TLBR[1].y,m_pst.ny);
+		
+					break;
+	
+				case 'C':
+		
+					r = m_bl_C.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);
+					index_Len++;
+		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+		
+					TLBR[0].x = min(TLBR[0].x,m_pst.nx);       
+					TLBR[0].y = max(TLBR[0].y,m_pst.ny);
+		
+					TLBR[1].x = max(TLBR[1].x,m_pst.nx);		
+					TLBR[1].y = min(TLBR[1].y,m_pst.ny);
+		
+					break;
+	
+				case 'D':
+		
+					r = m_bl_D.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);
+					index_Len++;
+		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+		
+					TLBR[0].x = min(TLBR[0].x,m_pst.nx);           
+					TLBR[0].y = max(TLBR[0].y,m_pst.ny);
+		
+					TLBR[1].x = max(TLBR[1].x,m_pst.nx);		
+					TLBR[1].y = min(TLBR[1].y,m_pst.ny);
+		
+					break;
+	
+				case 'E':
+		
+					r = m_bl_E.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);
+					index_Len++;
+		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+		
+					TLBR[0].x = min(TLBR[0].x,m_pst.nx);         
+					TLBR[0].y = max(TLBR[0].y,m_pst.ny);
+		
+					TLBR[1].x = max(TLBR[1].x,m_pst.nx);		
+					TLBR[1].y = min(TLBR[1].y,m_pst.ny);
+		
+					break;
+	
+				case 'F':
+		
+					r = m_bl_F.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);
+					index_Len++;
+		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+					
+					TLBR[0].x = min(TLBR[0].x,m_pst.nx);           
+					TLBR[0].y = max(TLBR[0].y,m_pst.ny);
+		
+					TLBR[1].x = max(TLBR[1].x,m_pst.nx);		
+					TLBR[1].y = min(TLBR[1].y,m_pst.ny);
+		
+					break;
+	
+				case 'G':
+		
+					cx  = m_pst.size*sin(m_pst.beta);		
+					cy  = m_pst.size*cos(m_pst.beta);
+		
+					new_x = m_pst.nx+cx;		
+					new_y = m_pst.ny+cy;
+		
+					m_pst.nx = new_x;		
+					m_pst.ny = new_y;
+		
+					TLBR[0].x = min(TLBR[0].x,m_pst.nx);        
+					TLBR[0].y = max(TLBR[0].y,m_pst.ny);
+		
+					TLBR[1].x = max(TLBR[1].x,m_pst.nx);		
+					TLBR[1].y = min(TLBR[1].y,m_pst.ny);
+		
+					break;
+	
+				case '~':
+		
+					m_pst.flip = (m_pst.flip?false:true);
+		
+					break;
+	
+				case '+':
+		
+					m_pst.beta += (m_delta * (1 + m_ranAng[index_Ang]) );
+					index_Ang++;
+		
+					break;
+	
+				case '-':
+		
+					m_pst.beta -= (m_delta * (1 + m_ranAng[index_Ang]) );		
+					index_Ang++;
+		
+					break;
+	
+				case '[':
+	
+					m_sta_stat.push(m_pst);
+		
+					break;
+	
+				case ']':
+		
+					m_pst = m_sta_stat.top();		
+					m_sta_stat.pop();
+		
+					break;
+	
+				default:
+		
+					break;
+		
+				} // end of switch	
+			} // end of for
 		}
-	}
+		else
+		{	
+			for ( int i=0; i<m_command.length(); i++)	
+			{		
+				switch (m_command[i])	
+				{	
+				case 'A':
+		
+					r = m_bl_A.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);
+  		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+		
+					TLBR[0].x = min(TLBR[0].x,m_pst.nx);         
+					TLBR[0].y = max(TLBR[0].y,m_pst.ny);
+		
+					TLBR[1].x = max(TLBR[1].x,m_pst.nx);		
+					TLBR[1].y = min(TLBR[1].y,m_pst.ny);
+		
+					break;
+	
+				case 'B':
+		
+					r = m_bl_B.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);
+  		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+		
+					TLBR[0].x = min(TLBR[0].x,m_pst.nx);          
+					TLBR[0].y = max(TLBR[0].y,m_pst.ny);
+		
+					TLBR[1].x = max(TLBR[1].x,m_pst.nx);		
+					TLBR[1].y = min(TLBR[1].y,m_pst.ny);
+		
+					break;
+	
+				case 'C':
+		
+					r = m_bl_C.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);
+		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+		
+					TLBR[0].x = min(TLBR[0].x,m_pst.nx);       
+					TLBR[0].y = max(TLBR[0].y,m_pst.ny);
+		
+					TLBR[1].x = max(TLBR[1].x,m_pst.nx);		
+					TLBR[1].y = min(TLBR[1].y,m_pst.ny);
+		
+					break;
+	
+				case 'D':
+		
+					r = m_bl_D.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);
+		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+		
+					TLBR[0].x = min(TLBR[0].x,m_pst.nx);           
+					TLBR[0].y = max(TLBR[0].y,m_pst.ny);
+		
+					TLBR[1].x = max(TLBR[1].x,m_pst.nx);		
+					TLBR[1].y = min(TLBR[1].y,m_pst.ny);
+		
+					break;
+	
+				case 'E':
+		
+					r = m_bl_E.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);
+		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+		
+					TLBR[0].x = min(TLBR[0].x,m_pst.nx);         
+					TLBR[0].y = max(TLBR[0].y,m_pst.ny);
+		
+					TLBR[1].x = max(TLBR[1].x,m_pst.nx);		
+					TLBR[1].y = min(TLBR[1].y,m_pst.ny);
+		
+					break;
+	
+				case 'F':
+		
+					r = m_bl_F.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);
+		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+					
+					TLBR[0].x = min(TLBR[0].x,m_pst.nx);           
+					TLBR[0].y = max(TLBR[0].y,m_pst.ny);
+		
+					TLBR[1].x = max(TLBR[1].x,m_pst.nx);		
+					TLBR[1].y = min(TLBR[1].y,m_pst.ny);
+		
+					break;
+	
+				case 'G':
+		
+					cx  = m_pst.size*sin(m_pst.beta);		
+					cy  = m_pst.size*cos(m_pst.beta);
+		
+					new_x = m_pst.nx+cx;		
+					new_y = m_pst.ny+cy;
+		
+					m_pst.nx = new_x;		
+					m_pst.ny = new_y;
+		
+					TLBR[0].x = min(TLBR[0].x,m_pst.nx);        
+					TLBR[0].y = max(TLBR[0].y,m_pst.ny);
+		
+					TLBR[1].x = max(TLBR[1].x,m_pst.nx);		
+					TLBR[1].y = min(TLBR[1].y,m_pst.ny);
+		
+					break;
+	
+				case '~':
+		
+					m_pst.flip = (m_pst.flip?false:true);
+		
+					break;
+	
+				case '+':
+		
+					m_pst.beta += (m_delta * (1 + m_ranAng[index_Ang]) );
+					index_Ang++;
+		
+					break;
+	
+				case '-':
+		
+					m_pst.beta -= (m_delta * (1 + m_ranAng[index_Ang]) );		
+					index_Ang++;
+		
+					break;
+	
+				case '[':
+	
+					m_sta_stat.push(m_pst);
+		
+					break;
+	
+				case ']':
+		
+					m_pst = m_sta_stat.top();		
+					m_sta_stat.pop();
+		
+					break;
+	
+				default:
+		
+					break;
+		
+				} // end of switch	
+			} // end of for
+		} // end of else
+	} // end of if angle is random 
+	else
+	{
+		if(fRanL)
+		{
+			for ( int i=0; i<m_command.length(); i++)	
+			{		
+				switch (m_command[i])	
+				{	
+				case 'A':
+		
+					r = m_bl_A.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);
+					index_Len++;
+  		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+		
+					TLBR[0].x = min(TLBR[0].x,m_pst.nx);         
+					TLBR[0].y = max(TLBR[0].y,m_pst.ny);
+		
+					TLBR[1].x = max(TLBR[1].x,m_pst.nx);		
+					TLBR[1].y = min(TLBR[1].y,m_pst.ny);
+		
+					break;
+	
+				case 'B':
+		
+					r = m_bl_B.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);
+					index_Len++;
+  		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+		
+					TLBR[0].x = min(TLBR[0].x,m_pst.nx);          
+					TLBR[0].y = max(TLBR[0].y,m_pst.ny);
+		
+					TLBR[1].x = max(TLBR[1].x,m_pst.nx);		
+					TLBR[1].y = min(TLBR[1].y,m_pst.ny);
+		
+					break;
+	
+				case 'C':
+		
+					r = m_bl_C.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);
+					index_Len++;
+		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+		
+					TLBR[0].x = min(TLBR[0].x,m_pst.nx);       
+					TLBR[0].y = max(TLBR[0].y,m_pst.ny);
+		
+					TLBR[1].x = max(TLBR[1].x,m_pst.nx);		
+					TLBR[1].y = min(TLBR[1].y,m_pst.ny);
+		
+					break;
+	
+				case 'D':
+		
+					r = m_bl_D.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);
+					index_Len++;
+		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+		
+					TLBR[0].x = min(TLBR[0].x,m_pst.nx);           
+					TLBR[0].y = max(TLBR[0].y,m_pst.ny);
+		
+					TLBR[1].x = max(TLBR[1].x,m_pst.nx);		
+					TLBR[1].y = min(TLBR[1].y,m_pst.ny);
+		
+					break;
+	
+				case 'E':
+		
+					r = m_bl_E.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);
+					index_Len++;
+		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+		
+					TLBR[0].x = min(TLBR[0].x,m_pst.nx);         
+					TLBR[0].y = max(TLBR[0].y,m_pst.ny);
+		
+					TLBR[1].x = max(TLBR[1].x,m_pst.nx);		
+					TLBR[1].y = min(TLBR[1].y,m_pst.ny);
+		
+					break;
+	
+				case 'F':
+		
+					r = m_bl_F.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);
+					index_Len++;
+		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+					
+					TLBR[0].x = min(TLBR[0].x,m_pst.nx);           
+					TLBR[0].y = max(TLBR[0].y,m_pst.ny);
+		
+					TLBR[1].x = max(TLBR[1].x,m_pst.nx);		
+					TLBR[1].y = min(TLBR[1].y,m_pst.ny);
+		
+					break;
+	
+				case 'G':
+		
+					cx  = m_pst.size*sin(m_pst.beta);		
+					cy  = m_pst.size*cos(m_pst.beta);
+		
+					new_x = m_pst.nx+cx;		
+					new_y = m_pst.ny+cy;
+		
+					m_pst.nx = new_x;		
+					m_pst.ny = new_y;
+		
+					TLBR[0].x = min(TLBR[0].x,m_pst.nx);        
+					TLBR[0].y = max(TLBR[0].y,m_pst.ny);
+		
+					TLBR[1].x = max(TLBR[1].x,m_pst.nx);		
+					TLBR[1].y = min(TLBR[1].y,m_pst.ny);
+		
+					break;
+	
+				case '~':
+		
+					m_pst.flip = (m_pst.flip?false:true);
+		
+					break;
+	
+				case '+':
+		
+					m_pst.beta += m_delta;
+		
+					break;
+	
+				case '-':
+		
+					m_pst.beta -= m_delta;		
+		
+					break;
+	
+				case '[':
+	
+					m_sta_stat.push(m_pst);
+		
+					break;
+	
+				case ']':
+		
+					m_pst = m_sta_stat.top();		
+					m_sta_stat.pop();
+		
+					break;
+	
+				default:
+		
+					break;
+		
+				} // end of switch	
+			} // end of for
+		}
+		else
+		{
+			for ( int i=0; i<m_command.length(); i++)	
+			{		
+				switch (m_command[i])	
+				{	
+				case 'A':
+		
+					r = m_bl_A.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);
+  		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+		
+					TLBR[0].x = min(TLBR[0].x,m_pst.nx);         
+					TLBR[0].y = max(TLBR[0].y,m_pst.ny);
+		
+					TLBR[1].x = max(TLBR[1].x,m_pst.nx);		
+					TLBR[1].y = min(TLBR[1].y,m_pst.ny);
+		
+					break;
+	
+				case 'B':
+		
+					r = m_bl_B.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);
+  		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+		
+					TLBR[0].x = min(TLBR[0].x,m_pst.nx);          
+					TLBR[0].y = max(TLBR[0].y,m_pst.ny);
+		
+					TLBR[1].x = max(TLBR[1].x,m_pst.nx);		
+					TLBR[1].y = min(TLBR[1].y,m_pst.ny);
+		
+					break;
+	
+				case 'C':
+		
+					r = m_bl_C.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);
+		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+		
+					TLBR[0].x = min(TLBR[0].x,m_pst.nx);       
+					TLBR[0].y = max(TLBR[0].y,m_pst.ny);
+		
+					TLBR[1].x = max(TLBR[1].x,m_pst.nx);		
+					TLBR[1].y = min(TLBR[1].y,m_pst.ny);
+		
+					break;
+	
+				case 'D':
+		
+					r = m_bl_D.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);
+		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+		
+					TLBR[0].x = min(TLBR[0].x,m_pst.nx);           
+					TLBR[0].y = max(TLBR[0].y,m_pst.ny);
+		
+					TLBR[1].x = max(TLBR[1].x,m_pst.nx);		
+					TLBR[1].y = min(TLBR[1].y,m_pst.ny);
+		
+					break;
+	
+				case 'E':
+		
+					r = m_bl_E.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);
+		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+		
+					TLBR[0].x = min(TLBR[0].x,m_pst.nx);         
+					TLBR[0].y = max(TLBR[0].y,m_pst.ny);
+		
+					TLBR[1].x = max(TLBR[1].x,m_pst.nx);		
+					TLBR[1].y = min(TLBR[1].y,m_pst.ny);
+		
+					break;
+	
+				case 'F':
+		
+					r = m_bl_F.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);
+		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+					
+					TLBR[0].x = min(TLBR[0].x,m_pst.nx);           
+					TLBR[0].y = max(TLBR[0].y,m_pst.ny);
+		
+					TLBR[1].x = max(TLBR[1].x,m_pst.nx);		
+					TLBR[1].y = min(TLBR[1].y,m_pst.ny);
+		
+					break;
+	
+				case 'G':
+		
+					cx  = m_pst.size*sin(m_pst.beta);		
+					cy  = m_pst.size*cos(m_pst.beta);
+		
+					new_x = m_pst.nx+cx;		
+					new_y = m_pst.ny+cy;
+		
+					m_pst.nx = new_x;		
+					m_pst.ny = new_y;
+		
+					TLBR[0].x = min(TLBR[0].x,m_pst.nx);        
+					TLBR[0].y = max(TLBR[0].y,m_pst.ny);
+		
+					TLBR[1].x = max(TLBR[1].x,m_pst.nx);		
+					TLBR[1].y = min(TLBR[1].y,m_pst.ny);
+		
+					break;
+	
+				case '~':
+		
+					m_pst.flip = (m_pst.flip?false:true);
+		
+					break;
+	
+				case '+':
+		
+					m_pst.beta += m_delta;
+		
+					break;
+	
+				case '-':
+		
+					m_pst.beta -= m_delta;		
+		
+					break;
+	
+				case '[':
+	
+					m_sta_stat.push(m_pst);
+		
+					break;
+	
+				case ']':
+		
+					m_pst = m_sta_stat.top();		
+					m_sta_stat.pop();
+		
+					break;
+	
+				default:
+		
+					break;
+		
+				} // end of switch	
+			} // end of for
+		} // end of else, not random for length 
+	} // end of else, not random for angle
 
 	LPtoDP(hdc,TLBR,2);
 
@@ -244,7 +779,7 @@ RECT DrawGraph::CheckBoundary(HWND hdlg)
 
 }
 
-void DrawGraph::Draw(HWND hdlg, int offset_x, int offset_y)
+void DrawGraph::Draw(HWND hdlg, int offset_x, int offset_y, BOOL fRanA, BOOL fRanL)
 {
 	HPEN   hPen; 
 	HDC    hdc;
@@ -271,172 +806,785 @@ void DrawGraph::Draw(HWND hdlg, int offset_x, int offset_y)
 		
 	SetWindowOrgEx(hdc, offset_x, offset_y, NULL);
 
-
+    int index_Ang = 0;
+	int index_Len = 0;
 
 	int cx,cy;
 	int new_x,new_y;
 
-	for ( int i=0; i<m_command.length(); i++)
+	if(fRanA)
 	{
-		switch (m_command[i])
-		{
-		case 'A':
+		if(fRanL)
+		{		 
+			for ( int i=0; i<m_command.length(); i++)	
+			{
+				switch (m_command[i])			
+				{					
 
-			hPen = CreatePen (PS_SOLID, 1, m_col_A.rgb) ;
-            SelectObject (hdc, hPen);
+				case 'A':
+							
+					hPen = CreatePen (PS_SOLID, 1, m_col_A.rgb) ;                
+					SelectObject (hdc, hPen);
+			    
+					r = m_bl_A.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);			    
+					index_Len++;
+			    
+					PolyBezier (hdc, tempt, 4) ;
+			    
+					MoveToEx (hdc, tempt[3].x, tempt[3].y, NULL);
+			    
+					m_pst.beta += r;
+			    
+					m_pst.nx = tempt[3].x;
+					m_pst.ny = tempt[3].y;
+			    
+					DeleteObject (hPen);
+			    
+					break;
+		    
+				case 'B':
+							
+					hPen = CreatePen (PS_SOLID, 1, m_col_B.rgb) ;
+					SelectObject (hdc, hPen);
 
-			r = m_bl_A.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);
+					r = m_bl_B.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);               
+					index_Len++;					
+					
+					PolyBezier (hdc, tempt, 4) ;
+		    
+					MoveToEx (hdc, tempt[3].x, tempt[3].y, NULL);
 
-			PolyBezier (hdc, tempt, 4) ;
+					m_pst.beta += r;
+			  
+					m_pst.nx = tempt[3].x;
+					m_pst.ny = tempt[3].y;
 
-			MoveToEx (hdc, tempt[3].x, tempt[3].y, NULL);
-  
-			m_pst.beta += r;
+					DeleteObject (hPen);
+	   
+					break;
+					
+				case 'C':
+							
+					hPen = CreatePen (PS_SOLID, 1, m_col_C.rgb) ;                
+					SelectObject (hdc, hPen);
 
-			m_pst.nx = tempt[3].x;
-			m_pst.ny = tempt[3].y;
+			    
+					r = m_bl_C.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);                
+					index_Len++;
+			    
+					PolyBezier (hdc, tempt, 4) ;
+			    
+					MoveToEx (hdc, tempt[3].x, tempt[3].y, NULL);
+			    
+					m_pst.beta += r;
+			   
+					m_pst.nx = tempt[3].x;			    
+					m_pst.ny = tempt[3].y;
+			    
+					DeleteObject (hPen);
+			    
+					break;
+					
+				case 'D':
+			
+					hPen = CreatePen (PS_SOLID, 1, m_col_D.rgb) ;            
+					SelectObject (hdc, hPen);
+			
+					r = m_bl_D.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);
+					index_Len++;
 
-			DeleteObject (hPen);
+					PolyBezier (hdc, tempt, 4) ;
+			
+					MoveToEx (hdc, tempt[3].x, tempt[3].y, NULL);
+			
+					m_pst.beta += r;
+			
+					m_pst.nx = tempt[3].x;			
+					m_pst.ny = tempt[3].y;
+			
+					DeleteObject (hPen);
+					
+					break;
+		
+				case 'E':
+			
+					hPen = CreatePen (PS_SOLID, 1, m_col_E.rgb) ;            
+					SelectObject (hdc, hPen);
+			
+					r = m_bl_E.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);            
+					index_Len++;
+			
+					PolyBezier (hdc, tempt, 4) ;
+			
+					MoveToEx (hdc, tempt[3].x, tempt[3].y, NULL);
+			
+					m_pst.beta += r;
+			
+					m_pst.nx = tempt[3].x;			
+					m_pst.ny = tempt[3].y;
+			
+					DeleteObject (hPen);
+			
+					break;
+					
+				case 'F':
+			
+					hPen = CreatePen (PS_SOLID, 1, m_col_F.rgb) ;            
+					SelectObject (hdc, hPen);
+			
+					r = m_bl_F.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);           
+					index_Len++;
+			
+					PolyBezier (hdc, tempt, 4) ;
+			
+					MoveToEx (hdc, tempt[3].x, tempt[3].y, NULL); 
+			
+					m_pst.beta += r;			
+					m_pst.nx = tempt[3].x;
+			
+					m_pst.ny = tempt[3].y;
+			
+					DeleteObject (hPen);
+			
+					break;
+		
+			
+				case 'G':
+			
+					cx  = m_pst.size*sin(m_pst.beta);
+					cy  = m_pst.size*cos(m_pst.beta);
+			
+					new_x = m_pst.nx+cx;			
+					new_y = m_pst.ny+cy;
+			
+					MoveToEx (hdc,new_x,new_y,NULL);
+					
+					m_pst.nx = new_x;			
+					m_pst.ny = new_y;			
+			
+					break;
 
-			break;
+		
+			
+				case '~':
+			
+					m_pst.flip = (m_pst.flip?false:true);
+			
+					break;
+					
+				case '+':			
+				
+					m_pst.beta += (m_delta * (1 + m_ranAng[index_Ang]) );			    
+					index_Ang++;
+			    
+					break;
+					
+				case '-':
+							
+					m_pst.beta -= (m_delta * (1 + m_ranAng[index_Ang]) );						
+					index_Ang++;
+			
+				break;
+		
+			
+				case '[':
+							
+					m_sta_stat.push(m_pst);			
+				
+					break;
+			
+				case ']':
+							
+					m_pst = m_sta_stat.top();			
+					m_sta_stat.pop();          
+				
+					MoveToEx(hdc,m_pst.nx,m_pst.ny,NULL);
+							
+					break;
+						
+				default:
+															
+					break;        
+ 
+				} // end of switch
+	      
+			} // end of for
+		
+		} // end of second if
 
-		case 'B':
+		else // not random for length, random for angle 	
+		{			
+			for ( int i=0; i<m_command.length(); i++)	
+			{				
+				switch (m_command[i])			
+				{									
+				case 'A':			
+				
+					hPen = CreatePen (PS_SOLID, 1, m_col_A.rgb) ;
+					SelectObject (hdc, hPen);
+			    
+					r = m_bl_A.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);			    
+			    
+					PolyBezier (hdc, tempt, 4) ;
+			    
+					MoveToEx (hdc, tempt[3].x, tempt[3].y, NULL);
+  			    
+					m_pst.beta += r;
+			    
+					m_pst.nx = tempt[3].x;
+					m_pst.ny = tempt[3].y;
+			    
+					DeleteObject (hPen);
+			    
+					break;
+		    
+				case 'B':			
+				
+					hPen = CreatePen (PS_SOLID, 1, m_col_B.rgb) ;
+					SelectObject (hdc, hPen);
+			    
+					r = m_bl_B.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);
+			    
+					PolyBezier (hdc, tempt, 4) ;
+			    
+					MoveToEx (hdc, tempt[3].x, tempt[3].y, NULL);
+  		    
+					m_pst.beta += r;
+			    
+					m_pst.nx = tempt[3].x;			    
+					m_pst.ny = tempt[3].y;
+			    
+					DeleteObject (hPen);
+			    
+					break;		
+			
+				case 'C':			
+				
+					hPen = CreatePen (PS_SOLID, 1, m_col_C.rgb) ;          
+					SelectObject (hdc, hPen);
+			 
+					r = m_bl_C.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);             
+			  
+					PolyBezier (hdc, tempt, 4) ;
+			   
+					MoveToEx (hdc, tempt[3].x, tempt[3].y, NULL);
+  			  
+					m_pst.beta += r;
+		   
+					m_pst.nx = tempt[3].x;			   
+					m_pst.ny = tempt[3].y;
+			 
+					DeleteObject (hPen);
+			   
+					break;		
+		
+				case 'D':
+		
+					hPen = CreatePen (PS_SOLID, 1, m_col_D.rgb) ;         
+					SelectObject (hdc, hPen);
+		
+					r = m_bl_D.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);       
+		
+					PolyBezier (hdc, tempt, 4) ;
+		
+					MoveToEx (hdc, tempt[3].x, tempt[3].y, NULL);
+  		
+					m_pst.beta += r;
+	
+					m_pst.nx = tempt[3].x;	
+					m_pst.ny = tempt[3].y;
+	
+					DeleteObject (hPen);
+	
+					break;	
+		
+				case 'E':
+		
+					hPen = CreatePen (PS_SOLID, 1, m_col_E.rgb) ;     
+					SelectObject (hdc, hPen);
+		
+					r = m_bl_E.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);       
+		
+					PolyBezier (hdc, tempt, 4) ;
+		
+					MoveToEx (hdc, tempt[3].x, tempt[3].y, NULL);
+  		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;				
+					m_pst.ny = tempt[3].y;
+		
+					DeleteObject (hPen);
+		
+					break;		
+		
+				case 'F':
+		
+					hPen = CreatePen (PS_SOLID, 1, m_col_F.rgb) ;        
+					SelectObject (hdc, hPen);
+		
+					r = m_bl_F.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);         
+		
+					PolyBezier (hdc, tempt, 4) ;
+		
+					MoveToEx (hdc, tempt[3].x, tempt[3].y, NULL);
+  		
+					m_pst.beta += r;
+					
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+		
+					DeleteObject (hPen);
+		
+					break;		
+		
+				case 'G':
+		
+					cx  = m_pst.size*sin(m_pst.beta);		
+					cy  = m_pst.size*cos(m_pst.beta);
+		
+					new_x = m_pst.nx+cx;		
+					new_y = m_pst.ny+cy;
+		
+					MoveToEx (hdc,new_x,new_y,NULL);
+		
+					m_pst.nx = new_x;	
+					m_pst.ny = new_y;			
+		
+					break;		
+		
+				case '~':
+		
+					m_pst.flip = (m_pst.flip?false:true);
+		
+					break;		
+		
+				case '+':		
+		
+					m_pst.beta += (m_delta * (1 + m_ranAng[index_Ang]) );		
+					index_Ang++;
+		
+					break;
+			
+				case '-':
+						
+					m_pst.beta -= (m_delta * (1 + m_ranAng[index_Ang]) );						
+					index_Ang++;			
+		
+					break;		
+		
+				case '[':			
+			
+					m_sta_stat.push(m_pst);			
+						
+					break;		
+		
+				case ']':			
+			
+					m_pst = m_sta_stat.top();			
+			
+					m_sta_stat.pop();         
+			
+					MoveToEx(hdc,m_pst.nx,m_pst.ny,NULL);			
+			
+					break;		
+		
+				default:
+						
+					break;
+        
+				} // end of switch
+	
+			} // end of for
+		} // end of else
 
-			hPen = CreatePen (PS_SOLID, 1, m_col_B.rgb) ;
-            SelectObject (hdc, hPen);
 
-			r = m_bl_B.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);
-
-			PolyBezier (hdc, tempt, 4) ;
-
-			MoveToEx (hdc, tempt[3].x, tempt[3].y, NULL);
-  
-			m_pst.beta += r;
-
-			m_pst.nx = tempt[3].x;
-			m_pst.ny = tempt[3].y;
-
-			DeleteObject (hPen);
-
-			break;
-		case 'C':
-
-			hPen = CreatePen (PS_SOLID, 1, m_col_C.rgb) ;
-            SelectObject (hdc, hPen);
-
-			r = m_bl_C.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);
-
-			PolyBezier (hdc, tempt, 4) ;
-
-			MoveToEx (hdc, tempt[3].x, tempt[3].y, NULL);
-  
-			m_pst.beta += r;
-
-			m_pst.nx = tempt[3].x;
-			m_pst.ny = tempt[3].y;
+	} // end of first if
 
 
-			DeleteObject (hPen);
+	else // not random for angle
+	{	
+		if(fRanL) // random for length, not random for angle	
+		{			
+			for ( int i=0; i<m_command.length(); i++)				
+			{				
+				switch (m_command[i])
+			
+				{					
+				case 'A':			
+				
+					hPen = CreatePen (PS_SOLID, 1, m_col_A.rgb) ;               
+					SelectObject (hdc, hPen);
+			    
+					r = m_bl_A.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);			    
+					index_Len++;
+			    
+					PolyBezier (hdc, tempt, 4) ;
+			    
+					MoveToEx (hdc, tempt[3].x, tempt[3].y, NULL); 
+			   
+					m_pst.beta += r;
+			    
+					m_pst.nx = tempt[3].x;			    
+					m_pst.ny = tempt[3].y;
+			    
+					DeleteObject (hPen);
+			    
+					break;
 
-			break;
-		case 'D':
+		    
+				case 'B':
+							
+					hPen = CreatePen (PS_SOLID, 1, m_col_B.rgb) ;               
+					SelectObject (hdc, hPen);
+			    
+					r = m_bl_B.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);                
+					index_Len++;
+			    
+					PolyBezier (hdc, tempt, 4) ;
+			    
+					MoveToEx (hdc, tempt[3].x, tempt[3].y, NULL);
+			    
+					m_pst.beta += r;
+			    
+					m_pst.nx = tempt[3].x;			    
+					m_pst.ny = tempt[3].y;
+			    
+					DeleteObject (hPen);
+			    
+					break;
+					
+				case 'C':			
+				
+					hPen = CreatePen (PS_SOLID, 1, m_col_C.rgb) ;              
+					SelectObject (hdc, hPen);
+			    
+					r = m_bl_C.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);               
+					index_Len++;
+			   
+					PolyBezier (hdc, tempt, 4) ;
+			 
+					MoveToEx (hdc, tempt[3].x, tempt[3].y, NULL);
+  			 
+					m_pst.beta += r;
+			
+					m_pst.nx = tempt[3].x;			 
+					m_pst.ny = tempt[3].y;
+			 
+					DeleteObject (hPen);
+			  
+					break;		
+		
+				case 'D':
+		
+					hPen = CreatePen (PS_SOLID, 1, m_col_D.rgb) ;         
+					SelectObject (hdc, hPen);
+		
+					r = m_bl_D.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);        
+					index_Len++;
+	
+					PolyBezier (hdc, tempt, 4) ;
+		
+					MoveToEx (hdc, tempt[3].x, tempt[3].y, NULL);
+  		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+		
+					DeleteObject (hPen);			
+		
+					break;
+				
+				case 'E':
+		
+					hPen = CreatePen (PS_SOLID, 1, m_col_E.rgb) ;         
+					SelectObject (hdc, hPen);
+		
+					r = m_bl_E.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);
+          
+					index_Len++;
+		
+					PolyBezier (hdc, tempt, 4) ;
+	
+					MoveToEx (hdc, tempt[3].x, tempt[3].y, NULL);
+  		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+		
+					DeleteObject (hPen);
+		
+					break;		
+		
+				case 'F':
+		
+					hPen = CreatePen (PS_SOLID, 1, m_col_F.rgb) ;         
+					SelectObject (hdc, hPen);
+		
+					r = m_bl_F.TranslatePointRan(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt, m_ranLen[index_Len]);         
+					index_Len++;
+		
+					PolyBezier (hdc, tempt, 4) ;
+		
+					MoveToEx (hdc, tempt[3].x, tempt[3].y, NULL);
+  		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+		
+					DeleteObject (hPen);
+		
+					break;
+				
+				case 'G':
+		
+					cx  = m_pst.size*sin(m_pst.beta);		
+					cy  = m_pst.size*cos(m_pst.beta);
+		
+					new_x = m_pst.nx+cx;		
+					new_y = m_pst.ny+cy;
+		
+					MoveToEx (hdc,new_x,new_y,NULL);
+		
+					m_pst.nx = new_x;		
+					m_pst.ny = new_y;
+					
+					break;
+				
+				case '~':
+			
+					m_pst.flip = (m_pst.flip?false:true);		
+					break;		
+		
+				case '+':
+					
+					m_pst.beta += m_delta;		
+			
+					break;
+				
+				case '-':
+					
+					m_pst.beta -= m_delta;						
+					
+					break;
+				
+				case '[':			
+			
+					m_sta_stat.push(m_pst);			
+					
+					break;		
+		
+				case ']':
+					
+					m_pst = m_sta_stat.top();							
+					m_sta_stat.pop();
+            			
+					MoveToEx(hdc,m_pst.nx,m_pst.ny,NULL);			
+			
+					break;
+						
+				default:
+							
+					break;
+		
 
-			hPen = CreatePen (PS_SOLID, 1, m_col_D.rgb) ;
-            SelectObject (hdc, hPen);
+        
+				} // end of switch
+	
+			} // end of for
+		} // end of if 
+	
+		else // not random for length, not random for angle	
+		{	
+			for ( int i=0; i<m_command.length(); i++)	
+			{				
+				switch (m_command[i])
+			
+				{					
+				case 'A':
+			
+				
+					hPen = CreatePen (PS_SOLID, 1, m_col_A.rgb) ;
+                
+					SelectObject (hdc, hPen);
+			 
+					r = m_bl_A.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);			 
+		
+					PolyBezier (hdc, tempt, 4) ;
+			  
+					MoveToEx (hdc, tempt[3].x, tempt[3].y, NULL); 
+			  
+					m_pst.beta += r;
+			  
+					m_pst.nx = tempt[3].x;			   
+					m_pst.ny = tempt[3].y;
+			 
+					DeleteObject (hPen);
+			  
+					break;
+		  
+				case 'B':			
+				
+					hPen = CreatePen (PS_SOLID, 1, m_col_B.rgb) ;              
+					SelectObject (hdc, hPen);
+			  
+					r = m_bl_B.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);            
+			  
+					PolyBezier (hdc, tempt, 4) ;
+			  
+					MoveToEx (hdc, tempt[3].x, tempt[3].y, NULL);
+			 
+					m_pst.beta += r;
+			  
+					m_pst.nx = tempt[3].x;			  
+					m_pst.ny = tempt[3].y;
+			   
+					DeleteObject (hPen);
+			  
+					break;		
+		
+				case 'C':
+						
+					hPen = CreatePen (PS_SOLID, 1, m_col_C.rgb) ;              
+					SelectObject (hdc, hPen);
+			  
+					r = m_bl_C.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);            
+					
+					PolyBezier (hdc, tempt, 4) ;
+			
+					MoveToEx (hdc, tempt[3].x, tempt[3].y, NULL);
+  		
+					m_pst.beta += r;
+			   
+					m_pst.nx = tempt[3].x;			 
+					m_pst.ny = tempt[3].y;
+			
+					DeleteObject (hPen);
+			  
+					break;
+				
+				case 'D':
+		
+					hPen = CreatePen (PS_SOLID, 1, m_col_D.rgb) ;        
+					SelectObject (hdc, hPen);
+		
+					r = m_bl_D.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);        
+		
+					PolyBezier (hdc, tempt, 4) ;
+		
+					MoveToEx (hdc, tempt[3].x, tempt[3].y, NULL);
+  		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+		
+					DeleteObject (hPen);			
+		
+					break;
+				
+				case 'E':
+		
+					hPen = CreatePen (PS_SOLID, 1, m_col_E.rgb) ;         
+					SelectObject (hdc, hPen);
+		
+					r = m_bl_E.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);        
+		
+					PolyBezier (hdc, tempt, 4) ;
+		
+					MoveToEx (hdc, tempt[3].x, tempt[3].y, NULL);
+  		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+		
+					DeleteObject (hPen);
+		
+					break;		
+		
+				case 'F':
+		
+					hPen = CreatePen (PS_SOLID, 1, m_col_F.rgb) ;        
+					SelectObject (hdc, hPen);
+		
+					r = m_bl_F.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);        
+		
+					PolyBezier (hdc, tempt, 4) ;
+		
+					MoveToEx (hdc, tempt[3].x, tempt[3].y, NULL);
+  		
+					m_pst.beta += r;
+		
+					m_pst.nx = tempt[3].x;		
+					m_pst.ny = tempt[3].y;
+		
+					DeleteObject (hPen);
+		
+					break;
+		
+				case 'G':
+		
+					cx  = m_pst.size*sin(m_pst.beta);		
+					cy  = m_pst.size*cos(m_pst.beta);
+		
+					new_x = m_pst.nx+cx;		
+					new_y = m_pst.ny+cy;
+		
+					MoveToEx (hdc,new_x,new_y,NULL);
+		
+					m_pst.nx = new_x;		
+					m_pst.ny = new_y;			
+		
+					break;		
+		
+				case '~':
+		
+					m_pst.flip = (m_pst.flip?false:true);
+		
+					break;
+			
+				case '+':
+					
+					m_pst.beta += m_delta ;			 
+			
+					break;		
+		
+				case '-':			
+		
+					m_pst.beta -= m_delta ;						
+		
+					break;		
+		
+				case '[':
+					
+					m_sta_stat.push(m_pst);
+								
+					break;		
+		
+				case ']':
+					
+					m_pst = m_sta_stat.top();					
+					m_sta_stat.pop();
+            		
+					MoveToEx(hdc,m_pst.nx,m_pst.ny,NULL);			
+		
+					break;
+		
+				default:
+						
+					break;		
+        
+				} // end of switch
+	
+			} // end of for
 
-			r = m_bl_D.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);
+		} // end of else
 
-			PolyBezier (hdc, tempt, 4) ;
-
-			MoveToEx (hdc, tempt[3].x, tempt[3].y, NULL);
-  
-			m_pst.beta += r;
-
-			m_pst.nx = tempt[3].x;
-			m_pst.ny = tempt[3].y;
-
-			DeleteObject (hPen);
-
-			break;
-		case 'E':
-
-			hPen = CreatePen (PS_SOLID, 1, m_col_E.rgb) ;
-            SelectObject (hdc, hPen);
-
-			r = m_bl_E.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);
-
-			PolyBezier (hdc, tempt, 4) ;
-
-			MoveToEx (hdc, tempt[3].x, tempt[3].y, NULL);
-  
-			m_pst.beta += r;
-
-			m_pst.nx = tempt[3].x;
-			m_pst.ny = tempt[3].y;
-
-			DeleteObject (hPen);
-
-			break;
-		case 'F':
-
-			hPen = CreatePen (PS_SOLID, 1, m_col_F.rgb) ;
-            SelectObject (hdc, hPen);
-
-			r = m_bl_F.TranslatePoint(m_pst.nx, m_pst.ny,m_pst.flip, m_pst.beta, tempt);
-
-			PolyBezier (hdc, tempt, 4) ;
-
-			MoveToEx (hdc, tempt[3].x, tempt[3].y, NULL);
-  
-			m_pst.beta += r;
-
-			m_pst.nx = tempt[3].x;
-			m_pst.ny = tempt[3].y;
-
-
-			DeleteObject (hPen);
-
-			break;
-		case 'G':
-
-			cx  = m_pst.size*sin(m_pst.beta);
-			cy  = m_pst.size*cos(m_pst.beta);
-
-			new_x = m_pst.nx+cx;
-			new_y = m_pst.ny+cy;
-
-			MoveToEx (hdc,new_x,new_y,NULL);
-
-			m_pst.nx = new_x;
-			m_pst.ny = new_y;
-
-			break;
-
-		case '~':
-			m_pst.flip = (m_pst.flip?false:true);
-			break;
-		case '+':
-			m_pst.beta += m_delta;
-			break;
-		case '-':
-			m_pst.beta -= m_delta;
-			break;
-		case '[':
-			m_sta_stat.push(m_pst);
-
-			break;
-
-		case ']':
-			m_pst = m_sta_stat.top();
-			m_sta_stat.pop();
-            MoveToEx(hdc,m_pst.nx,m_pst.ny,NULL);
-			break;
-
-		default:
-			break;
-		}
-	}
-
+	} // end of else
 	ReleaseDC (hdlg, hdc);
     ClearState();
 }
@@ -504,4 +1652,45 @@ void DrawGraph::SetCol(char c, COLOR col)
 void DrawGraph::ClearState()
 {
 	m_pst.nx = m_pst.ny = m_pst.beta = 0;
+}
+
+	
+void DrawGraph::GenRandomA(int a, int range)
+{
+	m_ranAng = new double[a];
+	range = min(100, range);
+	srand(unsigned(time(NULL)));
+	for(int i=0; i<a; i++)
+	{
+		m_ranAng[i] = ( double(rand()%(2*range)) - range)/100;
+	}
+}
+			
+void DrawGraph::GenRandomL(int l, int range)
+{
+	m_ranLen = new double[l];
+	range = min(100,range);
+	srand(unsigned(time(NULL)));
+	for(int i=0; i<l; i++)
+	{
+		m_ranLen[i] = ( double(rand()%(2*range)) - range)/100;
+	}
+}
+
+void DrawGraph::ClearDyAryA()
+{
+	if(m_ranAng!=NULL)
+	{
+		delete [] m_ranAng;
+	    m_ranAng = NULL;
+	}
+}
+
+void DrawGraph::ClearDyAryL()
+{
+	if(m_ranLen!=NULL)
+	{	
+		delete [] m_ranLen;
+	    m_ranLen = NULL;
+	}
 }

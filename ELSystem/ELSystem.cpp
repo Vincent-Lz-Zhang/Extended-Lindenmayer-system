@@ -184,3 +184,53 @@ void ELSystem::Gentree()
 	  
 
 }
+
+
+int ELSystem::CountLetter()
+{
+	int count = 0;
+	if(!m_Tree.empty())
+	{	
+		for(int i=0; i<m_Tree.length(); i++)	
+		{		
+			switch(m_Tree[i])		
+			{		
+			case 'A':
+		    case 'B':
+		    case 'C':
+		    case 'D':
+		    case 'E':
+		    case 'F':			
+				count++;
+			    break;		
+			default:
+			    break;		
+			}	
+		}
+	}
+	return count;	
+}
+	
+int ELSystem::CountSymbol()
+{
+		
+	int count = 0;
+	if(!m_Tree.empty())
+	{	
+		for(int i=0; i<m_Tree.length(); i++)	
+		{		
+			switch(m_Tree[i])		
+			{		
+			case '+':
+		    case '-':			
+				count++;
+			    break;
+		
+			default:
+			    break;
+		
+			}	
+		}
+	}
+	return count;
+}

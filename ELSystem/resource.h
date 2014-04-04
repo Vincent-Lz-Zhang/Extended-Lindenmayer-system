@@ -40,13 +40,15 @@
 #define IDM_EDIT_COLOR                  40002
 #define IDM_EDIT_LINE                   40003
 #define IDM_EDIT_ANIM                   40004
+#define IDM_FRAME_INSERT                40005
+#define IDM_FRAME_DELETE                40006
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        112
-#define _APS_NEXT_COMMAND_VALUE         40005
+#define _APS_NEXT_RESOURCE_VALUE        113
+#define _APS_NEXT_COMMAND_VALUE         40007
 #define _APS_NEXT_CONTROL_VALUE         1032
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

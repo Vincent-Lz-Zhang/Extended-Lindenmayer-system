@@ -37,12 +37,18 @@ public:
     void AddFrame(unsigned int, FRAMEINFO &);
     void FillStateArr(int idx, int *a) const;
     void UpdateFrmInfo(unsigned int, FRAMEINFO &);
+
+	bool IsMapEmpty() const { return FrmMap.empty();}
+	unsigned int MapSize() const {return FrmMap.size();}
+	void RemoveALL(){ FrmMap.clear();}
+	void FillAniArry(int *f, double *l, double *a) const;
+
+	unsigned int FrsFrmIndex() const; 
+	double FrsFrmAng() const;
+	double FrsFrmLen() const;
+
 	void PrintAll();
 	void Show(unsigned int);
-	bool IsMapEmpty(){ return FrmMap.empty();}
-	int MapSize(){return FrmMap.size();}
-	void RemoveALL(){ FrmMap.clear();}
-
 };
 
 #endif

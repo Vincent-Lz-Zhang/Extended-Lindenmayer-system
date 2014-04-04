@@ -59,6 +59,77 @@ void Frame::FillStateArr(int idx, int *a) const
 
 }
 
+void Frame::FillAniArry(int *f, double *l, double *a) const
+{
+	FRAMEMAP::const_iterator pos;
+	FRAMEMAP::const_iterator pos_later;
+	FRAMEMAP::const_iterator end;
+
+	end = FrmMap.end(); end--;
+
+	int i;
+	for(i=0,pos=FrmMap.begin();pos!=end;i++,pos++)
+	{
+		pos_later = pos; pos_later++;
+
+		// use the next frame's length ratio minus the current frame's length ratio
+		// then devide it by the difference of two frames' index numbers
+		// finally, devide it by 100, because it is ratio, should be in percent
+
+		l[i] = (  double( (pos_later->second.len_Ratio) - (pos->second.len_Ratio) )
+			     /double( (pos_later->first)            - (pos->first) ) 
+			   ) ;
+			   
+
+		// use the next frame's angle minus the current frame's angle
+		// then devide it by the difference of two frames' index numbers
+
+        a[i] = double( (pos_later->second.angle) - (pos->second.angle) )
+			  /double( (pos_later->first)        - (pos->first) );
+
+		// the next frame's index num
+
+		f[i] = pos_later->first;
+	}
+}
+
+unsigned int Frame::FrsFrmIndex() const
+{
+	if(!FrmMap.empty())
+	{
+		return ( FrmMap.begin() )->first;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+double Frame::FrsFrmAng() const
+{
+	if(!FrmMap.empty())
+	{
+		return ( FrmMap.begin() )->second.angle;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+double Frame::FrsFrmLen() const
+{
+	if(!FrmMap.empty())
+	{
+		return ( FrmMap.begin() )->second.len_Ratio;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+//----------------------debugging functions-------------------------//
 
 void Frame::Show(unsigned int num)
 {

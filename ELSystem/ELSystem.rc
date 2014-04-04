@@ -69,8 +69,14 @@ STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "About Extended L-System"
 FONT 10, "System"
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,109,90,50,14
-    ICON            "ELSystem",IDC_STATIC,20,20,20,20
+    DEFPUSHBUTTON   "OK",IDOK,72,104,28,12
+    ICON            "ELSystem",IDC_STATIC,20,27,16,16
+    CTEXT           "CSIT 691 Extended L-System",IDC_STATIC,60,16,95,9
+    CTEXT           "Created by ",IDC_STATIC,77,29,46,9
+    LTEXT           "Supervised by",IDC_STATIC,77,57,48,9
+    LTEXT           "ZHANG Lingzhang",IDC_STATIC,73,43,61,9
+    LTEXT           "Prof.Rossiter",IDC_STATIC,79,71,44,9
+    LTEXT           "HKUST",IDC_STATIC,89,83,24,9
 END
 
 GRAPHICS DIALOG DISCARDABLE  150, 25, 241, 209
@@ -158,16 +164,12 @@ BEGIN
                     20,30,174,35
     CTEXT           "Length:",IDC_STATIC,23,73,25,8
     CTEXT           "Angle:",IDC_STATIC,25,114,21,8
-    CTEXT           "",IDC_STATIC_SAMPLE,121,155,60,51,0,WS_EX_CLIENTEDGE | 
+    CTEXT           "",1130,74,155,60,51,0,WS_EX_CLIENTEDGE | 
                     WS_EX_STATICEDGE
-    CTEXT           "FrameRate",IDC_STATIC,35,160,37,8
     SCROLLBAR       1125,24,90,166,11
     SCROLLBAR       1126,24,131,166,11
     LTEXT           "",IDC_STATIC_LEN,62,73,14,8
     LTEXT           "",IDC_STATIC_ANG,61,114,15,8
-    COMBOBOX        IDC_COMBO_ANIM_FR,32,178,48,47,CBS_DROPDOWNLIST | 
-                    CBS_OWNERDRAWFIXED | CBS_SORT | WS_VSCROLL | WS_GROUP | 
-                    WS_TABSTOP
     CTEXT           "Time Line:",IDC_STATIC,21,13,35,8
     PUSHBUTTON      "Add",IDC_BTN_ADD_FRM,97,13,22,11
     EDITTEXT        IDC_EDIT_FRM,125,13,26,12,ES_RIGHT | ES_AUTOHSCROLL
@@ -272,7 +274,7 @@ BEGIN
         MENUITEM "Edit &Color",                 IDM_EDIT_COLOR
         MENUITEM "Edit Basic &Lines",           IDM_EDIT_LINE
         MENUITEM SEPARATOR
-        MENUITEM "A&nimation",                  IDM_EDIT_ANIM
+        MENUITEM "Edit A&nimation",             IDM_EDIT_ANIM
     END
     POPUP "&Help"
     BEGIN
@@ -280,21 +282,13 @@ BEGIN
     END
 END
 
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Dialog Info
-//
-
-ANIMABOX DLGINIT
+FRAMEMENU MENU DISCARDABLE 
 BEGIN
-    IDC_COMBO_ANIM_FR, 0x403, 2, 0
-0x0038, 
-    IDC_COMBO_ANIM_FR, 0x403, 3, 0
-0x3031, "\000" 
-    IDC_COMBO_ANIM_FR, 0x403, 3, 0
-0x3231, "\000" 
-    0
+    POPUP "Frame_Edit"
+    BEGIN
+        MENUITEM "&Insert frame",               IDM_FRAME_INSERT
+        MENUITEM "&Remove frame",               IDM_FRAME_DELETE, GRAYED
+    END
 END
 
 #endif    // English (U.S.) resources

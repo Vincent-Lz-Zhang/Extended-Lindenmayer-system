@@ -65,29 +65,38 @@ private:
 
 	stack<STATE> m_sta_stat;  // stack of current states
 
+	double * m_ranAng;        // array of random numbers for angle  
+	double * m_ranLen;        // array of random numbers for length 
+
 public:
 	
 	friend class Animation;
 
-	BezierLine m_bl_A, m_bl_B, m_bl_C,   // BezierLine objects
+	BezierLine m_bl_A, m_bl_B, m_bl_C,          // BezierLine objects
 		       m_bl_D, m_bl_E, m_bl_F;
 
-	DrawGraph();  // command string and angle
+	DrawGraph();                                // command string and angle
 
-	void Update(string &, int);            // the same parameters as constructor
+	void Update(string &, int);                 // the same parameters as constructor
 
-	~DrawGraph();                        // default destructor
+	~DrawGraph();                               // default destructor
 
-	RECT CheckBoundary(HWND);                 //                    //
+	RECT CheckBoundary(HWND, BOOL, BOOL);       // calculate the size of the generated graphics, used for calculating scroll
+	                                            // bars' range
 
-	void Draw(HWND, int, int);                // paint on the graphic dialog
+	void Draw(HWND, int, int, BOOL, BOOL);      // paint on the graphic dialog
 
-	COLOR FindCol(char c) const;               // get the COLOR structur by character as index
+	COLOR FindCol(char c) const;                // get the COLOR structur by character as index
 
-	void SetCol(char c, COLOR col);      // set the COLOR structur by character as index
+	void SetCol(char c, COLOR col);             // set the COLOR structur by character as index
 
-	void ClearState();                   // clear the current state information
+	void ClearState();                          // clear the current state information
 
+	void GenRandomA(int, int);                  // generate the random number array for angle, length of array and maximum
+	void GenRandomL(int, int);                  // generate the random number array for length ratio, length of array and maximum
+ 
+	void ClearDyAryA();                         // free the dynamic array's memory
+	void ClearDyAryL();                         // free the dynamic array's memory
 };
 
 #endif
