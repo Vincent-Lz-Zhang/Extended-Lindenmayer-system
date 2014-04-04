@@ -1,12 +1,12 @@
 #include "DrawGraph.h"
 
 
-COLOR DrawGraph::m_col_A = { 0,0,0,'A' } ;
-COLOR DrawGraph::m_col_B = { 0,0,0,'B' } ;
-COLOR DrawGraph::m_col_C = { 0,0,0,'C' } ; 
-COLOR DrawGraph::m_col_D = { 0,0,0,'D' } ; 
-COLOR DrawGraph::m_col_E = { 0,0,0,'E' } ; 
-COLOR DrawGraph::m_col_F = { 0,0,0,'F' } ;
+COLOR DrawGraph::m_col_A = { RGB(0,0,0),'A' } ;
+COLOR DrawGraph::m_col_B = { RGB(0,0,0),'B' } ;
+COLOR DrawGraph::m_col_C = { RGB(0,0,0),'C' } ; 
+COLOR DrawGraph::m_col_D = { RGB(0,0,0),'D' } ; 
+COLOR DrawGraph::m_col_E = { RGB(0,0,0),'E' } ; 
+COLOR DrawGraph::m_col_F = { RGB(0,0,0),'F' } ;
 
 
 
@@ -33,6 +33,7 @@ DrawGraph::~DrawGraph()
 
 void DrawGraph::Draw(HWND hdlg)
 {
+	HPEN hPen; 
 	HDC hdc;
 	RECT rect;
 	hdc = GetDC (hdlg) ;
@@ -56,11 +57,10 @@ void DrawGraph::Draw(HWND hdlg)
 		switch (m_command[i])
 		{
 		case 'A':
-		case 'B':
-		case 'C':
-		case 'D':
-		case 'E':
-		case 'F':
+
+			hPen = CreatePen (PS_SOLID, 1, m_col_A.rgb) ;
+            SelectObject (hdc, hPen);
+
 			cx = m_pst.size*sin(m_pst.beta);
 			cy = m_pst.size*cos(m_pst.beta);
 
@@ -73,6 +73,113 @@ void DrawGraph::Draw(HWND hdlg)
   
 			m_pst.nx = new_x;
 			m_pst.ny = new_y;
+
+			DeleteObject (hPen);
+
+			break;
+		case 'B':
+
+			hPen = CreatePen (PS_SOLID, 1, m_col_B.rgb) ;
+            SelectObject (hdc, hPen);
+
+			cx = m_pst.size*sin(m_pst.beta);
+			cy = m_pst.size*cos(m_pst.beta);
+
+			new_x = m_pst.nx+cx;
+			new_y = m_pst.ny+cy;
+
+			LineTo(hdc,new_x,new_y);
+
+			MoveToEx(hdc,new_x,new_y,NULL);
+  
+			m_pst.nx = new_x;
+			m_pst.ny = new_y;
+
+			DeleteObject (hPen);
+
+			break;
+		case 'C':
+
+			hPen = CreatePen (PS_SOLID, 1, m_col_C.rgb) ;
+            SelectObject (hdc, hPen);
+
+			cx = m_pst.size*sin(m_pst.beta);
+			cy = m_pst.size*cos(m_pst.beta);
+
+			new_x = m_pst.nx+cx;
+			new_y = m_pst.ny+cy;
+
+			LineTo(hdc,new_x,new_y);
+
+			MoveToEx(hdc,new_x,new_y,NULL);
+  
+			m_pst.nx = new_x;
+			m_pst.ny = new_y;
+
+			DeleteObject (hPen);
+
+			break;
+		case 'D':
+
+			hPen = CreatePen (PS_SOLID, 1, m_col_D.rgb) ;
+            SelectObject (hdc, hPen);
+
+			cx = m_pst.size*sin(m_pst.beta);
+			cy = m_pst.size*cos(m_pst.beta);
+
+			new_x = m_pst.nx+cx;
+			new_y = m_pst.ny+cy;
+
+			LineTo(hdc,new_x,new_y);
+
+			MoveToEx(hdc,new_x,new_y,NULL);
+  
+			m_pst.nx = new_x;
+			m_pst.ny = new_y;
+
+			DeleteObject (hPen);
+
+			break;
+		case 'E':
+
+			hPen = CreatePen (PS_SOLID, 1, m_col_E.rgb) ;
+            SelectObject (hdc, hPen);
+
+			cx = m_pst.size*sin(m_pst.beta);
+			cy = m_pst.size*cos(m_pst.beta);
+
+			new_x = m_pst.nx+cx;
+			new_y = m_pst.ny+cy;
+
+			LineTo(hdc,new_x,new_y);
+
+			MoveToEx(hdc,new_x,new_y,NULL);
+  
+			m_pst.nx = new_x;
+			m_pst.ny = new_y;
+
+			DeleteObject (hPen);
+
+			break;
+		case 'F':
+
+			hPen = CreatePen (PS_SOLID, 1, m_col_F.rgb) ;
+            SelectObject (hdc, hPen);
+
+			cx = m_pst.size*sin(m_pst.beta);
+			cy = m_pst.size*cos(m_pst.beta);
+
+			new_x = m_pst.nx+cx;
+			new_y = m_pst.ny+cy;
+
+			LineTo(hdc,new_x,new_y);
+
+			MoveToEx(hdc,new_x,new_y,NULL);
+  
+			m_pst.nx = new_x;
+			m_pst.ny = new_y;
+
+			DeleteObject (hPen);
 
 			break;
 		case 'G':
@@ -102,7 +209,7 @@ void DrawGraph::Draw(HWND hdlg)
 		case ']':
 			m_pst = m_sta_stat.top();
 			m_sta_stat.pop();
-
+            MoveToEx(hdc,m_pst.nx,m_pst.ny,NULL);
 			break;
 
 		default:
@@ -117,7 +224,7 @@ void DrawGraph::Draw(HWND hdlg)
 COLOR DrawGraph::FindCol(char c)
 
 {
-	COLOR col= { 0,0,0,'X' };
+	COLOR _col= { RGB(0,0,0),'X' };
 
 	switch(c)
 	{
@@ -140,7 +247,7 @@ COLOR DrawGraph::FindCol(char c)
 		return m_col_F;
 		break;
 	default:
-		return col;
+		return _col;
 		break;
 	}
 }

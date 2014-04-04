@@ -12,6 +12,8 @@
 #include "DrawGraph.h"
 #include "ParaValidator.h"
 
+#include <commdlg.h>
+
 #define ID_STATIC_AXIOM 1
 #define ID_STATIC_RULES 2
 #define ID_STATIC_ORDER 3
@@ -43,7 +45,7 @@ ELSystem g_elsys;
 //DrawGraph dgr("F",0);
 DrawGraph g_dg_ptr;
 
-
+     
 static COLOR col_A, col_B, col_C, col_D, col_E, col_F;
 ///////////////////////
 
@@ -51,7 +53,8 @@ LRESULT CALLBACK WndProc      (HWND, UINT, WPARAM, LPARAM) ;
 BOOL    CALLBACK AboutDlgProc (HWND, UINT, WPARAM, LPARAM) ;
 BOOL    CALLBACK GraphDlgProc (HWND, UINT, WPARAM, LPARAM) ;
 BOOL    CALLBACK ColorDlgProc (HWND, UINT, WPARAM, LPARAM) ;
-BOOL    CALLBACK ColorScrDlgProc (HWND, UINT, WPARAM, LPARAM);
+BOOL    CALLBACK LineDlgProc (HWND, UINT, WPARAM, LPARAM) ;
+BOOL    CALLBACK BezierDlgProc (HWND, UINT, WPARAM, LPARAM) ;
 
 int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
                     PSTR szCmdLine, int iCmdShow)
@@ -128,16 +131,16 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
      static HWND hwnd_Edit_Axm, hwnd_Edit_Rule, hwnd_Edit_Ord, hwnd_Edit_Ang;
 	 static HWND hwnd_Btn_Apply, hwnd_Btn_Reset, hwnd_Btn_Concl;
 
-     static int   cxChar, cyChar ;
+     static int   cxChar, cyChar;
 
      switch (message)
      {
      case WM_CREATE :
 
-		  cxChar = LOWORD (GetDialogBaseUnits ()) ;
-          cyChar = HIWORD (GetDialogBaseUnits ()) ;
+		  cxChar = LOWORD (GetDialogBaseUnits ());
+          cyChar = HIWORD (GetDialogBaseUnits ());
 
-          hInstance = ((LPCREATESTRUCT) lParam)->hInstance ;
+          hInstance = ((LPCREATESTRUCT) lParam)->hInstance;
 
 		  //////////////////////////////////////
 		  // initialize the GDIs
@@ -151,7 +154,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
                          WS_CHILD | WS_VISIBLE |
                                    WS_BORDER | ES_LEFT ,
                          8 * cxChar, cyChar, 4*cxChar, cyChar, hwnd, (HMENU) ID_EDIT_AXIOM,
-                          hInstance, NULL) ;
+                          hInstance, NULL);
        
 		  hwnd_Stic_Rule = CreateWindow ( TEXT( "STATIC"), rule, WS_CHILD | WS_VISIBLE,
 			  cxChar, 3 * cyChar, 16 * cxChar, cyChar, 
@@ -161,7 +164,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
                          WS_CHILD | WS_VISIBLE |
                                    WS_BORDER | ES_LEFT ,
                          cxChar, 5 * cyChar, 30 * cxChar, cyChar, hwnd, (HMENU) ID_EDIT_RULES,
-                          hInstance, NULL) ;
+                          hInstance, NULL);
 
 		  hwnd_Stic_Ord = CreateWindow ( TEXT( "STATIC"), order, WS_CHILD | WS_VISIBLE,
 			  cxChar, 7 * cyChar, 5 * cxChar, cyChar, 
@@ -171,7 +174,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
                          WS_CHILD | WS_VISIBLE |
                                    WS_BORDER | ES_LEFT ,
                          7 * cxChar, 7 * cyChar, 3 * cxChar, cyChar, hwnd, (HMENU) ID_EDIT_ORDER,
-                          hInstance, NULL) ;     		  
+                          hInstance, NULL);     		  
 
 		  hwnd_Stic_Ang = CreateWindow ( TEXT( "STATIC"), angle, WS_CHILD | WS_VISIBLE,
 			  12 * cxChar, 7 * cyChar, 5 * cxChar, cyChar, 
@@ -181,7 +184,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
                          WS_CHILD | WS_VISIBLE |
                                    WS_BORDER | ES_LEFT ,
                          18 * cxChar, 7 * cyChar, 4 * cxChar, cyChar, hwnd, (HMENU) ID_EDIT_ANGLE,
-                          hInstance, NULL) ;
+                          hInstance, NULL);
 
           // buttons 
 
@@ -191,7 +194,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
                                    14 * cxChar, 20 * cyChar,
                                    6 * cxChar, 7 * cyChar / 4,
                                    hwnd, (HMENU) ID_BTN_APPLY,
-                                   hInstance, NULL) ;
+                                   hInstance, NULL);
 
 		  hwnd_Btn_Reset = CreateWindow ( TEXT("button"), 
                                    btnReset,
@@ -199,7 +202,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
                                    21 * cxChar, 20 * cyChar,
                                    7 * cxChar, 7 * cyChar / 4,
                                    hwnd, (HMENU) ID_BTN_RESET,
-                                   hInstance, NULL) ;
+                                   hInstance, NULL);
 
 		  hwnd_Btn_Concl = CreateWindow ( TEXT("button"), 
                                    btnConcl,
@@ -207,7 +210,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
                                    29 * cxChar, 20 * cyChar,
                                    8 * cxChar, 7 * cyChar / 4,
                                    hwnd, (HMENU) ID_BTN_CONCEAL,
-                                   hInstance, NULL) ;
+                                   hInstance, NULL);
 
 		  return 0 ;
 
@@ -215,11 +218,15 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
           switch (LOWORD (wParam))
           {
           case IDM_APP_ABOUT :
-               DialogBox (hInstance, TEXT ("AboutBox"), hwnd, AboutDlgProc) ;
+               DialogBox (hInstance, TEXT ("AboutBox"), hwnd, AboutDlgProc);
                break ;
 
           case IDM_EDIT_COLOR :
-               DialogBox (hInstance, TEXT ("ColorBox"), hwnd, ColorDlgProc) ;
+               DialogBox (hInstance, TEXT ("ColorBox"), hwnd, ColorDlgProc);
+               break ;
+
+          case IDM_EDIT_LINE :
+               DialogBox (hInstance, TEXT ("LineBox"), hwnd, LineDlgProc);
                break ;
 
 		  case ID_BTN_APPLY :
@@ -283,7 +290,7 @@ BOOL CALLBACK AboutDlgProc (HWND hDlg, UINT message,
      return FALSE ;
 }
 
-void PaintColor(HWND hctrl, int r, int g, int b)
+void PaintColor(HWND hctrl, COLORREF col_ref)
 {
 
 	 HBRUSH hBrush;
@@ -295,7 +302,7 @@ void PaintColor(HWND hctrl, int r, int g, int b)
 
      hdc = GetDC (hctrl);
      GetClientRect (hctrl, &rect);
-     hBrush = CreateSolidBrush ( RGB(r,g,b) );
+     hBrush = CreateSolidBrush ( col_ref );
      hBrush = (HBRUSH) SelectObject (hdc, hBrush);
      
 
@@ -312,9 +319,21 @@ BOOL CALLBACK ColorDlgProc (HWND hDlg, UINT message,
                             WPARAM wParam, LPARAM lParam)
 {
 
-	static HINSTANCE hInstance ;
+	static HINSTANCE hInstance;
+    static COLORREF crCustColors[16] ;
+	static CHOOSECOLOR cc;
 
-	PAINTSTRUCT  ps ;
+	cc.lStructSize    = sizeof (CHOOSECOLOR) ;
+	cc.hwndOwner      = NULL ;
+	cc.hInstance      = NULL ;
+	cc.rgbResult      = RGB (0x8D, 0x8C, 0x40) ;
+    cc.lpCustColors   = crCustColors ;
+    cc.Flags          = CC_RGBINIT | CC_FULLOPEN ;
+    cc.lCustData      = 0 ;
+    cc.lpfnHook       = NULL ;
+    cc.lpTemplateName = NULL ;
+
+	PAINTSTRUCT  ps;
 
 	//static COLOR col_A, col_B, col_C, col_D, col_E, col_F;
     static HWND hCtrlCol_A, hCtrlCol_B, hCtrlCol_C, 
@@ -335,12 +354,14 @@ BOOL CALLBACK ColorDlgProc (HWND hDlg, UINT message,
 			 hCtrlCol_D = GetDlgItem (hDlg, IDC_COLOR_D);
 			 hCtrlCol_E = GetDlgItem (hDlg, IDC_COLOR_E);
 			 hCtrlCol_F = GetDlgItem (hDlg, IDC_COLOR_F);
+
 			 col_A = g_dg_ptr.FindCol('A');
 			 col_B = g_dg_ptr.FindCol('B');
 			 col_C = g_dg_ptr.FindCol('C');
 			 col_D = g_dg_ptr.FindCol('D');
              col_E = g_dg_ptr.FindCol('E');
 			 col_F = g_dg_ptr.FindCol('F');
+
 			 return FALSE;
 		 case WM_COMMAND:
 			 switch (LOWORD (wParam))
@@ -358,33 +379,51 @@ BOOL CALLBACK ColorDlgProc (HWND hDlg, UINT message,
 					 EndDialog (hDlg, FALSE);               
 					 return TRUE;
                  case IDC_BTN_COR_A:
-
-					 DialogBox (hInstance, TEXT ("ColorScrollBox"), hCtrlCol_A, ColorScrDlgProc) ;             
+					      
+                     cc.rgbResult = col_A.rgb; 
+					 ChooseColor (&cc); 
+					 col_A.rgb = cc.rgbResult;
+					 PaintColor(hCtrlCol_A, col_A.rgb );
 					 return FALSE;
 
 				 case IDC_BTN_COR_B:
 
-					 DialogBox (hInstance, TEXT ("ColorScrollBox"), hCtrlCol_B, ColorScrDlgProc) ;             
+                     cc.rgbResult = col_B.rgb; 
+					 ChooseColor (&cc); 
+					 col_B.rgb = cc.rgbResult;
+					 PaintColor(hCtrlCol_B, col_B.rgb );             
 					 return FALSE;
 
 				 case IDC_BTN_COR_C:
 
-					 DialogBox (hInstance, TEXT ("ColorScrollBox"), hCtrlCol_C, ColorScrDlgProc) ;             
+                     cc.rgbResult = col_C.rgb; 
+					 ChooseColor (&cc); 
+					 col_C.rgb = cc.rgbResult;
+					 PaintColor(hCtrlCol_C, col_C.rgb );             
 					 return FALSE;
 
 				 case IDC_BTN_COR_D:
 
-					 DialogBox (hInstance, TEXT ("ColorScrollBox"), hCtrlCol_D, ColorScrDlgProc) ;             
+                     cc.rgbResult = col_D.rgb; 
+					 ChooseColor (&cc); 
+					 col_D.rgb = cc.rgbResult;
+					 PaintColor(hCtrlCol_D, col_D.rgb );             
 					 return FALSE;
 
 				 case IDC_BTN_COR_E:
 
-					 DialogBox (hInstance, TEXT ("ColorScrollBox"), hCtrlCol_E, ColorScrDlgProc) ;             
+                     cc.rgbResult = col_E.rgb; 
+					 ChooseColor (&cc); 
+					 col_E.rgb = cc.rgbResult;
+					 PaintColor(hCtrlCol_E, col_E.rgb );             
 					 return FALSE;
 
 				 case IDC_BTN_COR_F:
 
-					 DialogBox (hInstance, TEXT ("ColorScrollBox"), hCtrlCol_F, ColorScrDlgProc) ;             
+                     cc.rgbResult = col_F.rgb; 
+					 ChooseColor (&cc); 
+					 col_F.rgb = cc.rgbResult;
+					 PaintColor(hCtrlCol_F, col_F.rgb );             
 					 return FALSE;
 
 			 }
@@ -394,12 +433,12 @@ BOOL CALLBACK ColorDlgProc (HWND hDlg, UINT message,
 			 BeginPaint (hDlg, &ps) ;		 		
 			 EndPaint (hDlg, &ps) ;   
 
-			 PaintColor(hCtrlCol_A, col_A.r, col_A.g, col_A.b );
-			 PaintColor(hCtrlCol_B, col_B.r, col_B.g, col_B.b );
-			 PaintColor(hCtrlCol_C, col_C.r, col_C.g, col_C.b );
-			 PaintColor(hCtrlCol_D, col_D.r, col_D.g, col_D.b );
-			 PaintColor(hCtrlCol_E, col_E.r, col_E.g, col_E.b );
-			 PaintColor(hCtrlCol_F, col_F.r, col_F.g, col_F.b );
+			 PaintColor(hCtrlCol_A, col_A.rgb );
+			 PaintColor(hCtrlCol_B, col_B.rgb );
+			 PaintColor(hCtrlCol_C, col_C.rgb );
+			 PaintColor(hCtrlCol_D, col_D.rgb );
+			 PaintColor(hCtrlCol_E, col_E.rgb );
+			 PaintColor(hCtrlCol_F, col_F.rgb );
 
 			 return TRUE;
 	 }
@@ -454,221 +493,210 @@ BOOL CALLBACK GraphDlgProc (HWND hDlg, UINT message,
   return FALSE ;
 }
 
-BOOL CALLBACK ColorScrDlgProc (HWND hDlg, UINT message, 
-                           WPARAM wParam, LPARAM lParam)
 
+/// the function for drawing Bezier line
+
+void DrawBezier (HDC hdc, POINT apt[])
+{
+     PolyBezier (hdc, apt, 4) ;
+     
+     MoveToEx (hdc, apt[0].x, apt[0].y, NULL) ;
+     LineTo   (hdc, apt[1].x, apt[1].y) ;
+     
+     MoveToEx (hdc, apt[2].x, apt[2].y, NULL) ;
+     LineTo   (hdc, apt[3].x, apt[3].y) ;
+}
+
+/////////////////////////////////
+
+
+BOOL CALLBACK LineDlgProc (HWND hDlg, UINT message, 
+                           WPARAM wParam, LPARAM lParam)
 {
 
-	 HWND hwndParent, hScr_Red, hScr_Green,hScr_Blue, hctrl;
+	static HINSTANCE hInstance;
+	
+	// since similar strucrur with color dialog box,
+	// similar variables
+    static HWND hCtrlCol_A, hCtrlCol_B, hCtrlCol_C, 
+		        hCtrlCol_D, hCtrlCol_E, hCtrlCol_F;
 
-	 int ictrlID, iparentID;
 
-	 static int icolor;
+	switch (message)
+     
+	{
 
-	 switch (message)
-     {
-		      
-	 case WM_INITDIALOG :
+		 
+	case WM_INITDIALOG:
 
-		 hScr_Red = GetDlgItem (hDlg, IDC_SCROLLBAR_RED);              
-		 SetScrollRange(hScr_Red, SB_CTL, 0, 255, FALSE);              
-		 SetScrollPos(hScr_Red, SB_CTL, 0, FALSE);
-
-		 hScr_Green = GetDlgItem (hDlg, IDC_SCROLLBAR_GREEN);              
-		 SetScrollRange(hScr_Green, SB_CTL, 0, 255, FALSE);              
-		 SetScrollPos(hScr_Green, SB_CTL, 0, FALSE);
-
-		 hScr_Blue = GetDlgItem (hDlg, IDC_SCROLLBAR_BLUE);              
-		 SetScrollRange(hScr_Blue, SB_CTL, 0, 255, FALSE);              
-		 SetScrollPos(hScr_Blue, SB_CTL, 0, FALSE);
-
-		 return TRUE;
-	 
-	 case WM_COMMAND:
 			 
-		 switch (LOWORD (wParam))
+		hCtrlCol_A = GetDlgItem (hDlg, IDC_LINE_A);
+		hCtrlCol_B = GetDlgItem (hDlg, IDC_LINE_B);
+		hCtrlCol_C = GetDlgItem (hDlg, IDC_LINE_C);
+		hCtrlCol_D = GetDlgItem (hDlg, IDC_LINE_D);
+		hCtrlCol_E = GetDlgItem (hDlg, IDC_LINE_E);
+		 
+		return FALSE;
+		 
+	case WM_CREATE:
+          
+		hInstance = ((LPCREATESTRUCT) lParam)->hInstance ;
+		  
+		return FALSE;
+
+ 
+		  
+	case WM_COMMAND:
 			 
-		 {
+		switch (LOWORD (wParam))
+			 
+		{
 				 
-		 case IDOK:
+		case IDOK:
 
-			 EndDialog (hDlg, TRUE);
-					 
-			 return TRUE;
+ 
+			EndDialog (hDlg, TRUE);		 
+			return TRUE;
 				 
-		 case IDCANCEL:
+		case IDCANCEL:
 					 
-			 EndDialog (hDlg, FALSE);               
+			EndDialog (hDlg, FALSE);               
 					 
-			 return TRUE;
+			return TRUE;
 
+
+		case IDC_BTN_LINE_A:
+
+			return FALSE;
+
+		case IDC_BTN_LINE_B:
+
+			return FALSE;
+
+		case IDC_BTN_LINE_C:
+
+			return FALSE;
+			
+		case IDC_BTN_LINE_D:
+
+			return FALSE;
+
+		case IDC_BTN_LINE_E:
+
+			return FALSE;
 		 }
-		      		 
-	case WM_HSCROLL :
-         
-	hctrl  = (HWND) lParam ;
-          
-	ictrlID = GetWindowLong(hctrl, GWL_ID);
-          
-    hwndParent = GetParent(hDlg) ;
+     
+		case IDC_BTN_LINE_F:
 
-    iparentID = GetWindowLong(hwndParent, GWL_ID);
-
-          switch (LOWORD (wParam))
-          {
+			return FALSE;
+	}
+	
 		
-			  icolor = HIWORD (wParam);
+	return FALSE;
 
-          case SB_THUMBPOSITION :
-          case SB_THUMBTRACK :
-			  switch(ictrlID)
-                                    //= 
-			  {
+}
 
-			  case IDC_SCROLLBAR_RED:
+BOOL    CALLBACK BezierDlgProc (HWND hDlg, UINT message, 
+                           WPARAM wParam, LPARAM lParam)
+{
 
-				  switch(iparentID)
-				  {
-				  case IDC_COLOR_A:
-					  col_A.r = icolor;
-					  SetScrollPos(hctrl, SB_CTL, icolor, TRUE);		  
-					  PaintColor(hwndParent,col_A.r, col_A.g, col_A.b);
-					  break;
-				  case IDC_COLOR_B:
-					  col_B.r = icolor;
-					  SetScrollPos(hctrl, SB_CTL, icolor, TRUE);		  
-					  PaintColor(hwndParent,col_B.r, col_B.g, col_B.b);
-					  break;
-				  case IDC_COLOR_C:
-					  col_C.r = icolor;
-					  SetScrollPos(hctrl, SB_CTL, icolor, TRUE);		  
-					  PaintColor(hwndParent,col_C.r, col_C.g, col_C.b);
-					  break;
-				  case IDC_COLOR_D:
-					  col_D.r = icolor;
-					  SetScrollPos(hctrl, SB_CTL, icolor, TRUE);		  
-					  PaintColor(hwndParent,col_D.r, col_D.g, col_D.b);
-					  break;
-				  case IDC_COLOR_E:
-					  col_E.r = icolor;
-					  SetScrollPos(hctrl, SB_CTL, icolor, TRUE);		  
-					  PaintColor(hwndParent,col_E.r, col_E.g, col_E.b);
-					  break;
-				  case IDC_COLOR_F:
-					  col_F.r = icolor;
-					  SetScrollPos(hctrl, SB_CTL, icolor, TRUE);		  
-					  PaintColor(hwndParent,col_F.r, col_F.g, col_F.b);
-					  break;
-				  default:
-					  return FALSE;
-				  }
+	     
+	static POINT apt[4];
+    HDC hdc;
+    int cxClient, cyClient;
+    PAINTSTRUCT ps;
 
-				  break;
-
-			  case IDC_SCROLLBAR_GREEN:
-				  switch(iparentID)
-				  {
-				  case IDC_COLOR_A:
-					  col_A.g = icolor;
-					  SetScrollPos(hctrl, SB_CTL, icolor, TRUE);		  
-					  PaintColor(hwndParent,col_A.r, col_A.g, col_A.b);
-					  break;
-				  case IDC_COLOR_B:
-					  col_B.g = icolor;
-					  SetScrollPos(hctrl, SB_CTL, icolor, TRUE);		  
-					  PaintColor(hwndParent,col_B.r, col_B.g, col_B.b);
-					  break;
-				  case IDC_COLOR_C:
-					  col_C.g = icolor;
-					  SetScrollPos(hctrl, SB_CTL, icolor, TRUE);		  
-					  PaintColor(hwndParent,col_C.r, col_C.g, col_C.b);
-					  break;
-				  case IDC_COLOR_D:
-					  col_D.g = icolor;
-					  SetScrollPos(hctrl, SB_CTL, icolor, TRUE);		  
-					  PaintColor(hwndParent,col_D.r, col_D.g, col_D.b);
-					  break;
-				  case IDC_COLOR_E:
-					  col_E.g = icolor;
-					  SetScrollPos(hctrl, SB_CTL, icolor, TRUE);		  
-					  PaintColor(hwndParent,col_E.r, col_E.g, col_E.b);
-					  break;
-				  case IDC_COLOR_F:
-					  col_F.g = icolor;
-					  SetScrollPos(hctrl, SB_CTL, icolor, TRUE);		  
-					  PaintColor(hwndParent,col_F.r, col_F.g, col_F.b);
-					  break;
-				  default:
-					  return FALSE;
-				  }
-
-				  break;
+	switch (message)
+     
+	{
 
 
-			  case IDC_SCROLLBAR_BLUE:
-				  switch(iparentID)
-				  {
-				  case IDC_COLOR_A:
-					  col_A.b = icolor;
-					  SetScrollPos(hctrl, SB_CTL, icolor, TRUE);		  
-					  PaintColor(hwndParent,col_A.r, col_A.g, col_A.b);
-					  break;
-				  case IDC_COLOR_B:
-					  col_B.b = icolor;
-					  SetScrollPos(hctrl, SB_CTL, icolor, TRUE);		  
-					  PaintColor(hwndParent,col_B.r, col_B.g, col_B.b);
-					  break;
-				  case IDC_COLOR_C:
-					  col_C.b = icolor;
-					  SetScrollPos(hctrl, SB_CTL, icolor, TRUE);		  
-					  PaintColor(hwndParent,col_C.r, col_C.g, col_C.b);
-					  break;
-				  case IDC_COLOR_D:
-					  col_D.b = icolor;
-					  SetScrollPos(hctrl, SB_CTL, icolor, TRUE);		  
-					  PaintColor(hwndParent,col_D.r, col_D.g, col_D.b);
-					  break;
-				  case IDC_COLOR_E:
-					  col_E.b = icolor;
-					  SetScrollPos(hctrl, SB_CTL, icolor, TRUE);		  
-					  PaintColor(hwndParent,col_E.r, col_E.g, col_E.b);
-					  break;
-				  case IDC_COLOR_F:
-					  col_F.b = icolor;
-					  SetScrollPos(hctrl, SB_CTL, icolor, TRUE);		  
-					  PaintColor(hwndParent,col_F.r, col_F.g, col_F.b);
-					  break;
-
-				  default:
-					  return FALSE;
-				  }
-
-				  break;
-
-			  default:
-				  return FALSE;
-
-
-			  }
-               
-			  break ;
-          default :
-               return FALSE ;
-          }
-
-       /*
-          DeleteObject ((HGDIOBJ) SetClassLong (hwndParent, GCL_HBRBACKGROUND,
-                              (LONG) CreateSolidBrush (
-                                   RGB (iColor[0], iColor[1], iColor[2])))) ;
+		
+	case WM_SIZE:
           
-          InvalidateRect (hwndParent, NULL, TRUE) ;
-*/
-        //  SetScrollPos  (hctrl, SB_CTL, icolor, TRUE);
-		//  PaintColor(hwndParent, );
-          return TRUE ;
-	 }
+		cxClient = LOWORD (lParam);
+        cyClient = HIWORD (lParam);
+          
+        apt[0].x = cxClient / 2;
+        apt[0].y = cyClient / 4;
+          
+        apt[1].x = cxClient / 4;
+        apt[1].y = cyClient / 2;
+          
+        apt[2].x = 3 * cxClient / 4;
+        apt[2].y =     cyClient / 2;
+          
+        apt[3].x =     cxClient / 2;
+        apt[3].y = 3 * cyClient / 4;
+          
+        return FALSE;
 
+	case WM_LBUTTONDOWN:     
+	case WM_RBUTTONDOWN:     
+	case WM_MOUSEMOVE:
 
+          
+		if (wParam & MK_LBUTTON || wParam & MK_RBUTTON)
+          
+		{
+               
+			hdc = GetDC (hDlg) ;
+               
+               
+			SelectObject (hdc, GetStockObject (WHITE_PEN)) ;
+               
+			DrawBezier (hdc, apt) ;
+               
+               
+			if (wParam & MK_LBUTTON)
+               
+			{
+                    
+				apt[1].x = LOWORD (lParam) ;
+                    
+				apt[1].y = HIWORD (lParam) ;
+               
+			}
+               
+               
+			if (wParam & MK_RBUTTON)
+               
+			{
+                    
+				apt[2].x = LOWORD (lParam) ;
+                    
+				apt[2].y = HIWORD (lParam) ;
+               
+			}
+               
+               
+			SelectObject (hdc, GetStockObject (BLACK_PEN)) ;
+               
+			DrawBezier (hdc, apt) ;
+               
+			ReleaseDC (hDlg, hdc) ;
+          
+		}
+          
+		return FALSE;
+          
+     
+	
+	case WM_PAINT:
+          
+		InvalidateRect (hDlg, NULL, TRUE) ;
+          
+          
+		hdc = BeginPaint (hDlg, &ps) ;
+          
+          
+		DrawBezier (hdc, apt) ;
+          
+          
+		EndPaint (hDlg, &ps) ;
+          
+		return FALSE;
+          
+	}
 
-	 return FALSE;
 }

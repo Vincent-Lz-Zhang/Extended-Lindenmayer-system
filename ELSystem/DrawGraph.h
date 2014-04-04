@@ -29,10 +29,12 @@ STATE;
 typedef struct
 {
 
-	int r;
-	int g;
-	int b;
+	//int r;
+	//int g;
+	//int b;
+	COLORREF rgb;
 	char index;
+
 
 }
 COLOR;
