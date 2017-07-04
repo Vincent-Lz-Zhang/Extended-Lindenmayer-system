@@ -1,6 +1,6 @@
 # Extended Lindenmayer system
 
-================
+
 This is an Independent Project I worked on during my study at Hong Kong University of Science & Technology back in 2009, for more details, please refer to [its hkust page](https://www.cse.ust.hk/~rossiter/independent_studies_projects/l_systems_animation/index.html).
 
 Below are some fractal graphics designed with this tool:
